@@ -4,131 +4,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: #f4f4f4;
+            padding: 20px;
         }
         .container {
-            width: 90%;
+            max-width: 900px;
             margin: auto;
+            background: white;
             padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
         }
-        .header {
+        h1 {
             text-align: center;
-            padding: 20px;
-            background: #333;
-            color: white;
-            font-size: 24px;
+            margin-bottom: 20px;
         }
         .stats {
             display: flex;
             justify-content: space-around;
-            margin: 20px 0;
-        }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            flex: 1;
-            margin: 10px;
+            margin-bottom: 20px;
         }
-        .table-container {
-            background: white;
-            padding: 20px;
+        .stat-card {
+            background: #007bff;
+            color: white;
+            padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
+            width: 20%;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 20px;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background: #333;
-            color: white;
-        }
-        .buttons {
-            margin-top: 20px;
+            padding: 8px;
             text-align: center;
         }
-        .btn {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .btn-primary {
-            background: #28a745;
-            color: white;
-        }
-        .btn-secondary {
+        th {
             background: #007bff;
             color: white;
         }
-        .btn-danger {
-            background: #dc3545;
+        .actions button {
+            background: red;
             color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .add-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .add-form input {
+            flex: 1;
+            padding: 8px;
+        }
+        .add-form button {
+            background: green;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">Alumni Admin Dashboard</div>
+        <h1>Alumni Admin Dashboard</h1>
+        
         <div class="stats">
-            <div class="card">
-                <h2>Total Alumni</h2>
-                <p>200</p>
-            </div>
-            <div class="card">
-                <h2>Upcoming Events</h2>
-                <p>5</p>
-            </div>
-            <div class="card">
-                <h2>Job Postings</h2>
-                <p>12</p>
-            </div>
-            <div class="card">
-                <h2>Engagement Rate</h2>
-                <p>78%</p>
-            </div>
+            <div class="stat-card">Total Alumni: <span id="totalAlumni">0</span></div>
+            <div class="stat-card">Upcoming Events: 5</div>
+            <div class="stat-card">Job Postings: 12</div>
+            <div class="stat-card">Engagement Rate: 78%</div>
         </div>
-        <div class="table-container">
-            <h2>Alumni List</h2>
-            <table>
+
+        <table>
+            <thead>
                 <tr>
                     <th>Name</th>
                     <th>Batch</th>
                     <th>Job</th>
+                    <th>Actions</th>
                 </tr>
-                <tr>
-                    <td>John Doe</td>
-                    <td>2020</td>
-                    <td>Software Engineer</td>
-                </tr>
-                <tr>
-                    <td>Jane Smith</td>
-                    <td>2019</td>
-                    <td>Data Scientist</td>
-                </tr>
-            </table>
-        </div>
-        <div class="buttons">
-            <button class="btn btn-primary">Add Alumni</button>
-            <button class="btn btn-secondary">Manage Events</button>
-            <button class="btn btn-danger">Delete Alumni</button>
+            </thead>
+            <tbody id="alumniTable">
+            </tbody>
+        </table>
+
+        <div class="add-form">
+            <input type="text" id="name" placeholder="Name">
+            <input type="text" id="batch" placeholder="Batch">
+            <input type="text" id="job" placeholder="Job">
+            <button onclick="addAlumni()">Add</button>
         </div>
     </div>
+
+    <script>
+        let alumniList = [];
+
+        function renderAlumni() {
+            const table = document.getElementById("alumniTable");
+            table.innerHTML = "";
+            alumniList.forEach((alumni, index) => {
+                const row = `<tr>
+                                <td>${alumni.name}</td>
+                                <td>${alumni.batch}</td>
+                                <td>${alumni.job}</td>
+                                <td class='actions'><button onclick="deleteAlumni(${index})">Delete</button></td>
+                            </tr>`;
+                table.innerHTML += row;
+            });
+            document.getElementById("totalAlumni").innerText = alumniList.length;
+        }
+
+        function addAlumni() {
+            const name = document.getElementById("name").value;
+            const batch = document.getElementById("batch").value;
+            const job = document.getElementById("job").value;
+
+            if (name && batch && job) {
+                alumniList.push({ name, batch, job });
+                renderAlumni();
+                document.getElementById("name").value = "";
+                document.getElementById("batch").value = "";
+                document.getElementById("job").value = "";
+            }
+        }
+
+        function deleteAlumni(index) {
+            alumniList.splice(index, 1);
+            renderAlumni();
+        }
+    </script>
 </body>
 </html>
