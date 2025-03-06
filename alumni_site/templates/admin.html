@@ -1,1 +1,134 @@
-git 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: #333;
+            color: white;
+            font-size: 24px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            flex: 1;
+            margin: 10px;
+        }
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #333;
+            color: white;
+        }
+        .buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+        .btn-secondary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Alumni Admin Dashboard</div>
+        <div class="stats">
+            <div class="card">
+                <h2>Total Alumni</h2>
+                <p>200</p>
+            </div>
+            <div class="card">
+                <h2>Upcoming Events</h2>
+                <p>5</p>
+            </div>
+            <div class="card">
+                <h2>Job Postings</h2>
+                <p>12</p>
+            </div>
+            <div class="card">
+                <h2>Engagement Rate</h2>
+                <p>78%</p>
+            </div>
+        </div>
+        <div class="table-container">
+            <h2>Alumni List</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Batch</th>
+                    <th>Job</th>
+                </tr>
+                <tr>
+                    <td>John Doe</td>
+                    <td>2020</td>
+                    <td>Software Engineer</td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>2019</td>
+                    <td>Data Scientist</td>
+                </tr>
+            </table>
+        </div>
+        <div class="buttons">
+            <button class="btn btn-primary">Add Alumni</button>
+            <button class="btn btn-secondary">Manage Events</button>
+            <button class="btn btn-danger">Delete Alumni</button>
+        </div>
+    </div>
+</body>
+</html>
