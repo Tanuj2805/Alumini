@@ -7,9 +7,12 @@ body {
 }
 
 header {
-    background: #007bff;
+    display: flex;
     color: white;
-    padding: 1em;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #007fff;
 }
 
 nav {
@@ -34,4 +37,20 @@ footer {
     position: absolute;
     bottom: 0;
     width: 100%;
+}
+
+/* Login Button Styles */
+.login-btn {
+    padding: 8px 15px;
+    background-color: white;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    border: 2px solid white;
+}
+
+.login-btn:hover {
+    background-color: #0056b3;
+    color: white;
 }
