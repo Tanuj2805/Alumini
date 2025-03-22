@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'alumni_site',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,7 @@ DATABASES = {
         }
     }
 }
+DJONGO_ALLOW_SCHEMA_MIGRATION = True
 
 
 # Password validation

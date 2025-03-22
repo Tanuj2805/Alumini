@@ -1,1 +1,5 @@
 django
+djongo==1.3.6
+setuptools
+pytz
+pymongo==3.12.3
