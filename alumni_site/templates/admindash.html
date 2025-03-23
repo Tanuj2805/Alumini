@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - VITGrad</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body">
+    <!-- Dashboard Wrapper -->
+    <div class="dashboard-wrapper">
+        <!-- Side Menu -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <img src="{% static 'images/vit_logo.webp' %}" alt="VITGrad Logo" class="logo-img" style="height: 50px; margin-right: 10px;">
+                <h1 class="logo">VITGrad</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Alumni</a></li>
+                    <li><a href="#"><i class="fas fa-calendar-alt"></i> Events</a></li>
+                    <li><a href="#"><i class="fas fa-briefcase"></i> Careers</a></li>
+                    <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <header class="dashboard-header">
+                        <h2>Admin Dashboard</h2>
+                        <a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </header>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="dashboard-content">
+                <!-- Cards -->
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-users"></i>
+                            <h3>Total Alumni</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>1,234</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h3>Upcoming Events</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>5</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-briefcase"></i>
+                            <h3>Job Postings</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>23</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Engagement Rate</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>78%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Alumni Growth Over Time</h3>
+                        <canvas id="alumniGrowthChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Event Participation</h3>
+                        <canvas id="eventParticipationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Alumni Growth Chart
+        const alumniGrowthCtx = document.getElementById('alumniGrowthChart').getContext('2d');
+        const alumniGrowthChart = new Chart(alumniGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Alumni Growth',
+                    data: [100, 200, 300, 400, 500, 600],
+                    borderColor: '#2563eb',
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Event Participation Chart
+        const eventParticipationCtx = document.getElementById('eventParticipationChart').getContext('2d');
+        const eventParticipationChart = new Chart(eventParticipationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Event 1', 'Event 2', 'Event 3', 'Event 4', 'Event 5'],
+                datasets: [{
+                    label: 'Participants',
+                    data: [50, 75, 100, 120, 150],
+                    backgroundColor: '#f59e0b',
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
