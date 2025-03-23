@@ -1,0 +1,419 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Dashboard - VITGrad</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        .posts-section {
+            margin-top: 2rem;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+    
+        .posts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+    
+        .btn-new-post {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.2s;
+        }
+    
+        .btn-new-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+    
+        .posts-grid {
+            display: grid;
+            gap: 2rem;
+        }
+    
+        .post-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+        }
+    
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+    
+        .post-author {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(90deg, #f8fafc, #ffffff);
+            border-bottom: 1px solid #f1f5f9;
+        }
+    
+        .post-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+    
+        .author-info {
+            flex-grow: 1;
+        }
+    
+        .author-info h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #1e293b;
+        }
+    
+        .post-time {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+    
+        .post-content {
+            padding: 1.5rem;
+            position: relative;
+        }
+    
+        .post-text {
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+    
+        .post-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 1rem;
+            transition: transform 0.3s;
+            cursor: zoom-in;
+        }
+    
+        .post-image:hover {
+            transform: scale(1.02);
+        }
+    
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+        }
+    
+        .action-group {
+            display: flex;
+            gap: 1.5rem;
+        }
+    
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+    
+        .btn-action:hover {
+            background: #f1f5f9;
+            color: #2563eb;
+        }
+    
+        .btn-action.active {
+            color: #2563eb;
+            font-weight: 600;
+        }
+    
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+    
+        .post-tag {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+    
+        .post-tag:hover {
+            background: #cbd5e1;
+        }
+    
+        .comment-preview {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: #ffffff;
+            border-top: 1px solid #f1f5f9;
+        }
+    
+        .comment-input {
+            flex-grow: 1;
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+    
+        .comment-input:focus {
+            border-color: #2563eb;
+        }
+    
+        /* Add emoji reactions */
+        .emoji-reactions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1.5rem 1rem;
+        }
+    
+        .emoji-button {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+    
+        .emoji-button:hover {
+            background: #f8fafc;
+            transform: scale(1.1);
+        }
+    </style>
+
+</head>
+<body class="dashboard-body">
+    <!-- Dashboard Wrapper -->
+    <div class="dashboard-wrapper">
+        <!-- Side Menu -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <img src="{% static 'images/vit_logo.webp' %}" alt="VITGrad Logo" class="logo-img" style="height: 50px; margin-right: 10px;">
+                <h1 class="logo">VITGrad</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-user-edit"></i> Update Profile</a></li>
+                    <li><a href="#"><i class="fas fa-calendar-alt"></i> Events</a></li>
+                    <li><a href="#"><i class="fas fa-briefcase"></i> Careers</a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> My Posts</a></li>
+                    <li><a href="#"><i class="fas fa-hand-holding-usd"></i> Donations</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Messages</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Connections</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <h2>Welcome Back, [Alumni Name]!</h2>
+                    <div class="header-actions">
+                        <a href="#" class="btn-notification"><i class="fas fa-bell"></i></a>
+                        <a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i></a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="dashboard-content">
+                <!-- Quick Stats -->
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-file-alt"></i>
+                            <h3>My Posts</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>12</p>
+                            <a href="#" class="btn-manage">Manage</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-envelope-open-text"></i>
+                            <h3>Unread Messages</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>3</p>
+                            <a href="#" class="btn-manage">View</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-calendar-check"></i>
+                            <h3>Upcoming Events</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>2</p>
+                            <a href="#" class="btn-manage">RSVP</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            <h3>Total Donations</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>₹25,000</p>
+                            <a href="#" class="btn-manage">Donate</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="posts-section">
+                    <div class="posts-header">
+                        <h3>Community Feed</h3>
+                        <button class="btn-new-post">
+                            <i class="fas fa-plus"></i>
+                            Create New Post
+                        </button>
+                    </div>
+                    
+                    <div class="posts-grid">
+                        <!-- Sample Post 1 -->
+                        <div class="post-card">
+                            <div class="post-author">
+                                <img src="{% static 'images/user1.jpg' %}" alt="User" class="post-avatar">
+                                <div class="author-info">
+                                    <h4>John Doe <span class="verified-badge"><i class="fas fa-check-circle"></i></span></h4>
+                                    <p class="post-time">2 hours ago · <i class="fas fa-globe-asia"></i></p>
+                                </div>
+                                <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            
+                            <div class="post-content">
+                                <p class="post-text">Just attended the amazing alumni meetup! Great to connect with old friends and make new connections. 🎉 #VITPride</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">#AlumniMeet</span>
+                                    <span class="post-tag">#VITPride</span>
+                                </div>
+                                <img src="{% static 'images/event1.jpg' %}" class="post-image" alt="Event photo">
+                                
+                                <div class="emoji-reactions">
+                                    <button class="emoji-button">👍 42</button>
+                                    <button class="emoji-button">❤️ 28</button>
+                                    <button class="emoji-button">🎉 15</button>
+                                </div>
+                            </div>
+                            
+                            <div class="post-actions">
+                                <div class="action-group">
+                                    <button class="btn-action">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        Like
+                                    </button>
+                                    <button class="btn-action">
+                                        <i class="fas fa-comment-alt"></i>
+                                        Comment
+                                    </button>
+                                    <button class="btn-action">
+                                        <i class="fas fa-share"></i>
+                                        Share
+                                    </button>
+                                </div>
+                                <button class="btn-action">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="comment-preview">
+                                <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
+                                <input type="text" class="comment-input" placeholder="Write a comment...">
+                            </div>
+                        </div>
+                
+                        <!-- Sample Post 2 -->
+                        <div class="post-card">
+                            <div class="post-author">
+                                <img src="{% static 'images/user2.jpg' %}" alt="User" class="post-avatar">
+                                <div class="author-info">
+                                    <h4>Jane Smith</h4>
+                                    <p class="post-time">5 hours ago · <i class="fas fa-user-friends"></i></p>
+                                </div>
+                                <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            
+                            <div class="post-content">
+                                <p class="post-text">Looking to hire fresh graduates for software development roles. Contact me for referrals! 👩💻 #CareerOpportunity</p>
+                                <div class="post-tags">
+                                    <span class="post-tag">#Hiring</span>
+                                    <span class="post-tag">#SoftwareDevelopment</span>
+                                </div>
+                                
+                                <div class="emoji-reactions">
+                                    <button class="emoji-button">👍 18</button>
+                                    <button class="emoji-button">💼 9</button>
+                                </div>
+                            </div>
+                            
+                            <div class="post-actions">
+                                <div class="action-group">
+                                    <button class="btn-action active">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        Liked
+                                    </button>
+                                    <button class="btn-action">
+                                        <i class="fas fa-comment-alt"></i>
+                                        Comment
+                                    </button>
+                                    <button class="btn-action">
+                                        <i class="fas fa-share"></i>
+                                        Share
+                                    </button>
+                                </div>
+                                <button class="btn-action">
+                                    <i class="far fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -32,3 +32,6 @@ def login(request):
 
 def admindash(request):
     return render(request,"admindash.html")
+
+def alumnidash(request):
+    return render(request,"alumnidash.html")
