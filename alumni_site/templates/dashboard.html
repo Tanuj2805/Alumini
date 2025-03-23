@@ -1,0 +1,169 @@
+{% extends "admindash.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Dashboard Section -->
+ 
+<div id="dashboard" class="content-section active">
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-users"></i>
+                <h3>Total Alumni</h3>
+            </div>
+            <div class="card-body">
+                <p>1,234</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Upcoming Events</h3>
+            </div>
+            <div class="card-body">
+                <p>5</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-briefcase"></i>
+                <h3>Job Postings</h3>
+            </div>
+            <div class="card-body">
+                <p>23</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i>
+                <h3>Engagement Rate</h3>
+            </div>
+            <div class="card-body">
+                <p>78%</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>Alumni Growth Over Time</h3>
+            <canvas id="alumniGrowthChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Event Participation</h3>
+            <canvas id="eventParticipationChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Alumni Management Section -->
+<div id="alumni" class="content-section">
+    <div class="section-header">
+        <h3>Alumni Management</h3>
+        <button class="btn-primary"><i class="fas fa-plus"></i> Add Alumni</button>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Graduation Year</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John Doe</td>
+                    <td>john@example.com</td>
+                    <td>2020</td>
+                    <td>
+                        <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Events Section -->
+<div id="events" class="content-section">
+    <div class="section-header">
+        <h3>Events Management</h3>
+        <button class="btn-primary"><i class="fas fa-plus"></i> New Event</button>
+    </div>
+    <div class="events-calendar">
+        <!-- Calendar implementation would go here -->
+    </div>
+</div>
+
+<!-- Add other sections following the same pattern -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize Charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Alumni Growth Chart
+        const alumniGrowthCtx = document.getElementById('alumniGrowthChart').getContext('2d');
+        new Chart(alumniGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Alumni Growth',
+                    data: [100, 200, 300, 400, 500, 600],
+                    borderColor: '#2563eb',
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Event Participation Chart
+        const eventParticipationCtx = document.getElementById('eventParticipationChart').getContext('2d');
+        new Chart(eventParticipationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Event 1', 'Event 2', 'Event 3', 'Event 4', 'Event 5'],
+                datasets: [{
+                    label: 'Participants',
+                    data: [50, 75, 100, 120, 150],
+                    backgroundColor: '#f59e0b',
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    });
+
+    // Navigation Handling
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            
+            // Remove active classes
+            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            
+            // Set active state
+            this.classList.add('active');
+            if(document.querySelector(targetId)) {
+                document.querySelector(targetId).classList.add('active');
+            }
+        });
+    });
+
+    // Initialize default view
+    document.querySelector('.sidebar-nav a.active').click();
+</script>
+{% endblock %}

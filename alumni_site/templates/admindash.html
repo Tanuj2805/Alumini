@@ -2,149 +2,438 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - VITGrad</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - VITGrad</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Base Styles */
+    body.dashboard-body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+    }
+    .dashboard-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    .dashboard-sidebar {
+      width: 280px;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    .sidebar-header {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .logo-img {
+      height: 50px;
+      margin-right: 10px;
+    }
+    .sidebar-nav ul {
+      list-style: none;
+      padding: 1rem;
+    }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      color: #64748b;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .sidebar-nav li a:hover, .sidebar-nav li a.active {
+      background: #2563eb;
+      color: white;
+    }
+    .dashboard-main {
+      flex: 1;
+      overflow-x: hidden;
+    }
+    .dashboard-header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .btn-logout {
+      color: #dc2626;
+      text-decoration: none;
+    }
+    .content-section {
+      display: none;
+      padding: 2rem;
+    }
+    .content-section.active {
+      display: block;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .charts-container {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .chart-card {
+      width: 40%;
+      background: white;
+      padding: 50px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    canvas {
+      height: 200px !important;
+    }
+  </style>
 </head>
 <body class="dashboard-body">
-    <!-- Dashboard Wrapper -->
-    <div class="dashboard-wrapper">
-        <!-- Side Menu -->
-        <aside class="dashboard-sidebar">
-            <div class="sidebar-header">
-                <img src="{% static 'images/vit_logo.webp' %}" alt="VITGrad Logo" class="logo-img" style="height: 50px; margin-right: 10px;">
-                <h1 class="logo">VITGrad</h1>
+  <div class="dashboard-wrapper">
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-header">
+        <img src="{% static 'images/vit_logo.webp' %}" alt="VITGrad Logo" class="logo-img">
+        <h1 class="logo">VITGrad</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="#dashboard" class="active">Dashboard</a></li>
+          <li><a href="#alumni">Alumni</a></li>
+          <li><a href="#events">Events</a></li>
+          <li><a href="#careers">Careers</a></li>
+          <li><a href="#posts">Posts</a></li>
+          <li><a href="#donation">Donation</a></li>
+          <li><a href="#management">Management</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h2>Admin Dashboard</h2>
+        <a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </header>
+      <div class="dashboard-content">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
+          <div class="cards-grid">
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-users"></i>
+                <h3>Total Alumni</h3>
+              </div>
+              <div class="card-body">
+                <p>1,234</p>
+              </div>
             </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li><a href="#"><i class="fas fa-users"></i> Alumni</a></li>
-                    <li><a href="#"><i class="fas fa-calendar-alt"></i> Events</a></li>
-                    <li><a href="#"><i class="fas fa-briefcase"></i> Careers</a></li>
-                    <li><a href="#"><i class="fas fa-file-alt"></i> Posts</a></li>
-                    <li><a href="#"><i class="fas fa-hand-holding-usd"></i> Donation</a></li>
-                    <li><a href="#"><i class="fas fa-users-cog"></i> Alumni Management</a></li>
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="dashboard-main">
-            <!-- Header -->
-            <header class="dashboard-header">
-                <div class="header-content">
-                    <header class="dashboard-header">
-                        <h2>Admin Dashboard</h2>
-                        <a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                    </header>
-                </div>
-            </header>
-
-            <!-- Content -->
-            <div class="dashboard-content">
-                <!-- Cards -->
-                <div class="cards-grid">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-users"></i>
-                            <h3>Total Alumni</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>1,234</p>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-calendar-alt"></i>
-                            <h3>Upcoming Events</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>5</p>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-briefcase"></i>
-                            <h3>Job Postings</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>23</p>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-line"></i>
-                            <h3>Engagement Rate</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>78%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h3>Alumni Growth Over Time</h3>
-                        <canvas id="alumniGrowthChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Event Participation</h3>
-                        <canvas id="eventParticipationChart"></canvas>
-                    </div>
-                </div>
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Upcoming Events</h3>
+              </div>
+              <div class="card-body">
+                <p>5</p>
+              </div>
             </div>
-        </main>
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-briefcase"></i>
+                <h3>Job Postings</h3>
+              </div>
+              <div class="card-body">
+                <p>23</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <i class="fas fa-chart-line"></i>
+                <h3>Engagement Rate</h3>
+              </div>
+              <div class="card-body">
+                <p>78%</p>
+              </div>
+            </div>
+          </div>
+          <div class="charts-container">
+            <div class="chart-card">
+              <h3>Alumni Growth Over Time</h3>
+              <canvas id="alumniGrowthChart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Event Participation</h3>
+              <canvas id="eventParticipationChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alumni Section -->
+        <div id="alumni" class="content-section">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h3>Alumni Management</h3>
+            <div class="alumni-actions" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <!-- Search Box -->
+                <input type="text" id="alumniSearch" placeholder="Search alumni..." style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 5px;">
+                <!-- Sort Dropdown -->
+                <select id="alumniSort" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 5px;">
+                <option value="">Sort By</option>
+                <option value="name">Name</option>
+                <option value="email">Email</option>
+                <option value="year">Graduation Year</option>
+                </select>
+                <!-- Action Buttons -->
+                <button class="btn-primary" id="alumniSearchBtn">
+                <i class="fas fa-search"></i> Search
+                </button>
+                <button class="btn-primary" id="alumniSortBtn">
+                <i class="fas fa-sort"></i> Sort
+                </button>
+                <button class="btn-primary" id="btnOpenModalAddAlumni">
+                    <i class="fas fa-plus"></i> Add Alumni
+                  </button>
+                  
+            </div>
+            </div>
+            <div class="table-container">
+            <table class="data-table" id="alumniTable">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Graduation Year</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Example Rows -->
+                <tr>
+                    <td>John Doe</td>
+                    <td>john@example.com</td>
+                    <td>2020</td>
+                    <td>
+                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>jane@example.com</td>
+                    <td>2019</td>
+                    <td>
+                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Michael Brown</td>
+                    <td>michael@example.com</td>
+                    <td>2021</td>
+                    <td>
+                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+  
+        <!-- Events Section -->
+        <div id="events" class="content-section">
+          <div class="section-header">
+            <h3>Events Management</h3>
+            <button class="btn-primary"><i class="fas fa-plus"></i> New Event</button>
+          </div>
+          <div class="events-calendar">
+            <!-- Calendar implementation -->
+          </div>
+        </div>
+        <!-- Careers Section -->
+        <div id="careers" class="content-section">
+          <h3>Career Opportunities</h3>
+          <p>Post and track job opportunities available for alumni.</p>
+        </div>
+        <!-- Posts Section -->
+        <div id="posts" class="content-section">
+          <h3>Posts and Announcements</h3>
+          <p>Manage news updates, posts, and announcements for the alumni community.</p>
+        </div>
+        <!-- Donation Section -->
+        <div id="donation" class="content-section">
+          <div class="donation-header">
+            <h3>Donation Management</h3>
+            <button class="donation-btn-primary"><i class="fas fa-plus"></i> Add Donation</button>
+          </div>
+          <div class="donation-cards-grid">
+            <div class="donation-card">
+              <h3>Total Donations</h3>
+              <p>$12,450</p>
+            </div>
+            <div class="donation-card">
+              <h3>Recent Donors</h3>
+              <ul class="donation-recent-list">
+                <li>John Doe - $200</li>
+                <li>Jane Smith - $150</li>
+                <li>Michael Brown - $500</li>
+              </ul>
+            </div>
+          </div>
+          <div class="donation-table-container">
+            <table class="donation-data-table">
+              <thead>
+                <tr>
+                  <th>Donor Name</th>
+                  <th>Email</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Payment Method</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>John Doe</td>
+                  <td>john@example.com</td>
+                  <td>$200</td>
+                  <td>March 20, 2025</td>
+                  <td>Credit Card</td>
+                  <td><span class="donation-status donation-completed">Completed</span></td>
+                  <td>
+                    <button class="donation-btn-action donation-edit"><i class="fas fa-edit"></i></button>
+                    <button class="donation-btn-action donation-delete"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Jane Smith</td>
+                  <td>jane@example.com</td>
+                  <td>$150</td>
+                  <td>March 18, 2025</td>
+                  <td>PayPal</td>
+                  <td><span class="donation-status donation-pending">Pending</span></td>
+                  <td>
+                    <button class="donation-btn-action donation-edit"><i class="fas fa-edit"></i></button>
+                    <button class="donation-btn-action donation-delete"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Michael Brown</td>
+                  <td>michael@example.com</td>
+                  <td>$500</td>
+                  <td>March 15, 2025</td>
+                  <td>Bank Transfer</td>
+                  <td><span class="donation-status donation-completed">Completed</span></td>
+                  <td>
+                    <button class="donation-btn-action donation-edit"><i class="fas fa-edit"></i></button>
+                    <button class="donation-btn-action donation-delete"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Management Section -->
+        <div id="management" class="content-section">
+          <h3>System Management</h3>
+          <p>Control user roles, permissions, and administrative settings.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Alumni Modal -->
+<div id="modalAddAlumni" class="modal">
+    <div id="modalContentAddAlumni" class="modal-content">
+      <span id="btnCloseModalAddAlumni" class="close">&times;</span>
+      <h2>Add Alumni</h2>
+      <form id="formAddAlumni">
+        <div class="form-group">
+          <label for="inputAlumniName">Name:</label>
+          <input type="text" id="inputAlumniName" name="alumniName" required>
+        </div>
+        <div class="form-group">
+          <label for="inputAlumniEmail">Email:</label>
+          <input type="email" id="inputAlumniEmail" name="alumniEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="inputAlumniYear">Graduation Year:</label>
+          <input type="number" id="inputAlumniYear" name="alumniYear" required>
+        </div>
+        <button type="submit" class="btn-primary" id="btnSubmitAddAlumni">Submit</button>
+      </form>
     </div>
+  </div>
+  
 
-    <script>
-        // Alumni Growth Chart
-        const alumniGrowthCtx = document.getElementById('alumniGrowthChart').getContext('2d');
-        const alumniGrowthChart = new Chart(alumniGrowthCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Alumni Growth',
-                    data: [100, 200, 300, 400, 500, 600],
-                    borderColor: '#2563eb',
-                    fill: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.sidebar-nav a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Remove active class from all links and content sections
+          navLinks.forEach(a => a.classList.remove('active'));
+          document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+          // Activate clicked link and corresponding section
+          this.classList.add('active');
+          const targetSection = document.querySelector(this.getAttribute('href'));
+          if (targetSection) {
+            targetSection.classList.add('active');
+          }
         });
-
-        // Event Participation Chart
-        const eventParticipationCtx = document.getElementById('eventParticipationChart').getContext('2d');
-        const eventParticipationChart = new Chart(eventParticipationCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Event 1', 'Event 2', 'Event 3', 'Event 4', 'Event 5'],
-                datasets: [{
-                    label: 'Participants',
-                    data: [50, 75, 100, 120, 150],
-                    backgroundColor: '#f59e0b',
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
+      });
+    });
+    
+    // Alumni Growth Chart
+    const alumniGrowthCtx = document.getElementById('alumniGrowthChart').getContext('2d');
+    new Chart(alumniGrowthCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Alumni Growth',
+          data: [100, 200, 300, 400, 500, 600],
+          borderColor: '#2563eb',
+          fill: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+    
+    // Event Participation Chart
+    const eventParticipationCtx = document.getElementById('eventParticipationChart').getContext('2d');
+    new Chart(eventParticipationCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Event 1', 'Event 2', 'Event 3', 'Event 4', 'Event 5'],
+        datasets: [{
+          label: 'Participants',
+          data: [50, 75, 100, 120, 150],
+          backgroundColor: '#f59e0b',
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  </script>
 </body>
 </html>
