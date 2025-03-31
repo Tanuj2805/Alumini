@@ -518,6 +518,7 @@ body {
     }
 }
 
+
 /* Dashboard Styles */
 .dashboard-body {
     font-family: 'Inter', sans-serif;
@@ -1035,4 +1036,388 @@ body {
     width: 100%;
     margin-top: 1rem;
   }
+
+/* Donation Section */
+
+/* Donation Section Styles */
+.donation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+  }
   
+  .section-title {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin: 0;
+  }
+  
+  .btn-donation {
+    background: #275dae;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-donation:hover {
+    background: #275dae;
+    transform: translateY(-2px);
+  }
+  
+  .donation-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+  }
+  
+  .summary-card.total-donations {
+    border-left: 4px solid #275dae;
+  }
+  
+  .summary-card.recent-donors {
+    border-left: 4px solid #2980b9;
+  }
+  
+  .card-icon {
+    width: 50px;
+    height: 50px;
+    background: #e9f5eb;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.5rem;
+  }
+  
+  .card-icon i {
+    font-size: 1.5rem;
+    color: #275dae;
+  }
+  
+  .amount {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0.5rem 0;
+  }
+  
+  .trend {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .trend.positive { color: #275dae; }
+  .trend.negative { color: #e74c3c; }
+  
+  .donor-list {
+    width: 100%;
+  }
+  
+  .donor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .donor-item:last-child { border-bottom: none; }
+  
+  .donation-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+  
+  .donation-data-table th {
+    background: #2c3e50;
+    color: white;
+    padding: 1rem;
+    text-align: left;
+  }
+  
+  .donation-data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .donor-info-cell {
+    display: flex;
+    align-items: center;
+  }
+  
+  .donor-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #275dae;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+  }
+  
+  .payment-method {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .credit-card { background: #e9f5eb; color: #275dae; }
+  .paypal { background: #f5f1e9; color: #003087; }
+  .bank-transfer { background: #e8f4f8; color: #2980b9; }
+  
+  .status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .status-badge.completed { background: #e9f5eb; color: #275dae; }
+  .status-badge.pending { background: #fde8e9; color: #e74c3c; }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .btn-action {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-action.view { background: #e8f4f8; color: #2980b9; }
+  .btn-action.receipt { background: #f5f1e9; color: #e67e22; }
+  .btn-action:hover { opacity: 0.8; }
+  
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .table-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .search-input {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 200px;
+  }
+  .content-section {
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 255, 0.2);
+  }
+
+  /* Section Header */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  /* Calendar Styles */
+  .calendar-header h4 {
+    color: #007bff;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    padding: 10px;
+  }
+
+  .calendar-day {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+  }
+  .content-section {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  /* Section Header */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin: 0;
+  }
+
+  .btn-primary {
+    background: #275dae;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.3s ease;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-primary:hover {
+    background: #1d4a8a;
+    transform: translateY(-2px);
+  }
+
+  /* Calendar Styles */
+  .calendar-header h4 {
+    color: #275dae;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    padding: 10px;
+  }
+
+  .calendar-day {
+    background: #275dae;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+
+  .calendar-day:hover {
+    background: #1d4a8a;
+    transform: scale(1.05);
+  }
+
+  /* Event Cards */
+  .event-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+    border-left: 4px solid #275dae;
+    transition: transform 0.3s ease;
+  }
+
+  .event-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .event-date {
+    background: #275dae;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+
+  .event-actions .btn-action {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #275dae;
+    transition: all 0.2s;
+    padding: 5px;
+  }
+
+  .event-actions .btn-action:hover {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+
+  /* loader */
+  #loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dim the background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px); /* Blur the background */
+  }
+  
+  #loader {
+    background-color: white;
+    padding: 20px 40px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: pulse 1.5s infinite ease-in-out; /* Add pulse animation */
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }

@@ -123,6 +123,51 @@
       z-index: 1000;
     }
     .profile-dropdown.show { display: block; }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1001;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 50%;
+      max-width: 600px;
+    }
+    
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body class="dashboard-body">
@@ -153,9 +198,16 @@
             <p>Logged in as: <strong>Admin</strong></p>
           </div>
         </div>
-        <a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <a href="#" class="btn-logout" data-logout-url="{% url 'logout' %}" onclick="confirmLogout(event)">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
       </header>
       <div class="dashboard-content">
+
+        <div id="loader-overlay" style="display: none;">
+          <div id="loader">Logging out...</div>
+        </div>
+     
         <!-- Dashboard Section -->
         <div id="dashboard" class="content-section active">
           <div class="cards-grid">
@@ -236,96 +288,99 @@
             </div>
             </div>
             <div class="table-container">
-            <table class="data-table" id="alumniTable">
+              <table class="data-table" id="alumniTable">
                 <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Graduation Year</th>
-                    <th>Actions</th>
-                </tr>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Full Name</th>
+                        <th>Date of Birth</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Street Name</th>
+                        <th>City</th>
+                        <th>Pincode</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <!-- Example Rows -->
-                <tr>
-                    <td>John Doe</td>
-                    <td>john@example.com</td>
-                    <td>2020</td>
-                    <td>
-                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Jane Smith</td>
-                    <td>jane@example.com</td>
-                    <td>2019</td>
-                    <td>
-                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Michael Brown</td>
-                    <td>michael@example.com</td>
-                    <td>2021</td>
-                    <td>
-                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
+                    {% for alumni in alumni_data %}
+                        <tr>
+                            <td>{{ alumni.first_name }}</td>
+                            <td>{{ alumni.last_name }}</td>
+                            <td>{{ alumni.alumni_name }}</td>
+                            <td>{{ alumni.DOB }}</td>
+                            <td>{{ alumni.age }}</td>
+                            <td>{{ alumni.alumni_email }}</td>
+                            <td>{{ alumni.alumni_phone }}</td>
+                            <td>{{ alumni.address }}</td>
+                            <td>{{ alumni.street_name }}</td>
+                            <td>{{ alumni.city }}</td>
+                            <td>{{ alumni.pincode }}</td>
+                            <td>
+                                <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                                <button class="btn-action delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="12">No alumni data available.</td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             </div>
         </div>
   
         <!-- Events Section -->
-          <div id="events" class="content-section">
-            <div class="section-header">
-              <h3>Events Management</h3>
-              <div class="section-actions">
-                <button class="btn-primary" id="btnOpenModalAddEvent">
-                  <i class="fas fa-plus"></i> New Event
-                </button>
+        <div id="events" class="content-section">
+          <div class="section-header">
+            <h3>Events Management</h3>
+            <div class="section-actions">
+              <button class="btn-primary" id="btnOpenModalAddEvent">
+                <i class="fas fa-plus"></i> New Event
+              </button>
+            </div>
+          </div>
+          
+          <div class="events-calendar">
+            <div class="calendar-header">
+              <h4>March 2024</h4>
+              <div class="calendar-controls">
+                <button class="btn-icon"><i class="fas fa-chevron-left"></i></button>
+                <button class="btn-icon"><i class="fas fa-chevron-right"></i></button>
               </div>
             </div>
-            
-            <div class="events-calendar">
-              <div class="calendar-header">
-                <h4>March 2024</h4>
-                <div class="calendar-controls">
-                  <button class="btn-icon"><i class="fas fa-chevron-left"></i></button>
-                  <button class="btn-icon"><i class="fas fa-chevron-right"></i></button>
-                </div>
-              </div>
-              <div class="calendar-grid">
-                <!-- Calendar days would be dynamically generated -->
-                <div class="calendar-day">1</div>
-                <div class="calendar-day">2</div>
-                <!-- ... more days ... -->
-              </div>
+            <div class="calendar-grid">
+              <!-- Calendar days would be dynamically generated -->
+              <div class="calendar-day">1</div>
+              <div class="calendar-day">2</div>
+              <!-- ... more days ... -->
             </div>
+          </div>
 
-            <div class="upcoming-events">
-              <h4>Upcoming Events</h4>
-              <div class="events-list">
-                <div class="event-card">
-                  <div class="event-date">
-                    <span class="event-day">15</span>
-                    <span class="event-month">MAR</span>
-                  </div>
-                  <div class="event-details">
-                    <h5>Alumni Meet 2024</h5>
-                    <p><i class="fas fa-map-marker-alt"></i> Main Campus Auditorium</p>
-                  </div>
-                  <div class="event-actions">
-                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
-                  </div>
+          <div class="upcoming-events">
+            <h4>Upcoming Events</h4>
+            <div class="events-list">
+              <div class="event-card">
+                <div class="event-date">
+                  <span class="event-day">15</span>
+                  <span class="event-month">MAR</span>
+                </div>
+                <div class="event-details">
+                  <h5>Alumni Meet 2024</h5>
+                  <p><i class="fas fa-map-marker-alt"></i> Main Campus Auditorium</p>
+                </div>
+                <div class="event-actions">
+                  <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                  <button class="btn-action delete"><i class="fas fa-trash"></i></button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
          <!-- Careers Section -->
         <div id="careers" class="content-section">
@@ -369,68 +424,100 @@
             </table>
           </div>
         </div>
-        <!-- Posts Section -->
-        <div id="posts" class="content-section">
-          <div class="section-header">
-            <h3>Content Management</h3>
-            <div class="section-actions">
-              <select class="filter-select">
-                <option>All Posts</option>
-                <option>News</option>
-                <option>Announcements</option>
-              </select>
-              <button class="btn-primary" id="btnOpenModalAddPost">
-                <i class="fas fa-plus"></i> Create Post
-              </button>
+       <!-- Posts Section -->
+      <div id="posts" class="content-section">
+        <div class="section-header">
+          <h3 class="section-title">Latest Posts</h3>
+          <div class="section-actions">
+            <button class="btn-primary" id="btnOpenModalAddPost">
+              <i class="fas fa-plus"></i> New Post
+            </button>
+          </div>
+        </div>
+        
+        <div class="posts-list">
+          <div class="post-card">
+            <h4>Understanding Mental Health Awareness</h4>
+            <p class="post-meta">By Admin | March 20, 2024</p>
+            <p>Raising awareness about mental health issues and supporting those in need...</p>
+            <div class="post-actions">
+              <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+              <button class="btn-action delete"><i class="fas fa-trash"></i></button>
             </div>
           </div>
-        
-          <div class="posts-grid">
-            <div class="post-card">
-              <div class="post-header">
-                <img src="{% static 'images/post-thumbnail.jpg' %}" alt="Post thumbnail">
-                <div class="post-meta">
-                  <h5>New Campus Initiative</h5>
-                  <div class="post-info">
-                    <span class="post-author"><i class="fas fa-user"></i> Admin</span>
-                    <span class="post-date"><i class="fas fa-calendar"></i> 2024-03-10</span>
-                  </div>
-                </div>
-              </div>
-              <div class="post-actions">
-                <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                <button class="btn-action delete"><i class="fas fa-trash"></i></button>
-                <span class="status published">Published</span>
-              </div>
+          
+          <div class="post-card">
+            <h4>Tips for Stress Management</h4>
+            <p class="post-meta">By Dr. Smith | March 18, 2024</p>
+            <p>Practical ways to handle stress and improve mental well-being...</p>
+            <div class="post-actions">
+              <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+              <button class="btn-action delete"><i class="fas fa-trash"></i></button>
             </div>
           </div>
         </div>
-        <!-- Donation Section -->
+      </div>
+
+       <!-- Donation Section -->
         <div id="donation" class="content-section">
           <div class="donation-header">
-            <h3>Donation Management</h3>
-            <button class="donation-btn-primary"><i class="fas fa-plus"></i> Add Donation</button>
+            <h3 class="section-title">Donation Management</h3>
+            <button class="btn-primary btn-donation">
+              <i class="fas fa-hand-holding-heart"></i> New Donation
+            </button>
           </div>
-          <div class="donation-cards-grid">
-            <div class="donation-card">
-              <h3>Total Donations</h3>
-              <p>$12,450</p>
+          
+          <div class="donation-summary-cards">
+            <div class="summary-card total-donations">
+              <div class="card-icon">
+                <i class="fas fa-coins"></i>
+              </div>
+              <div class="card-content">
+                <h4>Total Donations</h4>
+                <p class="amount">$24,850</p>
+                <span class="trend positive"><i class="fas fa-arrow-up"></i> 12% from last month</span>
+              </div>
             </div>
-            <div class="donation-card">
-              <h3>Recent Donors</h3>
-              <ul class="donation-recent-list">
-                <li>John Doe - $200</li>
-                <li>Jane Smith - $150</li>
-                <li>Michael Brown - $500</li>
-              </ul>
+            
+            <div class="summary-card recent-donors">
+              <div class="card-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="card-content">
+                <h4>Recent Donors</h4>
+                <div class="donor-list">
+                  <div class="donor-item">
+                    <div class="donor-info">
+                      <span class="donor-name">John Doe</span>
+                      <span class="donation-amount">$500</span>
+                    </div>
+                    <span class="donation-date">Mar 25, 2024</span>
+                  </div>
+                  <div class="donor-item">
+                    <div class="donor-info">
+                      <span class="donor-name">Jane Smith</span>
+                      <span class="donation-amount">$250</span>
+                    </div>
+                    <span class="donation-date">Mar 24, 2024</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
           <div class="donation-table-container">
+            <div class="table-header">
+              <h4>Donation Records</h4>
+              <div class="table-controls">
+                <input type="text" placeholder="Search donations..." class="search-input">
+                <button class="btn-filter"><i class="fas fa-filter"></i> Filter</button>
+              </div>
+            </div>
+            
             <table class="donation-data-table">
               <thead>
                 <tr>
-                  <th>Donor Name</th>
-                  <th>Email</th>
+                  <th>Donor</th>
                   <th>Amount</th>
                   <th>Date</th>
                   <th>Payment Method</th>
@@ -440,39 +527,34 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>John Doe</td>
-                  <td>john@example.com</td>
-                  <td>$200</td>
-                  <td>March 20, 2025</td>
-                  <td>Credit Card</td>
-                  <td><span class="donation-status donation-completed">Completed</span></td>
-                  <td>
-                    <button class="donation-btn-action donation-edit"><i class="fas fa-edit"></i></button>
-                    <button class="donation-btn-action donation-delete"><i class="fas fa-trash"></i></button>
+                  <td class="donor-info-cell">
+                    <div class="donor-avatar">
+                      JD
+                    </div>
+                    <div class="donor-details">
+                      <span class="donor-name">John Doe</span>
+                      <span class="donor-email">john@example.com</span>
+                    </div>
                   </td>
-                </tr>
-                <tr>
-                  <td>Jane Smith</td>
-                  <td>jane@example.com</td>
-                  <td>$150</td>
-                  <td>March 18, 2025</td>
-                  <td>PayPal</td>
-                  <td><span class="donation-status donation-pending">Pending</span></td>
-                  <td>
-                    <button class="donation-btn-action donation-edit"><i class="fas fa-edit"></i></button>
-                    <button class="donation-btn-action donation-delete"><i class="fas fa-trash"></i></button>
+                  <td class="amount-cell">
+                    <span class="donation-amount">$200</span>
                   </td>
-                </tr>
-                <tr>
-                  <td>Michael Brown</td>
-                  <td>michael@example.com</td>
-                  <td>$500</td>
-                  <td>March 15, 2025</td>
-                  <td>Bank Transfer</td>
-                  <td><span class="donation-status donation-completed">Completed</span></td>
+                  <td>2024-03-20</td>
                   <td>
-                    <button class="donation-btn-action donation-edit"><i class="fas fa-edit"></i></button>
-                    <button class="donation-btn-action donation-delete"><i class="fas fa-trash"></i></button>
+                    <span class="payment-method credit-card">
+                      <i class="fas fa-credit-card"></i> Card
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge completed">
+                      <i class="fas fa-check-circle"></i> Completed
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="btn-action view"><i class="fas fa-eye"></i></button>
+                      <button class="btn-action receipt"><i class="fas fa-receipt"></i></button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -521,116 +603,241 @@
   </div>
 
   <!-- Add Alumni Modal -->
-<div id="modalAddAlumni" class="modal">
-    <div id="modalContentAddAlumni" class="modal-content">
-      <span id="btnCloseModalAddAlumni" class="close">&times;</span>
-      <h2>Add Alumni</h2>
-      <form id="formAddAlumni">
-        <div class="form-group">
-          <label for="inputAlumniName">Name:</label>
-          <input type="text" id="inputAlumniName" name="alumniName" required>
-        </div>
-        <div class="form-group">
-          <label for="inputAlumniEmail">Email:</label>
-          <input type="email" id="inputAlumniEmail" name="alumniEmail" required>
-        </div>
-        <div class="form-group">
-          <label for="inputAlumniYear">Graduation Year:</label>
-          <input type="number" id="inputAlumniYear" name="alumniYear" required>
-        </div>
-        <button type="submit" class="btn-primary" id="btnSubmitAddAlumni">Submit</button>
-      </form>
-    </div>
+    <div id="modalAddAlumni" class="modal">
+      <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Add Alumni</h2>
+          <form id="alumniForm" action="{% url 'add_alumni' %}"  method="post"  onsubmit="return validateForm()">
+              {% csrf_token %}
+
+              <div class="form-group">
+                  <label for="inputFirstName">First Name:</label>
+                  <input type="text" id="inputFirstName" name="first_name" required pattern="^[A-Za-z\s'-]+$" title="Only letters, spaces, hyphens and apostrophes are allowed">
+                  <small id="firstNameError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputLastName">Last Name:</label>
+                  <input type="text" id="inputLastName" name="last_name" required pattern="^[A-Za-z\s'-]+$" title="Only letters, spaces, hyphens and apostrophes are allowed">
+                  <small id="lastNameError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputAlumniName">Full Name:</label>
+                  <input type="text" id="inputAlumniName" name="alumni_name" required pattern="^[A-Za-z\s'-]+$" title="Only letters, spaces, hyphens and apostrophes are allowed">
+                  <small id="alumniNameError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputDOB">Date of Birth:</label>
+                  <input type="date" id="inputDOB" name="DOB" required>
+                  <small id="dobError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputAge">Age:</label>
+                  <input type="number" id="inputAge" name="age" required min="18" max="150" title="Age must be between 18 and 150">
+                  <small id="ageError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputAlumniEmail">Email:</label>
+                  <input type="email" id="inputAlumniEmail" name="alumni_email" required>
+                  <small id="emailError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputAlumniPhone">Phone:</label>
+                  <input type="tel" id="inputAlumniPhone" name="alumni_phone" required pattern="^[0-9]{10,15}$" title="Phone number must be 10 to 15 digits">
+                  <small id="phoneError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputAddress">Address:</label>
+                  <textarea id="inputAddress" name="address" required></textarea>
+                  <small id="addressError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputStreetName">Street Name:</label>
+                  <input type="text" id="inputStreetName" name="street_name" required>
+                  <small id="streetNameError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputCity">City:</label>
+                  <input type="text" id="inputCity" name="city" required>
+                  <small id="cityError" class="error-message"></small>
+              </div>
+
+              <div class="form-group">
+                  <label for="inputPincode">Pincode:</label>
+                  <input type="text" id="inputPincode" name="pincode" required pattern="^[0-9]{6,10}$" title="Pincode must be 6 to 10 digits">
+                  <small id="pincodeError" class="error-message"></small>
+              </div>
+
+              <button type="submit" class="btn-primary">Submit</button>
+          </form>
+      </div>
   </div>
-  
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const navLinks = document.querySelectorAll('.sidebar-nav a');
-      navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          // Remove active class from all links and content sections
-          navLinks.forEach(a => a.classList.remove('active'));
-          document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-          // Activate clicked link and corresponding section
-          this.classList.add('active');
-          const targetSection = document.querySelector(this.getAttribute('href'));
-          if (targetSection) {
-            targetSection.classList.add('active');
-          }
-        });
-      });
-    });
-    
-    // Alumni Growth Chart
-    const alumniGrowthCtx = document.getElementById('alumniGrowthChart').getContext('2d');
-    new Chart(alumniGrowthCtx, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-          label: 'Alumni Growth',
-          data: [100, 200, 300, 400, 500, 600],
-          borderColor: '#2563eb',
-          fill: false,
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true } }
-      }
-    });
-    
-    // Event Participation Chart
-    const eventParticipationCtx = document.getElementById('eventParticipationChart').getContext('2d');
-    new Chart(eventParticipationCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Event 1', 'Event 2', 'Event 3', 'Event 4', 'Event 5'],
-        datasets: [{
-          label: 'Participants',
-          data: [50, 75, 100, 120, 150],
-          backgroundColor: '#f59e0b',
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true } }
-      }
-    });
+  <!-- Add Event Modal-->
+  <div id="modalAddEvent" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add Event</h2>
+        <form id="eventForm" action="{% url 'add_event' %}" method="post" onsubmit="return validateEventForm()">
+            {% csrf_token %}
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const profilePic = document.querySelector('.profile-pic');
-      const profileDropdown = document.querySelector('.profile-dropdown');
-      const userProfile = document.querySelector('.user-profile');
+            <div class="form-group">
+                <label for="inputEventName">Event Name:</label>
+                <input type="text" id="inputEventName" name="event_name" required>
+                <small id="eventNameError" class="error-message"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEventDate">Event Date:</label>
+                <input type="date" id="inputEventDate" name="event_date" required>
+                <small id="eventDateError" class="error-message"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="inputLocation">Location:</label>
+                <input type="text" id="inputLocation" name="location" required>
+                <small id="locationError" class="error-message"></small>
+            </div>
+
+            <button type="submit" class="btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+<style>
+  .error-message {
+      color: red;
+      font-size: 0.8em;
+      display: block;
+  }
+  </style>
+
+<script>
+  function confirmLogout(event) {
+    event.preventDefault();
   
-      if (!profilePic || !profileDropdown || !userProfile) return;
+    if (window.confirm('Are you sure you want to logout?')) {
+      const loaderOverlay = document.getElementById('loader-overlay');
+      const logoutUrl = event.target.dataset.logoutUrl;
   
-      // Toggle dropdown on profile click
-      profilePic.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const isOpen = profileDropdown.classList.toggle('show');
-          userProfile.setAttribute('aria-expanded', isOpen.toString());
-      });
+      loaderOverlay.style.display = 'flex';
   
-      // Close dropdown when clicking outside
-      document.addEventListener('click', (e) => {
-          const isClickInside = e.target.closest('.user-profile');
-          if (isClickInside) return;
-          
-          profileDropdown.classList.remove('show');
-          userProfile.setAttribute('aria-expanded', 'false');
-      });
+      setTimeout(function() {
+        window.location.href = logoutUrl;
+      }, 1000);
+    }
+  }
+
+  function validateForm() {
+    let isValid = true;
+    const firstName = document.getElementById('inputFirstName').value;
+    const lastName = document.getElementById('inputLastName').value;
+    const alumniName = document.getElementById('inputAlumniName').value;
+    const dob = document.getElementById('inputDOB').value;
+    const age = document.getElementById('inputAge').value;
+    const email = document.getElementById('inputAlumniEmail').value;
+    const phone = document.getElementById('inputAlumniPhone').value;
+    const address = document.getElementById('inputAddress').value;
+    const streetName = document.getElementById('inputStreetName').value;
+    const city = document.getElementById('inputCity').value;
+    const pincode = document.getElementById('inputPincode').value;
+
+    // Clear previous error messages
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+    if (!/^[A-Za-z\s'-]+$/.test(firstName)) {
+        document.getElementById('firstNameError').textContent = 'Invalid first name format.';
+        isValid = false;
+    }
+
+    if (!/^[A-Za-z\s'-]+$/.test(lastName)) {
+        document.getElementById('lastNameError').textContent = 'Invalid last name format.';
+        isValid = false;
+    }
+
+    if (!/^[A-Za-z\s'-]+$/.test(alumniName)) {
+        document.getElementById('alumniNameError').textContent = 'Invalid full name format.';
+        isValid = false;
+    }
+
+    if (!dob) {
+        document.getElementById('dobError').textContent = 'Date of birth is required.';
+        isValid = false;
+    }
+
+    if (!age || age < 18 || age > 150) {
+        document.getElementById('ageError').textContent = 'Age must be between 18 and 150.';
+        isValid = false;
+    }
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        document.getElementById('emailError').textContent = 'Invalid email format.';
+        isValid = false;
+    }
+
+    if (!phone || !/^[0-9]{10,15}$/.test(phone)) {
+        document.getElementById('phoneError').textContent = 'Phone must be 10 to 15 digits.';
+        isValid = false;
+    }
+
+    if (!address) {
+        document.getElementById('addressError').textContent = 'Address is required.';
+        isValid = false;
+    }
+
+    if (!streetName) {
+        document.getElementById('streetNameError').textContent = 'Street name is required.';
+        isValid = false;
+    }
+
+    if (!city) {
+        document.getElementById('cityError').textContent = 'City is required.';
+        isValid = false;
+    }
+
+    if (!pincode || !/^[0-9]{6,10}$/.test(pincode)) {
+        document.getElementById('pincodeError').textContent = 'Pincode must be 6 to 10 digits.';
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+function validateEventForm() {
+  let isValid = true;
+  const eventName = document.getElementById('inputEventName').value;
+  const eventDate = document.getElementById('inputEventDate').value;
+  const location = document.getElementById('inputLocation').value;
+
+  document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+  if (!eventName) {
+      document.getElementById('eventNameError').textContent = 'Event name is required.';
+      isValid = false;
+  }
+
+  if (!eventDate) {
+      document.getElementById('eventDateError').textContent = 'Event date is required.';
+      isValid = false;
+  }
+
+  if (!location) {
+      document.getElementById('locationError').textContent = 'Location is required.';
+      isValid = false;
+  }
+
+  return isValid;
+}
+</script>
   
-      // Close dropdown on ESC press
-      document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') {
-              profileDropdown.classList.remove('show');
-              userProfile.setAttribute('aria-expanded', 'false');
-          }
-      });
-  });
-  </script>
+<script src="{% static 'js/script.js' %}"></script>
+
 </body>
 </html>

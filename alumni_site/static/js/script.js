@@ -180,3 +180,150 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
+  //admin dash
+
+  // Generic Modal Handler
+function initializeModal(modalId, openButtonId) {
+  const modal = document.getElementById(modalId);
+  const openButton = document.getElementById(openButtonId);
+  if (!modal || !openButton) return;
+
+  const closeButton = modal.querySelector('.close');
+  
+  openButton.addEventListener('click', () => modal.style.display = 'block');
+  closeButton.addEventListener('click', () => modal.style.display = 'none');
+  window.addEventListener('click', (e) => e.target === modal && (modal.style.display = 'none'));
+}
+
+// Form Submission Handler
+async function handleFormSubmit(formId, endpoint, successMessage) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+          const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') },
+              body: formData
+          });
+
+          if (response.ok) {
+              alert(successMessage);
+              form.reset();
+              document.getElementById(form.closest('.modal').id).style.display = 'none';
+              // Add logic to refresh relevant data
+          } else {
+              alert('Error: ' + response.statusText);
+          }
+      } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred');
+      }
+  });
+}
+
+// Initialize Dashboard
+document.addEventListener('DOMContentLoaded', () => {
+  // Navigation
+  document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      link.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelectorAll('.sidebar-nav a, .content-section').forEach(el => 
+              el.classList.remove('active')
+          );
+          this.classList.add('active');
+          document.querySelector(this.getAttribute('href')).classList.add('active');
+      });
+  });
+
+  // Profile Dropdown
+  const profilePic = document.querySelector('.profile-pic');
+  const profileDropdown = document.querySelector('.profile-dropdown');
+  if (profilePic && profileDropdown) {
+      profilePic.addEventListener('click', (e) => {
+          e.stopPropagation();
+          profileDropdown.classList.toggle('show');
+      });
+
+      document.addEventListener('click', () => profileDropdown.classList.remove('show'));
+      document.addEventListener('keydown', (e) => 
+          e.key === 'Escape' && profileDropdown.classList.remove('show')
+      );
+  }
+
+  // Initialize Modals
+  initializeModal('modalAddAlumni', 'btnOpenModalAddAlumni');
+  initializeModal('modalAddEvent', 'btnOpenModalAddEvent');
+
+  // Form Submissions
+  handleFormSubmit('alumniForm', '/add_alumni/', 'Alumni added successfully!');
+  handleFormSubmit('eventForm', '/add_event/', 'Event created successfully!');
+
+  // Charts
+  new Chart(document.getElementById('alumniGrowthChart').getContext('2d'), {
+      type: 'line',
+      data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+              label: 'Alumni Growth',
+              data: [100, 200, 300, 400, 500, 600],
+              borderColor: '#2563eb',
+              fill: false
+          }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+
+  new Chart(document.getElementById('eventParticipationChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+          labels: ['Event 1', 'Event 2', 'Event 3', 'Event 4', 'Event 5'],
+          datasets: [{
+              label: 'Participants',
+              data: [50, 75, 100, 120, 150],
+              backgroundColor: '#f59e0b'
+          }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+});
+
+
+//logout
+function confirmLogout(event) {
+  event.preventDefault(); // Prevent default link behavior
+
+  console.log("Hello");
+  if (window.confirm('Are you sure you want to logout?')) {
+    // Get the logout URL from the data attribute
+    const logoutUrl = event.target.dataset.logoutUrl;
+    window.location.href = logoutUrl; // Redirect to the logout URL
+  }
+}
+
+//add event
+document.addEventListener('DOMContentLoaded', function() {
+
+  var modal = document.getElementById("modalAddEvent");
+  var btn = document.getElementById("btnOpenModalAddEvent");
+  var span = document.getElementsByClassName("close")[0];
+
+  btn.onclick = function() {
+      modal.style.display = "block";
+  }
+
+  span.onclick = function() {
+      modal.style.display = "none";
+  }
+
+
+  window.onclick = function(event) {
+      if (event.target == modal) {
+          modal.style.display = "none";
+      }
+  }
+});

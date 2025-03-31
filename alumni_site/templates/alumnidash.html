@@ -9,8 +9,36 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
     <style>
+        /* Layout Structure */
+        * {
+            box-sizing: border-box;
+        }
+    
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+    
+        .dashboard-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+    
+        .dashboard-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 1rem;
+            gap: 2rem;
+        }
+    
+        /* Posts Section */
         .posts-section {
-            margin-top: 2rem;
+            flex: 1;
+            overflow-y: auto;
             background: #ffffff;
             border-radius: 15px;
             padding: 2rem;
@@ -45,6 +73,7 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
     
+        /* Post Components */
         .posts-grid {
             display: grid;
             gap: 2rem;
@@ -78,10 +107,6 @@
             margin-right: 1rem;
             border: 2px solid #ffffff;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-    
-        .author-info {
-            flex-grow: 1;
         }
     
         .author-info h4 {
@@ -198,7 +223,6 @@
             border-color: #2563eb;
         }
     
-        /* Add emoji reactions */
         .emoji-reactions {
             display: flex;
             gap: 0.5rem;
@@ -415,5 +439,24 @@
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.sidebar-nav a');
+            navLinks.forEach(link => {
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove active class from all links and content sections
+                navLinks.forEach(a => a.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+                // Activate clicked link and corresponding section
+                this.classList.add('active');
+                const targetSection = document.querySelector(this.getAttribute('href'));
+                if (targetSection) {
+                  targetSection.classList.add('active');
+                }
+              });
+            });
+          });
+    </script>
 </body>
 </html>
