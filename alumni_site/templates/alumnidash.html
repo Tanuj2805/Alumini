@@ -242,6 +242,236 @@
             background: #f8fafc;
             transform: scale(1.1);
         }
+
+        /* Add modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Additional styles for new sections */
+        .content-section {
+            display: none;
+            padding: 2rem;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        /* Profile Section Styles */
+        .profile-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-details {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Events Section Styles */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .event-image {
+            position: relative;
+            height: 200px;
+        }
+
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .event-date {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Careers Section Styles */
+        .careers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .career-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Messages Section Styles */
+        .messages-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1rem;
+            height: calc(100vh - 200px);
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .messages-sidebar {
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .message-input {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* Connections Section Styles */
+        .connections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .connection-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .connection-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
     </style>
 
 </head>
@@ -256,14 +486,14 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li><a href="#"><i class="fas fa-user-edit"></i> Update Profile</a></li>
-                    <li><a href="#"><i class="fas fa-calendar-alt"></i> Events</a></li>
-                    <li><a href="#"><i class="fas fa-briefcase"></i> Careers</a></li>
-                    <li><a href="#"><i class="fas fa-file-alt"></i> My Posts</a></li>
-                    <li><a href="#"><i class="fas fa-hand-holding-usd"></i> Donations</a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> Messages</a></li>
-                    <li><a href="#"><i class="fas fa-users"></i> Connections</a></li>
+                    <li><a href="#dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#profile"><i class="fas fa-user-edit"></i> Update Profile</a></li>
+                    <li><a href="#events"><i class="fas fa-calendar-alt"></i> Events</a></li>
+                    <li><a href="#careers"><i class="fas fa-briefcase"></i> Careers</a></li>
+                    <li><a href="#my-posts"><i class="fas fa-file-alt"></i> My Posts</a></li>
+                    <li><a href="#donations"><i class="fas fa-hand-holding-usd"></i> Donations</a></li>
+                    <li><a href="#messages"><i class="fas fa-envelope"></i> Messages</a></li>
+                    <li><a href="#connections"><i class="fas fa-users"></i> Connections</a></li>
                 </ul>
             </nav>
         </aside>
@@ -283,180 +513,919 @@
 
             <!-- Content -->
             <div class="dashboard-content">
-                <!-- Quick Stats -->
-                <div class="cards-grid">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-file-alt"></i>
-                            <h3>My Posts</h3>
+                <!-- Content Sections -->
+                <div class="content-section active" id="dashboard-section">
+                    <!-- Quick Stats -->
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-file-alt"></i>
+                                <h3>My Posts</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>12</p>
+                                <a href="#" class="btn-manage">Manage</a>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <p>12</p>
-                            <a href="#" class="btn-manage">Manage</a>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-envelope-open-text"></i>
+                                <h3>Unread Messages</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>3</p>
+                                <a href="#" class="btn-manage">View</a>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-calendar-check"></i>
+                                <h3>Upcoming Events</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>2</p>
+                                <a href="#" class="btn-manage">RSVP</a>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-hand-holding-heart"></i>
+                                <h3>Total Donations</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>₹25,000</p>
+                                <a href="#" class="btn-manage">Donate</a>
+                            </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-envelope-open-text"></i>
-                            <h3>Unread Messages</h3>
+
+                    <div class="posts-section">
+                        <div class="posts-header">
+                            <h3>Community Feed</h3>
+                            <button class="btn-new-post">
+                                <i class="fas fa-plus"></i>
+                                Create New Post
+                            </button>
                         </div>
-                        <div class="card-body">
-                            <p>3</p>
-                            <a href="#" class="btn-manage">View</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-calendar-check"></i>
-                            <h3>Upcoming Events</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>2</p>
-                            <a href="#" class="btn-manage">RSVP</a>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-hand-holding-heart"></i>
-                            <h3>Total Donations</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>₹25,000</p>
-                            <a href="#" class="btn-manage">Donate</a>
+                        
+                        <div class="posts-grid">
+                            <!-- Sample Post 1 -->
+                            <div class="post-card">
+                                <div class="post-author">
+                                    <img src="{% static 'images/user1.jpg' %}" alt="User" class="post-avatar">
+                                    <div class="author-info">
+                                        <h4>John Doe <span class="verified-badge"><i class="fas fa-check-circle"></i></span></h4>
+                                        <p class="post-time">2 hours ago · <i class="fas fa-globe-asia"></i></p>
+                                    </div>
+                                    <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                                </div>
+                                
+                                <div class="post-content">
+                                    <p class="post-text">Just attended the amazing alumni meetup! Great to connect with old friends and make new connections. 🎉 #VITPride</p>
+                                    <div class="post-tags">
+                                        <span class="post-tag">#AlumniMeet</span>
+                                        <span class="post-tag">#VITPride</span>
+                                    </div>
+                                    <img src="{% static 'images/event1.jpg' %}" class="post-image" alt="Event photo">
+                                    
+                                    <div class="emoji-reactions">
+                                        <button class="emoji-button">👍 42</button>
+                                        <button class="emoji-button">❤️ 28</button>
+                                        <button class="emoji-button">🎉 15</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="post-actions">
+                                    <div class="action-group">
+                                        <button class="btn-action">
+                                            <i class="fas fa-thumbs-up"></i>
+                                            Like
+                                        </button>
+                                        <button class="btn-action">
+                                            <i class="fas fa-comment-alt"></i>
+                                            Comment
+                                        </button>
+                                        <button class="btn-action">
+                                            <i class="fas fa-share"></i>
+                                            Share
+                                        </button>
+                                    </div>
+                                    <button class="btn-action">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="comment-preview">
+                                    <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
+                                    <input type="text" class="comment-input" placeholder="Write a comment...">
+                                </div>
+                            </div>
+                    
+                            <!-- Sample Post 2 -->
+                            <div class="post-card">
+                                <div class="post-author">
+                                    <img src="{% static 'images/user2.jpg' %}" alt="User" class="post-avatar">
+                                    <div class="author-info">
+                                        <h4>Jane Smith</h4>
+                                        <p class="post-time">5 hours ago · <i class="fas fa-user-friends"></i></p>
+                                    </div>
+                                    <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                                </div>
+                                
+                                <div class="post-content">
+                                    <p class="post-text">Looking to hire fresh graduates for software development roles. Contact me for referrals! 👩💻 #CareerOpportunity</p>
+                                    <div class="post-tags">
+                                        <span class="post-tag">#Hiring</span>
+                                        <span class="post-tag">#SoftwareDevelopment</span>
+                                    </div>
+                                    
+                                    <div class="emoji-reactions">
+                                        <button class="emoji-button">👍 18</button>
+                                        <button class="emoji-button">💼 9</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="post-actions">
+                                    <div class="action-group">
+                                        <button class="btn-action active">
+                                            <i class="fas fa-thumbs-up"></i>
+                                            Liked
+                                        </button>
+                                        <button class="btn-action">
+                                            <i class="fas fa-comment-alt"></i>
+                                            Comment
+                                        </button>
+                                        <button class="btn-action">
+                                            <i class="fas fa-share"></i>
+                                            Share
+                                        </button>
+                                    </div>
+                                    <button class="btn-action">
+                                        <i class="far fa-bookmark"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="posts-section">
-                    <div class="posts-header">
-                        <h3>Community Feed</h3>
-                        <button class="btn-new-post">
-                            <i class="fas fa-plus"></i>
-                            Create New Post
+                <!-- Profile Section -->
+                <div class="content-section" id="profile-section">
+                    <div class="section-header">
+                        <h2>Update Profile</h2>
+                        <button class="btn-primary" onclick="showProfileModal()">
+                            <i class="fas fa-edit"></i> Edit Profile
                         </button>
                     </div>
-                    
-                    <div class="posts-grid">
-                        <!-- Sample Post 1 -->
-                        <div class="post-card">
-                            <div class="post-author">
-                                <img src="{% static 'images/user1.jpg' %}" alt="User" class="post-avatar">
-                                <div class="author-info">
-                                    <h4>John Doe <span class="verified-badge"><i class="fas fa-check-circle"></i></span></h4>
-                                    <p class="post-time">2 hours ago · <i class="fas fa-globe-asia"></i></p>
-                                </div>
-                                <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
-                            </div>
-                            
-                            <div class="post-content">
-                                <p class="post-text">Just attended the amazing alumni meetup! Great to connect with old friends and make new connections. 🎉 #VITPride</p>
-                                <div class="post-tags">
-                                    <span class="post-tag">#AlumniMeet</span>
-                                    <span class="post-tag">#VITPride</span>
-                                </div>
-                                <img src="{% static 'images/event1.jpg' %}" class="post-image" alt="Event photo">
-                                
-                                <div class="emoji-reactions">
-                                    <button class="emoji-button">👍 42</button>
-                                    <button class="emoji-button">❤️ 28</button>
-                                    <button class="emoji-button">🎉 15</button>
+                    <div class="profile-grid">
+                        <div class="profile-card">
+                            <div class="profile-header">
+                                <img src="{% static 'images/user1.jpg' %}" alt="Profile" class="profile-avatar">
+                                <div class="profile-info">
+                                    <h3>John Doe</h3>
+                                    <p>Class of 2020</p>
                                 </div>
                             </div>
-                            
-                            <div class="post-actions">
-                                <div class="action-group">
-                                    <button class="btn-action">
-                                        <i class="fas fa-thumbs-up"></i>
-                                        Like
-                                    </button>
-                                    <button class="btn-action">
-                                        <i class="fas fa-comment-alt"></i>
-                                        Comment
-                                    </button>
-                                    <button class="btn-action">
-                                        <i class="fas fa-share"></i>
-                                        Share
-                                    </button>
+                            <div class="profile-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>john.doe@example.com</span>
                                 </div>
-                                <button class="btn-action">
-                                    <i class="fas fa-bookmark"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="comment-preview">
-                                <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
-                                <input type="text" class="comment-input" placeholder="Write a comment...">
+                                <div class="detail-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>+91 98765 43210</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Bangalore, India</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span>Software Engineer at Tech Corp</span>
+                                </div>
                             </div>
                         </div>
-                
-                        <!-- Sample Post 2 -->
-                        <div class="post-card">
-                            <div class="post-author">
-                                <img src="{% static 'images/user2.jpg' %}" alt="User" class="post-avatar">
-                                <div class="author-info">
-                                    <h4>Jane Smith</h4>
-                                    <p class="post-time">5 hours ago · <i class="fas fa-user-friends"></i></p>
-                                </div>
-                                <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                        <div class="profile-stats">
+                            <div class="stat-card">
+                                <h4>Network</h4>
+                                <p>250 Connections</p>
                             </div>
-                            
-                            <div class="post-content">
-                                <p class="post-text">Looking to hire fresh graduates for software development roles. Contact me for referrals! 👩💻 #CareerOpportunity</p>
-                                <div class="post-tags">
-                                    <span class="post-tag">#Hiring</span>
-                                    <span class="post-tag">#SoftwareDevelopment</span>
-                                </div>
-                                
-                                <div class="emoji-reactions">
-                                    <button class="emoji-button">👍 18</button>
-                                    <button class="emoji-button">💼 9</button>
-                                </div>
+                            <div class="stat-card">
+                                <h4>Posts</h4>
+                                <p>45 Posts</p>
                             </div>
-                            
-                            <div class="post-actions">
-                                <div class="action-group">
-                                    <button class="btn-action active">
-                                        <i class="fas fa-thumbs-up"></i>
-                                        Liked
-                                    </button>
-                                    <button class="btn-action">
-                                        <i class="fas fa-comment-alt"></i>
-                                        Comment
-                                    </button>
-                                    <button class="btn-action">
-                                        <i class="fas fa-share"></i>
-                                        Share
-                                    </button>
-                                </div>
-                                <button class="btn-action">
-                                    <i class="far fa-bookmark"></i>
-                                </button>
+                            <div class="stat-card">
+                                <h4>Events</h4>
+                                <p>12 Attended</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- Events Section -->
+                <div class="content-section" id="events-section">
+                    <div class="section-header">
+                        <h2>Events</h2>
+                        <div class="header-actions">
+                            <button class="btn-secondary" onclick="filterEvents('upcoming')">Upcoming</button>
+                            <button class="btn-secondary" onclick="filterEvents('past')">Past</button>
+                        </div>
+                    </div>
+                    <div class="events-grid">
+                        <div class="event-card">
+                            <div class="event-image">
+                                <img src="{% static 'images/event1.jpg' %}" alt="Event">
+                                <span class="event-date">Dec 15, 2023</span>
+                            </div>
+                            <div class="event-content">
+                                <h3>Annual Alumni Meet 2023</h3>
+                                <p class="event-location"><i class="fas fa-map-marker-alt"></i> VIT Campus, Vellore</p>
+                                <p class="event-description">Join us for the biggest alumni gathering of the year. Network with fellow alumni and share your experiences.</p>
+                                <div class="event-actions">
+                                    <button class="btn-primary" onclick="handleRSVP(this)">RSVP</button>
+                                    <button class="btn-secondary" onclick="showEventDetails(this)">Details</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- More event cards -->
+                    </div>
+                </div>
+
+                <!-- Careers Section -->
+                <div class="content-section" id="careers-section">
+                    <div class="section-header">
+                        <h2>Career Opportunities</h2>
+                        <button class="btn-primary" onclick="showJobPostModal()">
+                            <i class="fas fa-plus"></i> Post Job
+                        </button>
+                    </div>
+                    <div class="careers-grid">
+                        <div class="career-card">
+                            <div class="career-header">
+                                <img src="{% static 'images/company1.jpg' %}" alt="Company" class="company-logo">
+                                <div class="career-info">
+                                    <h3>Senior Software Engineer</h3>
+                                    <p>Tech Solutions Inc.</p>
+                                </div>
+                            </div>
+                            <div class="career-details">
+                                <p><i class="fas fa-map-marker-alt"></i> Bangalore, India</p>
+                                <p><i class="fas fa-money-bill-wave"></i> ₹15-20 LPA</p>
+                                <p><i class="fas fa-briefcase"></i> 3-5 years</p>
+                            </div>
+                            <p class="career-description">Looking for an experienced software engineer to join our team...</p>
+                            <div class="career-actions">
+                                <button class="btn-primary" onclick="applyForJob(this)">Apply</button>
+                                <button class="btn-secondary" onclick="shareJob(this)">Share</button>
+                            </div>
+                        </div>
+                        <!-- More career cards -->
+                    </div>
+                </div>
+
+                <!-- My Posts Section -->
+                <div class="content-section" id="my-posts-section">
+                    <div class="section-header">
+                        <h2>My Posts</h2>
+                        <button class="btn-primary" onclick="showPostModal()">
+                            <i class="fas fa-plus"></i> New Post
+                        </button>
+                    </div>
+                    <div class="posts-grid">
+                        <!-- User's posts will be dynamically loaded here -->
+                    </div>
+                </div>
+
+                <!-- Donations Section -->
+                <div class="content-section" id="donations-section">
+                    <div class="section-header">
+                        <h2>Donations</h2>
+                        <button class="btn-primary" onclick="showDonationModal()">
+                            <i class="fas fa-hand-holding-heart"></i> Make Donation
+                        </button>
+                    </div>
+                    <div class="donations-grid">
+                        <div class="donation-card">
+                            <div class="donation-header">
+                                <h3>Scholarship Fund</h3>
+                                <span class="donation-progress">75%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 75%"></div>
+                            </div>
+                            <p class="donation-goal">Goal: ₹10,00,000</p>
+                            <p class="donation-raised">Raised: ₹7,50,000</p>
+                            <button class="btn-primary" onclick="donateToFund(this)">Donate Now</button>
+                        </div>
+                        <!-- More donation cards -->
+                    </div>
+                </div>
+
+                <!-- Messages Section -->
+                <div class="content-section" id="messages-section">
+                    <div class="section-header">
+                        <h2>Messages</h2>
+                        <button class="btn-primary" onclick="showNewMessageModal()">
+                            <i class="fas fa-plus"></i> New Message
+                        </button>
+                    </div>
+                    <div class="messages-container">
+                        <div class="messages-sidebar">
+                            <div class="message-search">
+                                <input type="text" placeholder="Search messages...">
+                            </div>
+                            <div class="message-list">
+                                <!-- Message previews -->
+                            </div>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <img src="{% static 'images/user2.jpg' %}" alt="User" class="message-avatar">
+                                <div class="message-user-info">
+                                    <h3>Jane Smith</h3>
+                                    <span>Online</span>
+                                </div>
+                            </div>
+                            <div class="message-chat">
+                                <!-- Chat messages -->
+                            </div>
+                            <div class="message-input">
+                                <input type="text" placeholder="Type a message...">
+                                <button class="btn-primary"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connections Section -->
+                <div class="content-section" id="connections-section">
+                    <div class="section-header">
+                        <h2>Connections</h2>
+                        <div class="header-actions">
+                            <button class="btn-secondary" onclick="filterConnections('all')">All</button>
+                            <button class="btn-secondary" onclick="filterConnections('pending')">Pending</button>
+                        </div>
+                    </div>
+                    <div class="connections-grid">
+                        <div class="connection-card">
+                            <img src="{% static 'images/user3.jpg' %}" alt="User" class="connection-avatar">
+                            <div class="connection-info">
+                                <h3>Mike Johnson</h3>
+                                <p>Class of 2019</p>
+                                <p>Software Engineer at Google</p>
+                            </div>
+                            <div class="connection-actions">
+                                <button class="btn-primary" onclick="acceptConnection(this)">Accept</button>
+                                <button class="btn-secondary" onclick="rejectConnection(this)">Reject</button>
+                            </div>
+                        </div>
+                        <!-- More connection cards -->
+                    </div>
+                </div>
             </div>
         </main>
     </div>
     <script>
+        // Navigation functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Handle sidebar navigation
             const navLinks = document.querySelectorAll('.sidebar-nav a');
-            navLinks.forEach(link => {
-              link.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Remove active class from all links and content sections
+            const contentSections = document.querySelectorAll('.content-section');
+
+            // Function to show section
+            function showSection(sectionId) {
+                contentSections.forEach(section => {
+                    if (section.id === sectionId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+            }
+
+            // Function to update active link
+            function updateActiveLink(link) {
                 navLinks.forEach(a => a.classList.remove('active'));
-                document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-                // Activate clicked link and corresponding section
-                this.classList.add('active');
-                const targetSection = document.querySelector(this.getAttribute('href'));
-                if (targetSection) {
-                  targetSection.classList.add('active');
-                }
-              });
+                link.classList.add('active');
+            }
+
+            // Handle navigation clicks
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1) + '-section';
+                    updateActiveLink(this);
+                    showSection(targetId);
+                });
             });
-          });
+
+            // Show dashboard section by default
+            showSection('dashboard-section');
+
+            // Handle notification button
+            const notificationBtn = document.querySelector('.btn-notification');
+            notificationBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Add notification functionality here
+                alert('Notifications feature coming soon!');
+            });
+
+            // Handle logout button
+            const logoutBtn = document.querySelector('.btn-logout');
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to logout?')) {
+                    window.location.href = "{% url 'logout' %}";
+                }
+            });
+
+            // Handle "Create New Post" button
+            const newPostBtn = document.querySelector('.btn-new-post');
+            newPostBtn.addEventListener('click', function() {
+                // Show post creation modal
+                showPostModal();
+            });
+
+            // Handle post actions (like, comment, share)
+            document.querySelectorAll('.btn-action').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const action = this.querySelector('i').className;
+                    
+                    if (action.includes('thumbs-up')) {
+                        handleLike(this);
+                    } else if (action.includes('comment-alt')) {
+                        handleComment(this);
+                    } else if (action.includes('share')) {
+                        handleShare(this);
+                    } else if (action.includes('bookmark')) {
+                        handleBookmark(this);
+                    }
+                });
+            });
+
+            // Handle emoji reactions
+            document.querySelectorAll('.emoji-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    handleEmojiReaction(this);
+                });
+            });
+
+            // Handle comment input
+            document.querySelectorAll('.comment-input').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleCommentSubmit(this);
+                    }
+                });
+            });
+
+            // Initialize all sections
+            initializeSections();
+        });
+
+        // Initialize all sections
+        function initializeSections() {
+            // Load user's posts
+            loadUserPosts();
+            // Load messages
+            loadMessages();
+            // Load connections
+            loadConnections();
+            // Load events
+            loadEvents();
+            // Load career opportunities
+            loadCareerOpportunities();
+        }
+
+        // Post creation modal
+        function showPostModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Create New Post</h2>
+                    <form id="postForm">
+                        <div class="form-group">
+                            <textarea placeholder="What's on your mind?" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="postImage">Add Image (optional)</label>
+                            <input type="file" id="postImage" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" placeholder="Add tags (comma separated)" id="postTags">
+                        </div>
+                        <button type="submit" class="btn-primary">Post</button>
+                    </form>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            modal.style.display = 'block';
+
+            // Close modal functionality
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.onclick = function() {
+                modal.remove();
+            };
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.remove();
+                }
+            };
+
+            // Handle form submission
+            const form = modal.querySelector('#postForm');
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                // Add post submission logic here
+                alert('Post created successfully!');
+                modal.remove();
+            };
+        }
+
+        // Handle like functionality
+        function handleLike(button) {
+            button.classList.toggle('active');
+            const count = button.querySelector('i').nextSibling;
+            if (button.classList.contains('active')) {
+                count.textContent = ' Liked';
+            } else {
+                count.textContent = ' Like';
+            }
+        }
+
+        // Handle comment functionality
+        function handleComment(button) {
+            const postCard = button.closest('.post-card');
+            const commentInput = postCard.querySelector('.comment-input');
+            commentInput.focus();
+        }
+
+        // Handle share functionality
+        function handleShare(button) {
+            // Add share functionality here
+            alert('Share feature coming soon!');
+        }
+
+        // Handle bookmark functionality
+        function handleBookmark(button) {
+            const icon = button.querySelector('i');
+            icon.classList.toggle('far');
+            icon.classList.toggle('fas');
+        }
+
+        // Handle emoji reactions
+        function handleEmojiReaction(button) {
+            const count = parseInt(button.textContent.split(' ')[1]) || 0;
+            button.textContent = `${button.textContent.split(' ')[0]} ${count + 1}`;
+        }
+
+        // Handle comment submission
+        function handleCommentSubmit(input) {
+            const comment = input.value.trim();
+            if (comment) {
+                // Add comment submission logic here
+                alert('Comment posted successfully!');
+                input.value = '';
+            }
+        }
+
+        // Handle quick stats card actions
+        document.querySelectorAll('.btn-manage').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const action = this.textContent.toLowerCase();
+                switch(action) {
+                    case 'manage':
+                        // Handle manage posts
+                        alert('Manage posts feature coming soon!');
+                        break;
+                    case 'view':
+                        // Handle view messages
+                        alert('View messages feature coming soon!');
+                        break;
+                    case 'rsvp':
+                        // Handle RSVP to events
+                        alert('RSVP feature coming soon!');
+                        break;
+                    case 'donate':
+                        // Handle donations
+                        alert('Donation feature coming soon!');
+                        break;
+                }
+            });
+        });
+
+        // Profile Modal
+        function showProfileModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Edit Profile</h2>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label>Profile Picture</label>
+                            <input type="file" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" value="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" value="john.doe@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" value="+91 98765 43210">
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" value="Bangalore, India">
+                        </div>
+                        <div class="form-group">
+                            <label>Current Position</label>
+                            <input type="text" value="Software Engineer at Tech Corp">
+                        </div>
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            modal.style.display = 'block';
+
+            // Close modal functionality
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.onclick = function() {
+                modal.remove();
+            };
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.remove();
+                }
+            };
+        }
+
+        // Event handling functions
+        function handleRSVP(button) {
+            button.classList.toggle('active');
+            button.textContent = button.classList.contains('active') ? 'RSVP\'d' : 'RSVP';
+        }
+
+        function showEventDetails(button) {
+            // Show event details modal
+            alert('Event details feature coming soon!');
+        }
+
+        // Career functions
+        function showJobPostModal() {
+            // Show job posting modal
+            alert('Job posting feature coming soon!');
+        }
+
+        function applyForJob(button) {
+            // Handle job application
+            alert('Job application feature coming soon!');
+        }
+
+        function shareJob(button) {
+            // Handle job sharing
+            alert('Job sharing feature coming soon!');
+        }
+
+        // Donation functions
+        function showDonationModal() {
+            // Show donation modal
+            alert('Donation feature coming soon!');
+        }
+
+        function donateToFund(button) {
+            // Handle donation
+            alert('Donation processing feature coming soon!');
+        }
+
+        // Message functions
+        function showNewMessageModal() {
+            // Show new message modal
+            alert('New message feature coming soon!');
+        }
+
+        // Connection functions
+        function filterConnections(filter) {
+            // Filter connections based on status
+            alert('Connection filtering feature coming soon!');
+        }
+
+        function acceptConnection(button) {
+            // Handle connection acceptance
+            alert('Connection accepted!');
+        }
+
+        function rejectConnection(button) {
+            // Handle connection rejection
+            alert('Connection rejected!');
+        }
+
+        // Data loading functions
+        function loadUserPosts() {
+            // Load user's posts
+            // This would typically involve an API call
+        }
+
+        function loadMessages() {
+            // Load messages
+            // This would typically involve an API call
+        }
+
+        function loadConnections() {
+            // Load connections
+            // This would typically involve an API call
+        }
+
+        function loadEvents() {
+            // Load events
+            // This would typically involve an API call
+        }
+
+        function loadCareerOpportunities() {
+            // Load career opportunities
+            // This would typically involve an API call
+        }
+
+        // Add styles for section visibility
+        const style = document.createElement('style');
+        style.textContent = `
+            .content-section {
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s ease-in-out;
+            }
+
+            .content-section.active {
+                display: block;
+                opacity: 1;
+            }
+
+            .dashboard-content {
+                min-height: calc(100vh - 80px);
+                padding: 20px;
+            }
+
+            .section-header {
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #f0f2f5;
+            }
+
+            .section-header h2 {
+                color: #1e293b;
+                font-size: 24px;
+                margin: 0;
+            }
+
+            .header-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn-secondary {
+                background: #f1f5f9;
+                color: #64748b;
+                padding: 0.8rem 1.5rem;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.2s;
+            }
+
+            .btn-secondary:hover {
+                background: #e2e8f0;
+                color: #1e293b;
+            }
+
+            .btn-secondary.active {
+                background: #2563eb;
+                color: white;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1) + '-section';
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add loading states for sections
+        function showLoadingState(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.innerHTML = `
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Loading...</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Add error handling for section loading
+        function showErrorState(sectionId, errorMessage) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>${errorMessage}</p>
+                        <button class="btn-primary" onclick="retryLoading('${sectionId}')">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Add retry functionality
+        function retryLoading(sectionId) {
+            showLoadingState(sectionId);
+            // Implement retry logic here
+            setTimeout(() => {
+                loadSectionContent(sectionId);
+            }, 1000);
+        }
+
+        // Add section content loading
+        function loadSectionContent(sectionId) {
+            showLoadingState(sectionId);
+            // Simulate API call
+            setTimeout(() => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    // Remove loading state
+                    section.classList.remove('loading');
+                    // Load actual content
+                    // This would typically involve an API call
+                }
+            }, 1000);
+        }
+
+        // Add styles for loading and error states
+        const loadingStyles = document.createElement('style');
+        loadingStyles.textContent = `
+            .loading-state {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 200px;
+                gap: 20px;
+            }
+
+            .spinner {
+                width: 40px;
+                height: 40px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #2563eb;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            .error-state {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 200px;
+                gap: 20px;
+                text-align: center;
+                color: #ef4444;
+            }
+
+            .error-state i {
+                font-size: 48px;
+            }
+        `;
+        document.head.appendChild(loadingStyles);
     </script>
 </body>
 </html>
