@@ -169,20 +169,32 @@
       border: 1px solid #ddd;
       border-radius: 4px;
     }
-
+    #pageLoader {
+      display: flex;
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease;
+    }
+    
     .spinner {
       width: 50px;
       height: 50px;
-      border: 6px solid #ccc;
-      border-top-color: #3498db;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-    
+
     @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -224,7 +236,7 @@
           <div id="loader">Logging out...</div>
         </div>
 
-        <div id="pageLoader" style="display: flex;position: fixed;top: 0; left: 0;width: 100%; height: 100%;background: rgba(255, 255, 255, 0.8);z-index: 9999;align-items: center;justify-content: center;">
+        <div id="pageLoader" style="display: flex;">
           <div class="spinner"></div>
         </div>
             
@@ -411,7 +423,7 @@
                 <td style="padding: 10px;">{{ event.location }}</td>
                 <td style="padding: 10px;">{{ event.description }}</td>
                 <td>
-                  <form method="POST" action="{% url 'delete_alumni' %}" style="display: inline;">
+                  <form method="POST" action="{% url 'delete_event' %}" style="display: inline;">
                     {% csrf_token %}
                     <input type="hidden" name="event_name" value="{{ event.event_name }}">
                     <button type="submit" class="btn-action delete" title="Delete" onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">
@@ -822,6 +834,55 @@
   </script>
 
 <script>
+  let activeRequests = 0;
+  const loader = document.getElementById('pageLoader');
+
+  // Handle initial page load
+  window.addEventListener('load', () => {
+    loader.style.display = 'none';
+  });
+
+  // Intercept all fetch requests
+  const originalFetch = window.fetch;
+  window.fetch = async (...args) => {
+    activeRequests++;
+    loader.style.display = 'flex';
+    try {
+      return await originalFetch(...args);
+    } finally {
+      activeRequests--;
+      if (activeRequests === 0) {
+        loader.style.display = 'none';
+      }
+    }
+  };
+
+  // Handle regular link navigation
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && !href.startsWith('#')) {
+        loader.style.display = 'flex';
+      }
+    });
+  });
+
+  // Handle form submissions
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', () => {
+      loader.style.display = 'flex';
+    });
+  });
+
+  // Existing confirmLogout function
+  function confirmLogout(event) {
+    event.preventDefault();
+    if (window.confirm('Are you sure you want to logout?')) {
+      loader.style.display = 'flex';
+      window.location.href = event.target.dataset.logoutUrl;
+    }
+  }
+
   function confirmLogout(event) {
     event.preventDefault();
   

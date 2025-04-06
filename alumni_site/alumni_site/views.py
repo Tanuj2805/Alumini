@@ -402,16 +402,13 @@ def edit_event(request):
 def delete_event(request):
     try:
         name = request.POST.get('event_name')
+        print(name)
         event = Event.objects.get(event_name=name)
-        
+        print("deleted event ",event)
         # Delete the event
         event.delete()
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Event deleted successfully'
-        })
-        
+        return redirect('admindash')
+
     except Event.DoesNotExist:
         return JsonResponse({
             'success': False,
@@ -478,33 +475,39 @@ def add_job(request):
             'message': f"Job posting failed: {e}"
         })
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from datetime import datetime
+from .models import Post  # Ensure Post model is defined and imported
+
 @require_POST
-def edit_job(request):
+def add_post(request):
     try:
-        job_id = request.POST.get('job_id')
-        # job = Job.objects.get(job_id=job_id)
-        
-        # Update job fields
-        # job.position = request.POST.get('position')
-        # job.company = request.POST.get('company')
-        # job.location = request.POST.get('location')
-        # job.description = request.POST.get('description')
-        # job.requirements = request.POST.get('requirements')
-        # job.status = request.POST.get('status')
-        
-        # Save the changes
-        # job.save()
-        
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        category = request.POST.get('category')
+        status = request.POST.get('status')
+
+        # Save post to the database
+        Post.objects.create(
+            title=title,
+            content=content,
+            category=category,
+            status=status,
+            author=request.user,
+            created_date=datetime.now()
+        )
+
         return JsonResponse({
             'success': True,
-            'message': 'Job updated successfully'
+            'message': 'Post created successfully!'
         })
-        
     except Exception as e:
         return JsonResponse({
             'success': False,
-            'message': str(e)
+            'message': f"Post creation failed: {str(e)}"
         }, status=500)
+
 
 @require_POST
 def delete_job(request):
