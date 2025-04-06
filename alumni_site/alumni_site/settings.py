@@ -82,8 +82,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'projects',
+        'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            'host': 'mongodb+srv://anuragnimkande:anurag123@cluster0.6sft9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+            'host': 'mongodb+srv://anuragnimkande:anurag123@cluster0.wlq1fxf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
         }
     }
 }

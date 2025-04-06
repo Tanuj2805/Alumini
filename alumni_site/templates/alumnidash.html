@@ -1128,30 +1128,55 @@
                 <div class="modal-content">
                     <span class="close">&times;</span>
                     <h2>Edit Profile</h2>
-                    <form id="profileForm">
+                    <form id="profileForm" method="POST" action="{% url 'update_alumni_profile' %}">
+                        {% csrf_token %}
                         <div class="form-group">
                             <label>Profile Picture</label>
-                            <input type="file" accept="image/*">
+                            <input type="file" name="profile_picture" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" name="first_name" value="John" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" name="last_name" value="Doe" required>
                         </div>
                         <div class="form-group">
                             <label>Full Name</label>
-                            <input type="text" value="John Doe">
+                            <input type="text" name="alumni_name" value="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" name="DOB" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" name="age" value="25" required>
                         </div>
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" value="john.doe@example.com">
+                            <input type="email" name="alumni_email" value="john.doe@example.com" required>
                         </div>
                         <div class="form-group">
                             <label>Phone</label>
-                            <input type="tel" value="+91 98765 43210">
+                            <input type="tel" name="alumni_phone" value="+91 98765 43210" required>
                         </div>
                         <div class="form-group">
-                            <label>Location</label>
-                            <input type="text" value="Bangalore, India">
+                            <label>Address</label>
+                            <textarea name="address" required>123 Main Street</textarea>
                         </div>
                         <div class="form-group">
-                            <label>Current Position</label>
-                            <input type="text" value="Software Engineer at Tech Corp">
+                            <label>Street Name</label>
+                            <input type="text" name="street_name" value="Main Street" required>
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" name="city" value="Bangalore" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Pincode</label>
+                            <input type="text" name="pincode" value="560001" required>
                         </div>
                         <button type="submit" class="btn-primary">Save Changes</button>
                     </form>
@@ -1171,6 +1196,46 @@
                 if (event.target == modal) {
                     modal.remove();
                 }
+            };
+            
+            // Form submission handler
+            const form = modal.querySelector('#profileForm');
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Saving...';
+                submitBtn.disabled = true;
+                
+                // Submit the form
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Profile updated successfully!');
+                        modal.remove();
+                        // Refresh the page to show updated data
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating your profile.');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                });
             };
         }
 

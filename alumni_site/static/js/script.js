@@ -327,3 +327,278 @@ document.addEventListener('DOMContentLoaded', function() {
       }
   }
 });
+
+// Admin Management Functions
+function showAddAdminModal() {
+    const modal = document.getElementById('modalAddAdmin');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+function showEditAdminModal(admin) {
+    const modal = document.getElementById('modalEditAdmin');
+    if (modal) {
+        // Populate form fields with admin data
+        document.getElementById('editAdminId').value = admin.id;
+        document.getElementById('editAdminName').value = admin.name;
+        document.getElementById('editAdminEmail').value = admin.email;
+        
+        modal.style.display = 'block';
+    }
+}
+
+function getAdminDetails(adminId) {
+    showLoader();
+    
+    fetch('/get_admin_details/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: `admin_id=${adminId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoader();
+        if (data.success) {
+            showEditAdminModal(data.admin);
+        } else {
+            alert(data.message || 'Error fetching admin details');
+        }
+    })
+    .catch(error => {
+        hideLoader();
+        console.error('Error:', error);
+        alert('An error occurred while fetching admin details');
+    });
+}
+
+function confirmDeleteAdmin(adminId) {
+    if (confirm('Are you sure you want to delete this admin?')) {
+        showLoader();
+        
+        fetch('/delete_admin/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: `admin_id=${adminId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoader();
+            if (data.success) {
+                alert('Admin deleted successfully');
+                location.reload(); // Refresh the page to update the admin list
+            } else {
+                alert(data.message || 'Error deleting admin');
+            }
+        })
+        .catch(error => {
+            hideLoader();
+            console.error('Error:', error);
+            alert('An error occurred while deleting the admin');
+        });
+    }
+}
+
+// Form validation for admin
+function validateAdminForm(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return false;
+
+    const name = form.querySelector('input[name="name"]').value.trim();
+    const email = form.querySelector('input[name="email"]').value.trim();
+    const password = form.querySelector('input[name="password"]').value.trim();
+
+    if (!name) {
+        alert('Please enter admin name');
+        return false;
+    }
+
+    if (!email) {
+        alert('Please enter admin email');
+        return false;
+    }
+
+    if (!validateEmail(email)) {
+        alert('Please enter a valid email address');
+        return false;
+    }
+
+    if (!password && formId === 'formAddAdmin') {
+        alert('Please enter admin password');
+        return false;
+    }
+
+    return true;
+}
+
+// Event Listeners for Admin Management
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Admin Modal
+    const btnOpenModalAddAdmin = document.getElementById('btnOpenModalAddAdmin');
+    const modalAddAdmin = document.getElementById('modalAddAdmin');
+    const btnCloseModalAddAdmin = document.getElementById('btnCloseModalAddAdmin');
+
+    if (btnOpenModalAddAdmin) {
+        btnOpenModalAddAdmin.addEventListener('click', showAddAdminModal);
+    }
+
+    if (btnCloseModalAddAdmin) {
+        btnCloseModalAddAdmin.addEventListener('click', () => {
+            modalAddAdmin.style.display = 'none';
+        });
+    }
+
+    // Add Admin Form Submission
+    const formAddAdmin = document.getElementById('formAddAdmin');
+    if (formAddAdmin) {
+        formAddAdmin.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateAdminForm('formAddAdmin')) {
+                const formData = new FormData(this);
+                showLoader();
+
+                fetch('/add_admin/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoader();
+                    if (data.success) {
+                        alert('Admin added successfully');
+                        modalAddAdmin.style.display = 'none';
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error adding admin');
+                    }
+                })
+                .catch(error => {
+                    hideLoader();
+                    console.error('Error:', error);
+                    alert('An error occurred while adding the admin');
+                });
+            }
+        });
+    }
+
+    // Edit Admin Form Submission
+    const formEditAdmin = document.getElementById('formEditAdmin');
+    if (formEditAdmin) {
+        formEditAdmin.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateAdminForm('formEditAdmin')) {
+                const formData = new FormData(this);
+                showLoader();
+
+                fetch('/edit_admin/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoader();
+                    if (data.success) {
+                        alert('Admin updated successfully');
+                        document.getElementById('modalEditAdmin').style.display = 'none';
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error updating admin');
+                    }
+                })
+                .catch(error => {
+                    hideLoader();
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the admin');
+                });
+            }
+        });
+    }
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === modalAddAdmin) {
+            modalAddAdmin.style.display = 'none';
+        }
+        const modalEditAdmin = document.getElementById('modalEditAdmin');
+        if (event.target === modalEditAdmin) {
+            modalEditAdmin.style.display = 'none';
+        }
+    });
+});
+
+// Utility Functions
+function getCsrfToken() {
+    const csrfCookie = document.cookie.split(';')
+        .find(cookie => cookie.trim().startsWith('csrftoken='));
+    return csrfCookie ? csrfCookie.split('=')[1] : '';
+}
+
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+function showLoader() {
+    const loader = document.getElementById('loader-overlay');
+    if (loader) {
+        loader.style.display = 'flex';
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader-overlay');
+    if (loader) {
+        loader.style.display = 'none';
+    }
+}
+
+  
+// Function to confirm delete alumni
+function confirmDeleteAlumni(alumniEmail) {
+    if (confirm('Are you sure you want to delete this alumni? This action cannot be undone.')) {
+      // Optional: show loading
+      showLoadingState('alumni');
+  
+      const formData = new FormData();
+      formData.append('alumni_email', alumniEmail);
+  
+      fetch('{% url "delete_alumni" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Show Django response as an alert
+        alert(data.message);
+  
+        // If successful, reload the page
+        if (data.success) {
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the alumni.');
+      })
+      .finally(() => {
+        hideLoadingState('alumni');
+      });
+    }
+  }
+  
+  // Show loader when page is loading
+  window.addEventListener('load', function () {
+    const loader = document.getElementById('pageLoader');
+    if (loader) {
+      loader.style.display = 'none';
+    }
+  });
