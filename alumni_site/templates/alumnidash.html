@@ -472,6 +472,94 @@
             border-radius: 50%;
             object-fit: cover;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 2% auto;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            min-height: 300px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 5px;
+            margin: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-actions {
+            padding: 15px 0 5px;
+            text-align: right;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .close {
+            position: absolute;
+            right: 25px;
+            top: 15px;
+            color: #aaa;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #666;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
     </style>
 
 </head>
@@ -885,9 +973,169 @@
             </div>
         </main>
     </div>
+
+    {% comment %} modal for update profile {% endcomment %}
+     <!-- Profile Modal -->
+     <div id="profileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Profile</h2>
+            <div class="form-scroll-container">
+                <form id="profileForm" method="POST" action="{% url 'update_alumni_profile' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <input type="file" name="profile_picture" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="alumni_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" name="DOB" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="number" name="age" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="alumni_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" name="alumni_phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea name="address" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Street Name</label>
+                        <input type="text" name="street_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pincode</label>
+                        <input type="text" name="pincode" required>
+                    </div>
+                </form>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" form="profileForm">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    {% comment %} add post modal {% endcomment %}
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Post</h2>
+            <form id="postForm" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-scroll-container">
+                    <div class="form-group">
+                        <label>Post Content <span class="required">*</span></label>
+                        <textarea name="content" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Add Image (Optional)</label>
+                        <input type="file" name="image" accept="image/*">
+                        <p class="help-text">Supported formats: JPG, PNG, GIF</p>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Publish Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Show Modal Function
+function showPostModal() {
+    document.getElementById('postModal').style.display = 'block';
+}
+
+// Close Modal Function
+function closePostModal() {
+    document.getElementById('postModal').style.display = 'none';
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Trigger button
+    document.querySelector('.btn-new-post').addEventListener('click', showPostModal);
+    
+    // Close button
+    document.querySelector('#postModal .close').addEventListener('click', closePostModal);
+    
+    // Close when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('postModal')) {
+            closePostModal();
+        }
+    });
+});
+        {% comment %} add post {% endcomment %}
+        document.getElementById('postForm').addEventListener('submit', function(e) {
+            const content = this.content.value.trim();
+            const image = this.image.files[0];
+            
+            if (!content && !image) {
+                e.preventDefault();
+                alert('Please provide either text content or an image');
+                this.content.focus();
+            }
+        });
+
+        {% comment %} showing the profile {% endcomment %}
+
+        function showProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.style.display = 'block';
+            
+            // Pre-fill form data from server-side context
+            const form = document.getElementById('profileForm');
+            // Example: form.elements.first_name.value = "{{ request.user.first_name }}";
+        }
+        
+        // Close Modal Handlers
+        document.querySelector('#profileModal .close').addEventListener('click', () => {
+            document.getElementById('profileModal').style.display = 'none';
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('profileModal')) {
+            document.getElementById('profileModal').style.display = 'none';
+            }
+        });
+        
+        // Auto-open modal if form errors exist
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if form.errors %}
+            showProfileModal();
+            {% endif %}
+        });
+
         // Navigation functionality
         document.addEventListener('DOMContentLoaded', function() {
+
+
             // Handle sidebar navigation
             const navLinks = document.querySelectorAll('.sidebar-nav a');
             const contentSections = document.querySelectorAll('.content-section');
@@ -998,55 +1246,6 @@
             loadCareerOpportunities();
         }
 
-        // Post creation modal
-        function showPostModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Create New Post</h2>
-                    <form id="postForm">
-                        <div class="form-group">
-                            <textarea placeholder="What's on your mind?" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="postImage">Add Image (optional)</label>
-                            <input type="file" id="postImage" accept="image/*">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" placeholder="Add tags (comma separated)" id="postTags">
-                        </div>
-                        <button type="submit" class="btn-primary">Post</button>
-                    </form>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-            modal.style.display = 'block';
-
-            // Close modal functionality
-            const closeBtn = modal.querySelector('.close');
-            closeBtn.onclick = function() {
-                modal.remove();
-            };
-
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.remove();
-                }
-            };
-
-            // Handle form submission
-            const form = modal.querySelector('#postForm');
-            form.onsubmit = function(e) {
-                e.preventDefault();
-                // Add post submission logic here
-                alert('Post created successfully!');
-                modal.remove();
-            };
-        }
-
         // Handle like functionality
         function handleLike(button) {
             button.classList.toggle('active');
@@ -1119,125 +1318,6 @@
                 }
             });
         });
-
-        // Profile Modal
-        function showProfileModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Edit Profile</h2>
-                    <form id="profileForm" method="POST" action="{% url 'update_alumni_profile' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label>Profile Picture</label>
-                            <input type="file" name="profile_picture" accept="image/*">
-                        </div>
-                        <div class="form-group">
-                            <label>First Name</label>
-                            <input type="text" name="first_name" value="John" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Last Name</label>
-                            <input type="text" name="last_name" value="Doe" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" name="alumni_name" value="John Doe" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Date of Birth</label>
-                            <input type="date" name="DOB" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Age</label>
-                            <input type="number" name="age" value="25" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="alumni_email" value="john.doe@example.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <input type="tel" name="alumni_phone" value="+91 98765 43210" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Address</label>
-                            <textarea name="address" required>123 Main Street</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Street Name</label>
-                            <input type="text" name="street_name" value="Main Street" required>
-                        </div>
-                        <div class="form-group">
-                            <label>City</label>
-                            <input type="text" name="city" value="Bangalore" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Pincode</label>
-                            <input type="text" name="pincode" value="560001" required>
-                        </div>
-                        <button type="submit" class="btn-primary">Save Changes</button>
-                    </form>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-            modal.style.display = 'block';
-
-            // Close modal functionality
-            const closeBtn = modal.querySelector('.close');
-            closeBtn.onclick = function() {
-                modal.remove();
-            };
-
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.remove();
-                }
-            };
-            
-            // Form submission handler
-            const form = modal.querySelector('#profileForm');
-            form.onsubmit = function(e) {
-                e.preventDefault();
-                
-                // Show loading state
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Saving...';
-                submitBtn.disabled = true;
-                
-                // Submit the form
-                fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Profile updated successfully!');
-                        modal.remove();
-                        // Refresh the page to show updated data
-                        window.location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating your profile.');
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                });
-            };
-        }
 
         // Event handling functions
         function handleRSVP(button) {

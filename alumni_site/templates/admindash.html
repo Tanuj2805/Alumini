@@ -169,33 +169,33 @@
       border: 1px solid #ddd;
       border-radius: 4px;
     }
-    #pageLoader {
-      display: flex;
+    .loader-wrapper {
       position: fixed;
-      top: 0; 
+      top: 0;
       left: 0;
-      width: 100%; 
+      width: 100%;
       height: 100%;
-      background: rgba(255, 255, 255, 0.8);
-      z-index: 9999;
-      align-items: center;
+      background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black background */
+      display: flex;
       justify-content: center;
-      transition: opacity 0.3s ease;
-    }
-    
-    .spinner {
+      align-items: center;
+      z-index: 9999; /* Ensure the loader appears on top of other content */
+  }
+  
+  .loader {
+      border: 8px solid #ffffff; /* White */
+      border-top: 8px solid #3498db; /* Blue */
+      border-radius: 50%;
       width: 50px;
       height: 50px;
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #3498db;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
+      animation: spin 1s linear infinite; /* Apply the rotation animation */
+  }
+  
+  @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
-    }
+  }
+  
   </style>
 </head>
 <body class="dashboard-body">
@@ -236,9 +236,9 @@
           <div id="loader">Logging out...</div>
         </div>
 
-        <div id="pageLoader" style="display: flex;">
-          <div class="spinner"></div>
-        </div>
+        <div class="loader-wrapper">
+          <div class="loader"></div>
+      </div>
             
         <!-- Dashboard Section -->
         <div id="dashboard" class="content-section active">
@@ -249,7 +249,7 @@
                 <h3>Total Alumni</h3>
               </div>
               <div class="card-body">
-                <p>1,234</p>
+                <p>{{ total_alumni }}</p>
               </div>
             </div>
             <div class="card">
@@ -258,7 +258,7 @@
                 <h3>Upcoming Events</h3>
               </div>
               <div class="card-body">
-                <p>5</p>
+                <p>{{ total_events }}</p>
               </div>
             </div>
             <div class="card">
@@ -267,7 +267,7 @@
                 <h3>Job Postings</h3>
               </div>
               <div class="card-body">
-                <p>23</p>
+                <p>{{ total_job }}</p>
               </div>
             </div>
             <div class="card">
@@ -299,8 +299,7 @@
             <h3>Alumni Management</h3>
             <div class="alumni-actions" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <!-- Search Box -->
-                <form id="alumniSearchForm" method="GET" action="{% url 'admindash' %}" style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="alumniSearch" name="search" placeholder="Search alumni..." value="{{ search_query }}" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 5px;">
+                   <input type="text" id="alumniSearch" name="search" placeholder="Search alumni..." value="{{ search_query }}" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 5px;">
                     <!-- Sort Dropdown -->
                     <select id="alumniSort" name="sort" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 5px;">
                         <option value="">Sort By</option>
@@ -312,10 +311,9 @@
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-search"></i> Search
                     </button>
-                    <button type="button" class="btn-primary" id="btnOpenModalAddAlumni">
-                        <i class="fas fa-plus"></i> Add Alumni
+                    <button class="btn-primary" id="btnOpenModalAddAlumni">
+                      <i class="fas fa-plus"></i> Add Alumni
                     </button>
-                </form>
             </div>
             </div>
             <div class="table-container">
@@ -470,20 +468,37 @@
                 </tr>
               </thead>
               <tbody>
+                {% for job in jobs %}
                 <tr>
-                  <td>Software Engineer</td>
-                  <td>Tech Corp</td>
-                  <td>Bangalore</td>
-                  <td>2024-03-01</td>
-                  <td>45</td>
-                  <td><span class="status active">Active</span></td>
+                  <td>{{ job.position }}</td>
+                  <td>{{ job.company }}</td>
+                  <td>{{ job.location }}</td>
+                  <td>{{ job.posted_at|date:"Y-m-d" }}</td>
+                  <td>{{ job.application_set.count }}</td>  <!-- Assuming related_name or ForeignKey reverse -->
                   <td>
-                    <button class="btn-action view"><i class="fas fa-eye"></i></button>
-                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                    <span class="status {% if job.status == 'active' %}active{% else %}inactive{% endif %}">
+                      {{ job.status|capfirst }}
+                    </span>
+                  </td>
+                  <td>
+                    <form method="POST" action="{% url 'delete_job' %}" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="job_id" value="{{ job.id }}">
+                      <input type="hidden" name="position" value="{{ job.position }}">
+                      <input type="hidden" name="company" value="{{ job.company }}">
+                      <button type="submit" class="btn-action delete" onclick="return confirm('Are you sure you want to delete this job?');">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
                   </td>
                 </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" style="text-align: center;">No jobs posted yet.</td>
+                </tr>
+                {% endfor %}
               </tbody>
-            </table>
+            </table>            
           </div>
         </div>
        <!-- Posts Section -->
@@ -669,7 +684,7 @@
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Add Alumni</h2>
-      <form id="alumniForm" action="{% url 'add_alumni' %}" method="post" onsubmit="return validateForm()">
+      <form id="alumniForm" action="{% url 'add_alumni' %}" method="post">
         {% csrf_token %}
   
         <div class="form-group">
@@ -766,9 +781,8 @@
       </form>
     </div>
   </div>
-  
+    
   <!-- Add Event Modal-->
-  
   <div id="modalAddEvent" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -817,6 +831,36 @@
     </div>
   </div>
 
+  <div id="modalAddJob" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Add Job</h2>
+      <form id="jobForm">
+        {% csrf_token %}
+        <div class="form-group"><label>Position:</label><input type="text" name="position" required></div>
+        <div class="form-group"><label>Company:</label><input type="text" name="company" required></div>
+        <div class="form-group"><label>Location:</label><input type="text" name="location" required></div>
+        <div class="form-group">
+          <label>Job Type:</label>
+          <select name="job_type" required>
+            <option value="full_time">Full Time</option>
+            <option value="part_time">Part Time</option>
+            <option value="contract">Contract</option>
+            <option value="internship">Internship</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Description:</label><textarea name="description" required></textarea></div>
+        <div class="form-group"><label>Requirements:</label><textarea name="requirements" required></textarea></div>
+        <div class="form-group"><label>Salary Range (e.g. 30000 - 50000):</label><input type="text" name="salary"></div>
+        <div class="form-group"><label>Skills (comma separated):</label><input type="text" name="skills_required"></div>
+        <div class="form-group"><label>Application Deadline:</label><input type="date" name="application_deadline" required></div>
+        <div class="form-group"><label>Contact Email:</label><input type="email" name="contact_email" required></div>
+        <input type="hidden" name="status" value="open">
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+  
 <style>
   .error-message {
       color: red;
@@ -826,14 +870,48 @@
   </style>
 
   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = document.getElementById("modalAddJob");
+      const btn = document.getElementById("btnOpenModalAddJob");
+      const closeBtn = modal.querySelector(".close");
+      const form = document.getElementById("jobForm");
 
-    window.addEventListener('load', function () {
-      const loader = document.getElementById('pageLoader');
-      if (loader) loader.style.display = 'none';
+      btn.addEventListener("click", () => modal.style.display = "block");
+      closeBtn.addEventListener("click", () => modal.style.display = "none");
+      window.addEventListener("click", e => { if (e.target === modal) modal.style.display = "none"; });
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        const response = await fetch("{% url 'add_job' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": formData.get('csrfmiddlewaretoken')
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+        alert(data.message);
+        if (data.success) {
+          modal.style.display = "none";
+          form.reset();
+        }
+      });
     });
+  </script>
+  
+
+  <script>
+    window.addEventListener('load', function() {
+      document.querySelector('.loader-wrapper').style.display = 'none';
+      document.querySelector('.content').style.display = 'block';
+  });
   </script>
 
 <script>
+
   let activeRequests = 0;
   const loader = document.getElementById('pageLoader');
 
@@ -1000,7 +1078,7 @@ function validateEventForm() {
 }
 
   // Handle add alumni button click
-  document.getElementById('btnOpenModalAddAlumni').addEventListener('click', function() {
+  document.getElementById('btnOpenModalAddAlumni').addEventListener('click', function(e) {
     document.getElementById('modalAddAlumni').style.display = 'block';
   });
 
@@ -1180,6 +1258,7 @@ function hideLoadingState(sectionId) {
     }
   }
 }
+  
 
 // Event Management Functions
 document.addEventListener('DOMContentLoaded', function() {
@@ -1210,124 +1289,6 @@ document.addEventListener('DOMContentLoaded', function() {
     showAddPostModal();
   });
 });
-
-// Function to show add post modal
-function showAddPostModal() {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalAddPost">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Create New Post</h2>
-        <form id="addPostForm" method="POST" action="{% url 'add_post' %}">
-          {% csrf_token %}
-          
-          <div class="form-group">
-            <label for="inputTitle">Title:</label>
-            <input type="text" id="inputTitle" name="title" required>
-            <small id="titleError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputContent">Content:</label>
-            <textarea id="inputContent" name="content" required></textarea>
-            <small id="contentError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputCategory">Category:</label>
-            <select id="inputCategory" name="category" required>
-              <option value="">Select a category</option>
-              <option value="news">News</option>
-              <option value="announcement">Announcement</option>
-              <option value="event">Event</option>
-              <option value="general">General</option>
-            </select>
-            <small id="categoryError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputStatus">Status:</label>
-            <select id="inputStatus" name="status" required>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-            <small id="statusError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Create Post</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalAddPost').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalAddPost');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#addPostForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validatePostForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Creating...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Post created successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while creating the post.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
 
 // Function to validate post form
 function validatePostForm() {
@@ -1363,1273 +1324,6 @@ function validatePostForm() {
   return isValid;
 }
 
-
-// Function to show edit post modal
-function showEditPostModal(post) {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalEditPost">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Edit Post</h2>
-        <form id="editPostForm" method="POST" action="{% url 'edit_post' %}">
-          {% csrf_token %}
-          <input type="hidden" name="post_id" value="${post.post_id}">
-          
-          <div class="form-group">
-            <label for="editTitle">Title:</label>
-            <input type="text" id="editTitle" name="title" value="${post.title}" required>
-            <small id="editTitleError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editContent">Content:</label>
-            <textarea id="editContent" name="content" required>${post.content}</textarea>
-            <small id="editContentError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editCategory">Category:</label>
-            <select id="editCategory" name="category" required>
-              <option value="">Select a category</option>
-              <option value="news" ${post.category === 'news' ? 'selected' : ''}>News</option>
-              <option value="announcement" ${post.category === 'announcement' ? 'selected' : ''}>Announcement</option>
-              <option value="event" ${post.category === 'event' ? 'selected' : ''}>Event</option>
-              <option value="general" ${post.category === 'general' ? 'selected' : ''}>General</option>
-            </select>
-            <small id="editCategoryError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editStatus">Status:</label>
-            <select id="editStatus" name="status" required>
-              <option value="draft" ${post.status === 'draft' ? 'selected' : ''}>Draft</option>
-              <option value="published" ${post.status === 'published' ? 'selected' : ''}>Published</option>
-            </select>
-            <small id="editStatusError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Update Post</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalEditPost').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalEditPost');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#editPostForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateEditPostForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Updating...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Post updated successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while updating the post.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
-
-// Function to validate edit post form
-function validateEditPostForm() {
-  let isValid = true;
-  const title = document.getElementById('editTitle').value;
-  const content = document.getElementById('editContent').value;
-  const category = document.getElementById('editCategory').value;
-  const status = document.getElementById('editStatus').value;
-
-  // Clear previous error messages
-  document.querySelectorAll('#modalEditPost .error-message').forEach(el => el.textContent = '');
-
-  if (!title) {
-      document.getElementById('editTitleError').textContent = 'Title is required.';
-      isValid = false;
-  }
-
-  if (!content) {
-      document.getElementById('editContentError').textContent = 'Content is required.';
-      isValid = false;
-  }
-
-  if (!category) {
-      document.getElementById('editCategoryError').textContent = 'Category is required.';
-      isValid = false;
-  }
-
-  if (!status) {
-      document.getElementById('editStatusError').textContent = 'Status is required.';
-      isValid = false;
-  }
-
-  return isValid;
-}
-
-// Function to show add donation modal
-function showAddDonationModal() {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalAddDonation">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Add New Donation</h2>
-        <form id="addDonationForm" method="POST" action="{% url 'add_donation' %}">
-          {% csrf_token %}
-          
-          <div class="form-group">
-            <label for="inputDonorName">Donor Name:</label>
-            <input type="text" id="inputDonorName" name="donor_name" required>
-            <small id="donorNameError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputDonorEmail">Donor Email:</label>
-            <input type="email" id="inputDonorEmail" name="donor_email" required>
-            <small id="donorEmailError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputAmount">Amount:</label>
-            <input type="number" id="inputAmount" name="amount" required min="1" step="0.01">
-            <small id="amountError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputPaymentMethod">Payment Method:</label>
-            <select id="inputPaymentMethod" name="payment_method" required>
-              <option value="">Select a payment method</option>
-              <option value="credit_card">Credit Card</option>
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="paypal">PayPal</option>
-              <option value="cash">Cash</option>
-            </select>
-            <small id="paymentMethodError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputNotes">Notes:</label>
-            <textarea id="inputNotes" name="notes"></textarea>
-            <small id="notesError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Add Donation</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalAddDonation').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalAddDonation');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#addDonationForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateDonationForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Adding...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Donation added successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while adding the donation.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
-
-// Function to validate donation form
-function validateDonationForm() {
-  let isValid = true;
-  const donorName = document.getElementById('inputDonorName').value;
-  const donorEmail = document.getElementById('inputDonorEmail').value;
-  const amount = document.getElementById('inputAmount').value;
-  const paymentMethod = document.getElementById('inputPaymentMethod').value;
-
-  // Clear previous error messages
-  document.querySelectorAll('#modalAddDonation .error-message').forEach(el => el.textContent = '');
-
-  if (!donorName) {
-      document.getElementById('donorNameError').textContent = 'Donor name is required.';
-      isValid = false;
-  }
-
-  if (!donorEmail || !/\S+@\S+\.\S+/.test(donorEmail)) {
-      document.getElementById('donorEmailError').textContent = 'Valid email is required.';
-      isValid = false;
-  }
-
-  if (!amount || amount <= 0) {
-      document.getElementById('amountError').textContent = 'Amount must be greater than zero.';
-      isValid = false;
-  }
-
-  if (!paymentMethod) {
-      document.getElementById('paymentMethodError').textContent = 'Payment method is required.';
-      isValid = false;
-  }
-
-  return isValid;
-}
-
-// Function to get donation details
-function getDonationDetails(donationId) {
-  // Show loading state
-  showLoadingState('donation');
-  
-  // Create form data
-  const formData = new FormData();
-  formData.append('donation_id', donationId);
-  
-  // Send request to get donation details
-  fetch('{% url "get_donation_details" %}', {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Show donation details in a modal
-      showDonationDetailsModal(data.donation);
-    } else {
-      alert('Error: ' + data.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred while fetching donation details.');
-  })
-  .finally(() => {
-    // Hide loading state
-    hideLoadingState('donation');
-  });
-}
-
-// Function to show donation details modal
-function showDonationDetailsModal(donation) {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalDonationDetails">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Donation Details</h2>
-        
-        <div class="donation-details">
-          <div class="detail-row">
-            <span class="detail-label">Donor Name:</span>
-            <span class="detail-value">${donation.donor_name}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Donor Email:</span>
-            <span class="detail-value">${donation.donor_email}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Amount:</span>
-            <span class="detail-value">$${donation.amount}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Date:</span>
-            <span class="detail-value">${donation.date}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Payment Method:</span>
-            <span class="detail-value">${donation.payment_method}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Status:</span>
-            <span class="detail-value">${donation.status}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Notes:</span>
-            <span class="detail-value">${donation.notes || 'No notes provided'}</span>
-          </div>
-        </div>
-        
-        <div class="donation-actions">
-          <button class="btn-primary" onclick="generateReceipt(${donation.donation_id})">
-            <i class="fas fa-receipt"></i> Generate Receipt
-          </button>
-          <button class="btn-primary" onclick="editDonation(${donation.donation_id})">
-            <i class="fas fa-edit"></i> Edit
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalDonationDetails').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalDonationDetails');
-  const closeBtn = modal.querySelector('.close');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-}
-
-// Function to generate receipt
-function generateReceipt(donationId) {
-  // Show loading state
-  showLoadingState('donation');
-  
-  // Create form data
-  const formData = new FormData();
-  formData.append('donation_id', donationId);
-  
-  // Send request to generate receipt
-  fetch('{% url "generate_receipt" %}', {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-    }
-  })
-  .then(response => {
-    if (response.ok) {
-      return response.blob();
-    }
-    throw new Error('Network response was not ok.');
-  })
-  .then(blob => {
-    // Create a link to download the receipt
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = `donation_receipt_${donationId}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    a.remove();
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred while generating the receipt.');
-  })
-  .finally(() => {
-    // Hide loading state
-    hideLoadingState('donation');
-  });
-}
-
-// Function to edit donation
-function editDonation(donationId) {
-  // Show loading state
-  showLoadingState('donation');
-  
-  // Create form data
-  const formData = new FormData();
-  formData.append('donation_id', donationId);
-  
-  // Send request to get donation details
-  fetch('{% url "get_donation_details" %}', {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Show edit modal
-      showEditDonationModal(data.donation);
-    } else {
-      alert('Error: ' + data.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred while fetching donation details.');
-  })
-  .finally(() => {
-    // Hide loading state
-    hideLoadingState('donation');
-  });
-}
-
-// Function to show edit donation modal
-function showEditDonationModal(donation) {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalEditDonation">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Edit Donation</h2>
-        <form id="editDonationForm" method="POST" action="{% url 'edit_donation' %}">
-          {% csrf_token %}
-          <input type="hidden" name="donation_id" value="${donation.donation_id}">
-          
-          <div class="form-group">
-            <label for="editDonorName">Donor Name:</label>
-            <input type="text" id="editDonorName" name="donor_name" value="${donation.donor_name}" required>
-            <small id="editDonorNameError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editDonorEmail">Donor Email:</label>
-            <input type="email" id="editDonorEmail" name="donor_email" value="${donation.donor_email}" required>
-            <small id="editDonorEmailError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editAmount">Amount:</label>
-            <input type="number" id="editAmount" name="amount" value="${donation.amount}" required min="1" step="0.01">
-            <small id="editAmountError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editPaymentMethod">Payment Method:</label>
-            <select id="editPaymentMethod" name="payment_method" required>
-              <option value="">Select a payment method</option>
-              <option value="credit_card" ${donation.payment_method === 'credit_card' ? 'selected' : ''}>Credit Card</option>
-              <option value="bank_transfer" ${donation.payment_method === 'bank_transfer' ? 'selected' : ''}>Bank Transfer</option>
-              <option value="paypal" ${donation.payment_method === 'paypal' ? 'selected' : ''}>PayPal</option>
-              <option value="cash" ${donation.payment_method === 'cash' ? 'selected' : ''}>Cash</option>
-            </select>
-            <small id="editPaymentMethodError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editStatus">Status:</label>
-            <select id="editStatus" name="status" required>
-              <option value="pending" ${donation.status === 'pending' ? 'selected' : ''}>Pending</option>
-              <option value="completed" ${donation.status === 'completed' ? 'selected' : ''}>Completed</option>
-              <option value="cancelled" ${donation.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>
-            <small id="editStatusError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editNotes">Notes:</label>
-            <textarea id="editNotes" name="notes">${donation.notes || ''}</textarea>
-            <small id="editNotesError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Update Donation</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalEditDonation').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalEditDonation');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#editDonationForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateEditDonationForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Updating...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Donation updated successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while updating the donation.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
-
-// Function to validate edit donation form
-function validateEditDonationForm() {
-  let isValid = true;
-  const donorName = document.getElementById('editDonorName').value;
-  const donorEmail = document.getElementById('editDonorEmail').value;
-  const amount = document.getElementById('editAmount').value;
-  const paymentMethod = document.getElementById('editPaymentMethod').value;
-  const status = document.getElementById('editStatus').value;
-
-  // Clear previous error messages
-  document.querySelectorAll('#modalEditDonation .error-message').forEach(el => el.textContent = '');
-
-  if (!donorName) {
-      document.getElementById('editDonorNameError').textContent = 'Donor name is required.';
-      isValid = false;
-  }
-
-  if (!donorEmail || !/\S+@\S+\.\S+/.test(donorEmail)) {
-      document.getElementById('editDonorEmailError').textContent = 'Valid email is required.';
-      isValid = false;
-  }
-
-  if (!amount || amount <= 0) {
-      document.getElementById('editAmountError').textContent = 'Amount must be greater than zero.';
-      isValid = false;
-  }
-
-  if (!paymentMethod) {
-      document.getElementById('editPaymentMethodError').textContent = 'Payment method is required.';
-      isValid = false;
-  }
-
-  if (!status) {
-      document.getElementById('editStatusError').textContent = 'Status is required.';
-      isValid = false;
-  }
-
-  return isValid;
-}
-
-// Admin Management Functions
-document.addEventListener('DOMContentLoaded', function() {
-  // Handle add admin button click
-  document.getElementById('btnOpenModalAddAdmin').addEventListener('click', function() {
-    showAddAdminModal();
-  });
-
-  // Handle edit admin button click
-  document.querySelectorAll('.admin-table .btn-action.edit').forEach(button => {
-    button.addEventListener('click', function() {
-      const adminId = this.closest('tr').getAttribute('data-admin-id');
-      getAdminDetails(adminId);
-    });
-  });
-
-  // Handle delete admin button click
-  document.querySelectorAll('.admin-table .btn-action.delete').forEach(button => {
-    button.addEventListener('click', function() {
-      const adminId = this.closest('tr').getAttribute('data-admin-id');
-      confirmDeleteAdmin(adminId);
-    });
-  });
-});
-
-// Function to show add admin modal
-function showAddAdminModal() {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalAddAdmin">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Add New Admin</h2>
-        <form id="addAdminForm" method="POST" action="{% url 'add_admin' %}">
-          {% csrf_token %}
-          
-          <div class="form-group">
-            <label for="inputUsername">Username:</label>
-            <input type="text" id="inputUsername" name="username" required>
-            <small id="usernameError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputEmail">Email:</label>
-            <input type="email" id="inputEmail" name="email" required>
-            <small id="emailError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputPassword">Password:</label>
-            <input type="password" id="inputPassword" name="password" required>
-            <small id="passwordError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputConfirmPassword">Confirm Password:</label>
-            <input type="password" id="inputConfirmPassword" name="confirm_password" required>
-            <small id="confirmPasswordError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputRole">Role:</label>
-            <select id="inputRole" name="role" required>
-              <option value="">Select a role</option>
-              <option value="super_admin">Super Admin</option>
-              <option value="admin">Admin</option>
-              <option value="moderator">Moderator</option>
-            </select>
-            <small id="roleError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Add Admin</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalAddAdmin').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalAddAdmin');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#addAdminForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateAdminForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Adding...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Admin added successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while adding the admin.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
-
-// Function to validate admin form
-function validateAdminForm() {
-  let isValid = true;
-  const username = document.getElementById('inputUsername').value;
-  const email = document.getElementById('inputEmail').value;
-  const password = document.getElementById('inputPassword').value;
-  const confirmPassword = document.getElementById('inputConfirmPassword').value;
-  const role = document.getElementById('inputRole').value;
-
-  // Clear previous error messages
-  document.querySelectorAll('#modalAddAdmin .error-message').forEach(el => el.textContent = '');
-
-  if (!username) {
-      document.getElementById('usernameError').textContent = 'Username is required.';
-      isValid = false;
-  }
-
-  if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      document.getElementById('emailError').textContent = 'Valid email is required.';
-      isValid = false;
-  }
-
-  if (!password) {
-      document.getElementById('passwordError').textContent = 'Password is required.';
-      isValid = false;
-  } else if (password.length < 8) {
-      document.getElementById('passwordError').textContent = 'Password must be at least 8 characters.';
-      isValid = false;
-  }
-
-  if (password !== confirmPassword) {
-      document.getElementById('confirmPasswordError').textContent = 'Passwords do not match.';
-      isValid = false;
-  }
-
-  if (!role) {
-      document.getElementById('roleError').textContent = 'Role is required.';
-      isValid = false;
-  }
-
-  return isValid;
-}
-
-// Function to get admin details
-function getAdminDetails(adminId) {
-  // Show loading state
-  showLoadingState('management');
-  
-  // Create form data
-  const formData = new FormData();
-  formData.append('admin_id', adminId);
-  
-  // Send request to get admin details
-  fetch('{% url "get_admin_details" %}', {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Show edit modal
-      showEditAdminModal(data.admin);
-    } else {
-      alert('Error: ' + data.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred while fetching admin details.');
-  })
-  .finally(() => {
-    // Hide loading state
-    hideLoadingState('management');
-  });
-}
-
-// Function to show edit admin modal
-function showEditAdminModal(admin) {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalEditAdmin">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Edit Admin</h2>
-        <form id="editAdminForm" method="POST" action="{% url 'edit_admin' %}">
-          {% csrf_token %}
-          <input type="hidden" name="admin_id" value="${admin.admin_id}">
-          
-          <div class="form-group">
-            <label for="editUsername">Username:</label>
-            <input type="text" id="editUsername" name="username" value="${admin.username}" required>
-            <small id="editUsernameError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editEmail">Email:</label>
-            <input type="email" id="editEmail" name="email" value="${admin.email}" required>
-            <small id="editEmailError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editRole">Role:</label>
-            <select id="editRole" name="role" required>
-              <option value="">Select a role</option>
-              <option value="super_admin" ${admin.role === 'super_admin' ? 'selected' : ''}>Super Admin</option>
-              <option value="admin" ${admin.role === 'admin' ? 'selected' : ''}>Admin</option>
-              <option value="moderator" ${admin.role === 'moderator' ? 'selected' : ''}>Moderator</option>
-            </select>
-            <small id="editRoleError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editPassword">New Password (leave blank to keep current):</label>
-            <input type="password" id="editPassword" name="password">
-            <small id="editPasswordError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editConfirmPassword">Confirm New Password:</label>
-            <input type="password" id="editConfirmPassword" name="confirm_password">
-            <small id="editConfirmPasswordError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Update Admin</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalEditAdmin').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalEditAdmin');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#editAdminForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateEditAdminForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Updating...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Admin updated successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while updating the admin.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
-
-// Function to validate edit admin form
-function validateEditAdminForm() {
-  let isValid = true;
-  const username = document.getElementById('editUsername').value;
-  const email = document.getElementById('editEmail').value;
-  const role = document.getElementById('editRole').value;
-  const password = document.getElementById('editPassword').value;
-  const confirmPassword = document.getElementById('editConfirmPassword').value;
-
-  // Clear previous error messages
-  document.querySelectorAll('#modalEditAdmin .error-message').forEach(el => el.textContent = '');
-
-  if (!username) {
-      document.getElementById('editUsernameError').textContent = 'Username is required.';
-      isValid = false;
-  }
-
-  if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      document.getElementById('editEmailError').textContent = 'Valid email is required.';
-      isValid = false;
-  }
-
-  if (!role) {
-      document.getElementById('editRoleError').textContent = 'Role is required.';
-      isValid = false;
-  }
-
-  // Only validate password if it's being changed
-  if (password) {
-    if (password.length < 8) {
-        document.getElementById('editPasswordError').textContent = 'Password must be at least 8 characters.';
-        isValid = false;
-    }
-
-    if (password !== confirmPassword) {
-        document.getElementById('editConfirmPasswordError').textContent = 'Passwords do not match.';
-        isValid = false;
-    }
-  }
-
-  return isValid;
-}
-
-// Function to confirm delete admin
-function confirmDeleteAdmin(adminId) {
-  if (confirm('Are you sure you want to delete this admin? This action cannot be undone.')) {
-    // Show loading state
-    showLoadingState('management');
-    
-    // Create form data
-    const formData = new FormData();
-    formData.append('admin_id', adminId);
-    
-    // Send request to delete admin
-    fetch('{% url "delete_admin" %}', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Admin deleted successfully!');
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while deleting the admin.');
-    })
-    .finally(() => {
-      // Hide loading state
-      hideLoadingState('management');
-    });
-  }
-}
-
-// Career Management Functions
-document.addEventListener('DOMContentLoaded', function() {
-  // Handle add job button click
-  document.getElementById('btnOpenModalAddJob').addEventListener('click', function() {
-    showAddJobModal();
-  });
-
-  // Handle edit job button click
-  document.querySelectorAll('.jobs-table .btn-action.edit').forEach(button => {
-    button.addEventListener('click', function() {
-      const jobId = this.closest('tr').getAttribute('data-job-id');
-      getJobDetails(jobId);
-    });
-  });
-
-  // Handle delete job button click
-  document.querySelectorAll('.jobs-table .btn-action.delete').forEach(button => {
-    button.addEventListener('click', function() {
-      const jobId = this.closest('tr').getAttribute('data-job-id');
-      confirmDeleteJob(jobId);
-    });
-  });
-});
-
-// Function to show add job modal
-function showAddJobModal() {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalAddJob">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Post New Job</h2>
-        <form id="addJobForm" method="POST" action="{% url 'add_job' %}">
-          {% csrf_token %}
-          
-          <div class="form-group">
-            <label for="inputPosition">Position:</label>
-            <input type="text" id="inputPosition" name="position" required>
-            <small id="positionError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputCompany">Company:</label>
-            <input type="text" id="inputCompany" name="company" required>
-            <small id="companyError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputLocation">Location:</label>
-            <input type="text" id="inputLocation" name="location" required>
-            <small id="locationError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputJobType">Job Type:</label>
-            <select id="inputJobType" name="job_type" required>
-              <option value="">Select job type</option>
-              <option value="full_time">Full Time</option>
-              <option value="part_time">Part Time</option>
-              <option value="contract">Contract</option>
-              <option value="internship">Internship</option>
-            </select>
-            <small id="jobTypeError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputDescription">Job Description:</label>
-            <textarea id="inputDescription" name="description" required></textarea>
-            <small id="descriptionError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputRequirements">Requirements:</label>
-            <textarea id="inputRequirements" name="requirements" required></textarea>
-            <small id="requirementsError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputSalary">Salary Range:</label>
-            <input type="text" id="inputSalary" name="salary" placeholder="e.g. $50,000 - $70,000">
-            <small id="salaryError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputApplicationDeadline">Application Deadline:</label>
-            <input type="date" id="inputApplicationDeadline" name="application_deadline" required>
-            <small id="applicationDeadlineError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="inputContactEmail">Contact Email:</label>
-            <input type="email" id="inputContactEmail" name="contact_email" required>
-            <small id="contactEmailError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Post Job</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalAddJob').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalAddJob');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#addJobForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateJobForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Posting...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Job posted successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while posting the job.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
 
 // Function to validate job form
 function validateJobForm() {
@@ -2688,302 +1382,6 @@ function validateJobForm() {
 
   return isValid;
 }
-
-// Function to get job details
-function getJobDetails(jobId) {
-  // Show loading state
-  showLoadingState('careers');
-  
-  // Create form data
-  const formData = new FormData();
-  formData.append('job_id', jobId);
-  
-  // Send request to get job details
-  fetch('{% url "get_job_details" %}', {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Show edit modal
-      showEditJobModal(data.job);
-    } else {
-      alert('Error: ' + data.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred while fetching job details.');
-  })
-  .finally(() => {
-    // Hide loading state
-    hideLoadingState('careers');
-  });
-}
-
-// Function to show edit job modal
-function showEditJobModal(job) {
-  // Create modal HTML
-  const modalHtml = `
-    <div class="modal" id="modalEditJob">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Edit Job</h2>
-        <form id="editJobForm" method="POST" action="{% url 'edit_job' %}">
-          {% csrf_token %}
-          <input type="hidden" name="job_id" value="${job.job_id}">
-          
-          <div class="form-group">
-            <label for="editPosition">Position:</label>
-            <input type="text" id="editPosition" name="position" value="${job.position}" required>
-            <small id="editPositionError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editCompany">Company:</label>
-            <input type="text" id="editCompany" name="company" value="${job.company}" required>
-            <small id="editCompanyError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editLocation">Location:</label>
-            <input type="text" id="editLocation" name="location" value="${job.location}" required>
-            <small id="editLocationError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editJobType">Job Type:</label>
-            <select id="editJobType" name="job_type" required>
-              <option value="">Select job type</option>
-              <option value="full_time" ${job.job_type === 'full_time' ? 'selected' : ''}>Full Time</option>
-              <option value="part_time" ${job.job_type === 'part_time' ? 'selected' : ''}>Part Time</option>
-              <option value="contract" ${job.job_type === 'contract' ? 'selected' : ''}>Contract</option>
-              <option value="internship" ${job.job_type === 'internship' ? 'selected' : ''}>Internship</option>
-            </select>
-            <small id="editJobTypeError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editDescription">Job Description:</label>
-            <textarea id="editDescription" name="description" required>${job.description}</textarea>
-            <small id="editDescriptionError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editRequirements">Requirements:</label>
-            <textarea id="editRequirements" name="requirements" required>${job.requirements}</textarea>
-            <small id="editRequirementsError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editSalary">Salary Range:</label>
-            <input type="text" id="editSalary" name="salary" value="${job.salary || ''}" placeholder="e.g. $50,000 - $70,000">
-            <small id="editSalaryError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editApplicationDeadline">Application Deadline:</label>
-            <input type="date" id="editApplicationDeadline" name="application_deadline" value="${job.application_deadline}" required>
-            <small id="editApplicationDeadlineError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editContactEmail">Contact Email:</label>
-            <input type="email" id="editContactEmail" name="contact_email" value="${job.contact_email}" required>
-            <small id="editContactEmailError" class="error-message"></small>
-          </div>
-
-          <div class="form-group">
-            <label for="editStatus">Status:</label>
-            <select id="editStatus" name="status" required>
-              <option value="active" ${job.status === 'active' ? 'selected' : ''}>Active</option>
-              <option value="closed" ${job.status === 'closed' ? 'selected' : ''}>Closed</option>
-              <option value="draft" ${job.status === 'draft' ? 'selected' : ''}>Draft</option>
-            </select>
-            <small id="editStatusError" class="error-message"></small>
-          </div>
-
-          <button type="submit" class="btn-primary">Update Job</button>
-        </form>
-      </div>
-    </div>
-  `;
-  
-  // Add modal to the DOM
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
-  // Show the modal
-  document.getElementById('modalEditJob').style.display = 'block';
-  
-  // Add event listeners
-  const modal = document.getElementById('modalEditJob');
-  const closeBtn = modal.querySelector('.close');
-  const form = modal.querySelector('#editJobForm');
-  
-  // Close modal when clicking on the close button
-  closeBtn.addEventListener('click', function() {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      modal.remove();
-    }
-  });
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateEditJobForm()) {
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Updating...';
-    submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Job updated successfully!');
-        modal.remove();
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while updating the job.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    });
-  });
-}
-
-// Function to validate edit job form
-function validateEditJobForm() {
-  let isValid = true;
-  const position = document.getElementById('editPosition').value;
-  const company = document.getElementById('editCompany').value;
-  const location = document.getElementById('editLocation').value;
-  const jobType = document.getElementById('editJobType').value;
-  const description = document.getElementById('editDescription').value;
-  const requirements = document.getElementById('editRequirements').value;
-  const applicationDeadline = document.getElementById('editApplicationDeadline').value;
-  const contactEmail = document.getElementById('editContactEmail').value;
-  const status = document.getElementById('editStatus').value;
-
-  // Clear previous error messages
-  document.querySelectorAll('#modalEditJob .error-message').forEach(el => el.textContent = '');
-
-  if (!position) {
-      document.getElementById('editPositionError').textContent = 'Position is required.';
-      isValid = false;
-  }
-
-  if (!company) {
-      document.getElementById('editCompanyError').textContent = 'Company is required.';
-      isValid = false;
-  }
-
-  if (!location) {
-      document.getElementById('editLocationError').textContent = 'Location is required.';
-      isValid = false;
-  }
-
-  if (!jobType) {
-      document.getElementById('editJobTypeError').textContent = 'Job type is required.';
-      isValid = false;
-  }
-
-  if (!description) {
-      document.getElementById('editDescriptionError').textContent = 'Job description is required.';
-      isValid = false;
-  }
-
-  if (!requirements) {
-      document.getElementById('editRequirementsError').textContent = 'Requirements are required.';
-      isValid = false;
-  }
-
-  if (!applicationDeadline) {
-      document.getElementById('editApplicationDeadlineError').textContent = 'Application deadline is required.';
-      isValid = false;
-  }
-
-  if (!contactEmail || !/\S+@\S+\.\S+/.test(contactEmail)) {
-      document.getElementById('editContactEmailError').textContent = 'Valid contact email is required.';
-      isValid = false;
-  }
-
-  if (!status) {
-      document.getElementById('editStatusError').textContent = 'Status is required.';
-      isValid = false;
-  }
-
-  return isValid;
-}
-
-// Function to confirm delete job
-function confirmDeleteJob(jobId) {
-  if (confirm('Are you sure you want to delete this job posting? This action cannot be undone.')) {
-    // Show loading state
-    showLoadingState('careers');
-    
-    // Create form data
-    const formData = new FormData();
-    formData.append('job_id', jobId);
-    
-    // Send request to delete job
-    fetch('{% url "delete_job" %}', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Job deleted successfully!');
-        // Refresh the page to show updated data
-        window.location.reload();
-      } else {
-        alert('Error: ' + data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while deleting the job.');
-    })
-    .finally(() => {
-      // Hide loading state
-      hideLoadingState('careers');
-    });
-  }
-}
-
 </script>
   
 <script src="{% static 'js/script.js' %}"></script>

@@ -39,7 +39,6 @@ urlpatterns = [
     
     # Career Management URLs
     path('add_job/', views.add_job, name='add_job'),
-    path('edit_job/', views.edit_job, name='edit_job'),
     path('delete_job/', views.delete_job, name='delete_job'),
     path('get_job_details/', views.get_job_details, name='get_job_details'),
     
@@ -61,4 +60,7 @@ urlpatterns = [
     path('edit_admin/', views.edit_admin, name='edit_admin'),
     path('delete_admin/', views.delete_admin, name='delete_admin'),
     path('get_admin_details/', views.get_admin_details, name='get_admin_details'),
+
+    #alumni urls
+    path('update_alumni_profile/', views.update_alumni_profile, name='update_alumni_profile'),
 ]

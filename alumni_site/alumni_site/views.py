@@ -77,8 +77,9 @@ def admindash(request):
         alumni_queryset = alumni_queryset.order_by('city')
 
     # Get jobs and events
-    jobs = Job.objects.all().order_by('-posted_date')
+    jobs = Job.objects.all()
     events = Event.objects.all().order_by('event_date')
+    print(events)
     upcoming_events = events.filter(event_date__gte=datetime.now().date())[:5]
 
     # Donations
@@ -86,13 +87,18 @@ def admindash(request):
     total_donations = donations.aggregate(total=Sum('amount'))['total'] or 0
     recent_donations = donations.order_by('-date')[:5]
 
+    print("Total Alumni:",Alumni.objects.count())
+    print("Total Events:",events.count())
+    print("Total Job Postings:",Job.objects.count())
+
     context = {
         'alumni_data': alumni_queryset,
         'search_query': search_query,
         'sort_by': sort_by,
-        'total_alumni': alumni_queryset.count(),
+        'total_alumni': Alumni.objects.count(),
+        'total_job':Job.objects.count(),
         'jobs': jobs,
-        'upcoming_events': upcoming_events,
+        'upcoming_events': events,
         'total_events': events.count(),
         'total_donations': total_donations,
         'recent_donations': recent_donations,
@@ -450,35 +456,58 @@ def get_event_details(request):
             'message': str(e)
         }, status=500)
 
-# Career Management Functions
 @require_POST
 def add_job(request):
     try:
-        # Assuming you have a Job model
-        Job.objects.create(
-            position=request.POST['position'],
-            company=request.POST['company'],
-            location=request.POST['location'],
-            description=request.POST['description'],
-            requirements=request.POST['requirements'],
-            posted_date=datetime.now().date(),
-            status='active'
-        )
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Job posted successfully!'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': f"Job posting failed: {e}"
-        })
+        # Extract POST fields
+        position = request.POST.get('position')
+        company = request.POST.get('company')
+        location = request.POST.get('location')
+        job_type = request.POST.get('job_type')
+        description = request.POST.get('description')
+        requirements = request.POST.get('requirements')
+        salary = request.POST.get('salary', '')
+        application_deadline = request.POST.get('application_deadline')
+        contact_email = request.POST.get('contact_email')
+        status = request.POST.get('status', 'draft')
+        skills = [skill.strip() for skill in request.POST.get('skills_required', '').split(',') if skill.strip()]
 
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from datetime import datetime
-from .models import Post  # Ensure Post model is defined and imported
+        # Basic validation
+        if not all([position, company, location, job_type, description, requirements, application_deadline, contact_email]):
+            return JsonResponse({'success': False, 'message': 'All fields are required.'})
+
+        # Handle salary parsing (e.g., "30000 - 50000")
+        salary_range = {}
+        if '-' in salary:
+            parts = salary.split('-')
+            if len(parts) == 2:
+                salary_range = {
+                    'min': parts[0].strip(),
+                    'max': parts[1].strip()
+                }
+
+        # Create job object
+        job = Job.objects.create(
+            position=position,
+            company=company,
+            location=location,
+            job_type=job_type,
+            description=description,
+            requirements=requirements,
+            salary_range=salary_range,
+            skills_required=skills,
+            application_deadline=application_deadline,
+            contact_email=contact_email,
+            status=status,
+            posted_date=datetime.now()
+        )
+
+        return JsonResponse({'success': True, 'message': 'Job posted successfully!', 'job_id': str(job._id)})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
+
+
 
 @require_POST
 def add_post(request):
@@ -513,16 +542,22 @@ def add_post(request):
 def delete_job(request):
     try:
         job_id = request.POST.get('job_id')
-        # job = Job.objects.get(job_id=job_id)
-        
-        # Delete the job
-        # job.delete()
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Job deleted successfully'
-        })
-        
+        position = request.POST.get('position')
+        company = request.POST.get('company')
+        print("Job ID to delete:", job_id)
+
+        job = Job.objects.filter(position=position, company=company).first()
+        print("Job to delete:", job)
+
+        if job:
+            job.delete()
+            return redirect('admindash')  # or replace with your job dashboard view
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Job not found'
+            }, status=404)
+
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -647,29 +682,7 @@ def add_donation(request):
 
 @require_POST
 def edit_donation(request):
-    try:
-        donation_id = request.POST.get('donation_id')
-        # donation = Donation.objects.get(donation_id=donation_id)
-        
-        # Update donation fields
-        # donation.donor = request.POST.get('donor')
-        # donation.amount = request.POST.get('amount')
-        # donation.payment_method = request.POST.get('payment_method')
-        # donation.status = request.POST.get('status')
-        
-        # Save the changes
-        # donation.save()
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Donation updated successfully'
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+    return redirect("admindash")
 
 @require_POST
 def delete_donation(request):
@@ -693,36 +706,7 @@ def delete_donation(request):
 
 @require_POST
 def get_donation_details(request):
-    try:
-        donation_id = request.POST.get('donation_id')
-        donation = Donation.objects.get(donation_id=donation_id)
-        
-        # Convert date to string format for JSON
-        date_str = donation.date.strftime('%Y-%m-%d')
-        
-        return JsonResponse({
-            'success': True,
-            'donation': {
-                'donation_id': donation.donation_id,
-                'donor_name': donation.donor,
-                'amount': float(donation.amount),
-                'payment_method': donation.payment_method,
-                'status': donation.status,
-                'date': date_str,
-                'notes': donation.notes if hasattr(donation, 'notes') else ''
-            }
-        })
-        
-    except Donation.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'Donation not found'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+    return redirect("admindash")
 
 @require_POST
 def generate_receipt(request):
@@ -787,139 +771,27 @@ def generate_receipt(request):
 # Admin Management Functions
 @require_POST
 def add_admin(request):
-    try:
-        # Assuming you have a Login model for admin users
-        Login.objects.create(
-            name=request.POST['name'],
-            email=request.POST['email'],
-            password=request.POST['password'],
-            role='admin'
-        )
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Admin added successfully!'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': f"Admin addition failed: {e}"
-        })
+    return redirect("admindash")
 
 @require_POST
 def edit_admin(request):
-    try:
-        admin_id = request.POST.get('admin_id')
-        admin = Login.objects.get(id=admin_id)
-        
-        # Update admin fields
-        admin.name = request.POST.get('name')
-        admin.email = request.POST.get('email')
-        
-        # Only update password if provided
-        if request.POST.get('password'):
-            admin.password = request.POST.get('password')
-        
-        # Save the changes
-        admin.save()
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Admin updated successfully'
-        })
-        
-    except Login.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'Admin not found'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+    return redirect("admindash")
 
 @require_POST
 def delete_admin(request):
-    try:
-        admin_id = request.POST.get('admin_id')
-        admin = Login.objects.get(id=admin_id)
-        
-        # Delete the admin
-        admin.delete()
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Admin deleted successfully'
-        })
-        
-    except Login.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'Admin not found'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+    return redirect("admindash")
 
 @login_required
 @require_POST
 def get_admin_details(request):
-    try:
-        admin_id = request.POST.get('admin_id')
-        admin = Login.objects.get(id=admin_id)
-        
-        return JsonResponse({
-            'success': True,
-            'admin': {
-                'id': admin.id,
-                'name': admin.name,
-                'email': admin.email,
-                'role': admin.role if hasattr(admin, 'role') else 'admin'
-            }
-        })
-    except Login.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'Admin not found'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+    return redirect("admindash")
 
 @login_required
 @require_POST
 def get_job_details(request):
-    try:
-        job_id = request.POST.get('job_id')
-        job = Job.objects.get(id=job_id)
-        
-        return JsonResponse({
-            'success': True,
-            'job': {
-                'id': job.id,
-                'position': job.position,
-                'company': job.company,
-                'location': job.location,
-                'job_type': job.job_type,
-                'description': job.description,
-                'requirements': job.requirements,
-                'application_deadline': job.application_deadline.strftime('%Y-%m-%d') if job.application_deadline else None,
-                'contact_email': job.contact_email,
-                'status': job.status
-            }
-        })
-    except Job.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'Job not found'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+    return redirect("admindash")
+
+@require_POST
+def update_alumni_profile(request):
+    if request.method == 'POST':
+        return redirect('alumnidash')
