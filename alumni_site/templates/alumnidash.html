@@ -153,6 +153,28 @@
             background: #f8fafc;
             border-top: 1px solid #f1f5f9;
         }
+
+        .posts-scroll-container {
+            max-height: 70vh; /* Adjust based on your layout */
+            overflow-y: auto;
+            padding-right: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        /* Optional: smooth scrollbar styling */
+        .posts-scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .posts-scroll-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .posts-scroll-container::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
+        
     
         .action-group {
             display: flex;
@@ -591,7 +613,7 @@
             <!-- Header -->
             <header class="dashboard-header">
                 <div class="header-content">
-                    <h2>Welcome Back, [Alumni Name]!</h2>
+                    <h2>Welcome Back, {{ alumni_name }}!</h2>
                     <div class="header-actions">
                         <a href="#" class="btn-notification"><i class="fas fa-bell"></i></a>
                         <a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i></a>
@@ -599,55 +621,7 @@
                 </div>
             </header>
 
-            <!-- Content -->
-            <div class="dashboard-content">
-                <!-- Content Sections -->
-                <div class="content-section active" id="dashboard-section">
-                    <!-- Quick Stats -->
-                    <div class="cards-grid">
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="fas fa-file-alt"></i>
-                                <h3>My Posts</h3>
-                            </div>
-                            <div class="card-body">
-                                <p>12</p>
-                                <a href="#" class="btn-manage">Manage</a>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="fas fa-envelope-open-text"></i>
-                                <h3>Unread Messages</h3>
-                            </div>
-                            <div class="card-body">
-                                <p>3</p>
-                                <a href="#" class="btn-manage">View</a>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="fas fa-calendar-check"></i>
-                                <h3>Upcoming Events</h3>
-                            </div>
-                            <div class="card-body">
-                                <p>2</p>
-                                <a href="#" class="btn-manage">RSVP</a>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="fas fa-hand-holding-heart"></i>
-                                <h3>Total Donations</h3>
-                            </div>
-                            <div class="card-body">
-                                <p>₹25,000</p>
-                                <a href="#" class="btn-manage">Donate</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="posts-section">
+                    <div class="content-section active" id="dashboard-section">
                         <div class="posts-header">
                             <h3>Community Feed</h3>
                             <button class="btn-new-post">
@@ -656,106 +630,72 @@
                             </button>
                         </div>
                         
-                        <div class="posts-grid">
-                            <!-- Sample Post 1 -->
-                            <div class="post-card">
-                                <div class="post-author">
-                                    <img src="{% static 'images/user1.jpg' %}" alt="User" class="post-avatar">
-                                    <div class="author-info">
-                                        <h4>John Doe <span class="verified-badge"><i class="fas fa-check-circle"></i></span></h4>
-                                        <p class="post-time">2 hours ago · <i class="fas fa-globe-asia"></i></p>
-                                    </div>
-                                    <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
-                                </div>
-                                
-                                <div class="post-content">
-                                    <p class="post-text">Just attended the amazing alumni meetup! Great to connect with old friends and make new connections. 🎉 #VITPride</p>
-                                    <div class="post-tags">
-                                        <span class="post-tag">#AlumniMeet</span>
-                                        <span class="post-tag">#VITPride</span>
-                                    </div>
-                                    <img src="{% static 'images/event1.jpg' %}" class="post-image" alt="Event photo">
-                                    
-                                    <div class="emoji-reactions">
-                                        <button class="emoji-button">👍 42</button>
-                                        <button class="emoji-button">❤️ 28</button>
-                                        <button class="emoji-button">🎉 15</button>
-                                    </div>
-                                </div>
-                                
-                                <div class="post-actions">
-                                    <div class="action-group">
-                                        <button class="btn-action">
-                                            <i class="fas fa-thumbs-up"></i>
-                                            Like
-                                        </button>
-                                        <button class="btn-action">
-                                            <i class="fas fa-comment-alt"></i>
-                                            Comment
-                                        </button>
-                                        <button class="btn-action">
-                                            <i class="fas fa-share"></i>
-                                            Share
-                                        </button>
-                                    </div>
-                                    <button class="btn-action">
-                                        <i class="fas fa-bookmark"></i>
-                                    </button>
-                                </div>
-                                
-                                <div class="comment-preview">
-                                    <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
-                                    <input type="text" class="comment-input" placeholder="Write a comment...">
-                                </div>
-                            </div>
-                    
-                            <!-- Sample Post 2 -->
-                            <div class="post-card">
-                                <div class="post-author">
-                                    <img src="{% static 'images/user2.jpg' %}" alt="User" class="post-avatar">
-                                    <div class="author-info">
-                                        <h4>Jane Smith</h4>
-                                        <p class="post-time">5 hours ago · <i class="fas fa-user-friends"></i></p>
-                                    </div>
-                                    <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
-                                </div>
-                                
-                                <div class="post-content">
-                                    <p class="post-text">Looking to hire fresh graduates for software development roles. Contact me for referrals! 👩💻 #CareerOpportunity</p>
-                                    <div class="post-tags">
-                                        <span class="post-tag">#Hiring</span>
-                                        <span class="post-tag">#SoftwareDevelopment</span>
+                        <div class="posts-scroll-container">
+                            <div class="posts-grid">
+                                {% for post in posts %}
+                                <div class="post-card">
+                                    <div class="post-author">
+                                        <img src="{% static post.author.avatar %}" alt="User" class="post-avatar">
+                                        <div class="author-info">
+                                            <h4>{{ post.author.alumni_name }}</h4>
+                                            <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
+                                        </div>
+                                        <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
                                     </div>
                                     
-                                    <div class="emoji-reactions">
-                                        <button class="emoji-button">👍 18</button>
-                                        <button class="emoji-button">💼 9</button>
+                                    <div class="post-content">
+                                        <p class="post-text">{{ post.content }}</p>
+                                        
+                                        {% if post.image %}
+                                            <img src="{{ post.image.url }}" class="post-image" alt="Post image">
+                                        {% endif %}
+                        
+                                        <div class="post-tags">
+                                            <span class="post-tag">#Alumni</span>
+                                            <span class="post-tag">#Post</span>
+                                        </div>
+                        
+                                        <div class="emoji-reactions">
+                                            <button class="emoji-button">👍</button>
+                                            <button class="emoji-button">❤️</button>
+                                            <button class="emoji-button">🎉</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="post-actions">
+                                        <div class="action-group">
+                                            <button class="btn-action">
+                                                <i class="fas fa-thumbs-up"></i>
+                                                Like
+                                            </button>
+                                            <button class="btn-action">
+                                                <i class="fas fa-comment-alt"></i>
+                                                Comment
+                                            </button>
+                                            <button class="btn-action">
+                                                <i class="fas fa-share"></i>
+                                                Share
+                                            </button>
+                                        </div>
+                                        <button class="btn-action">
+                                            <i class="fas fa-bookmark"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="comment-preview">
+                                        <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
+                                        <input type="text" class="comment-input" placeholder="Write a comment...">
                                     </div>
                                 </div>
-                                
-                                <div class="post-actions">
-                                    <div class="action-group">
-                                        <button class="btn-action active">
-                                            <i class="fas fa-thumbs-up"></i>
-                                            Liked
-                                        </button>
-                                        <button class="btn-action">
-                                            <i class="fas fa-comment-alt"></i>
-                                            Comment
-                                        </button>
-                                        <button class="btn-action">
-                                            <i class="fas fa-share"></i>
-                                            Share
-                                        </button>
-                                    </div>
-                                    <button class="btn-action">
-                                        <i class="far fa-bookmark"></i>
-                                    </button>
-                                </div>
+                                {% empty %}
+                                    <p>No posts to show.</p>
+                                {% endfor %}
                             </div>
                         </div>
+                        
+                                
+                                    
                     </div>
-                </div>
 
                 <!-- Profile Section -->
                 <div class="content-section" id="profile-section">
@@ -768,24 +708,24 @@
                     <div class="profile-grid">
                         <div class="profile-card">
                             <div class="profile-header">
-                                <img src="{% static 'images/user1.jpg' %}" alt="Profile" class="profile-avatar">
+                                <img src="{% static account_holder.avatar %}" alt="Profile" class="profile-avatar">
                                 <div class="profile-info">
-                                    <h3>John Doe</h3>
-                                    <p>Class of 2020</p>
+                                    <h3>{{ account_holder.alumni_name }}</h3>
+                                    <p>Class of {{ account_holder.graduation_year }}</p>
                                 </div>
                             </div>
                             <div class="profile-details">
                                 <div class="detail-item">
                                     <i class="fas fa-envelope"></i>
-                                    <span>john.doe@example.com</span>
+                                    <span>{{ account_holder.alumni_email }}</span>
                                 </div>
                                 <div class="detail-item">
                                     <i class="fas fa-phone"></i>
-                                    <span>+91 98765 43210</span>
+                                    <span>{{ account_holder.alumni_phone }}</span>
                                 </div>
                                 <div class="detail-item">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <span>Bangalore, India</span>
+                                    <span>{{ account_holder.address }}</span>
                                 </div>
                                 <div class="detail-item">
                                     <i class="fas fa-briefcase"></i>
@@ -1040,7 +980,8 @@
     </div>
 
     {% comment %} add post modal {% endcomment %}
-    <div id="postModal" class="modal">
+       <!-- Post Modal -->
+       <div id="postModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Create New Post</h2>
@@ -1051,11 +992,9 @@
                         <label>Post Content <span class="required">*</span></label>
                         <textarea name="content" rows="4" required></textarea>
                     </div>
-                    
                     <div class="form-group">
                         <label>Add Image (Optional)</label>
                         <input type="file" name="image" accept="image/*">
-                        <p class="help-text">Supported formats: JPG, PNG, GIF</p>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -1066,31 +1005,55 @@
     </div>
 
     <script>
-        // Show Modal Function
-function showPostModal() {
-    document.getElementById('postModal').style.display = 'block';
-}
-
-// Close Modal Function
-function closePostModal() {
-    document.getElementById('postModal').style.display = 'none';
-}
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // Trigger button
-    document.querySelector('.btn-new-post').addEventListener('click', showPostModal);
-    
-    // Close button
-    document.querySelector('#postModal .close').addEventListener('click', closePostModal);
-    
-    // Close when clicking outside
-    window.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('postModal')) {
-            closePostModal();
+        // Modal Handling
+        function showPostModal() {
+            document.getElementById('postModal').style.display = 'block';
         }
-    });
-});
+
+        function closePostModal() {
+            document.getElementById('postModal').style.display = 'none';
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // New Post Button
+            document.querySelector('.btn-new-post').addEventListener('click', (e) => {
+                e.preventDefault();
+                showPostModal();
+            });
+
+            // Close Modal
+            document.querySelector('#postModal .close').addEventListener('click', closePostModal);
+
+            // Close when clicking outside modal
+            window.addEventListener('click', (e) => {
+                if (e.target === document.getElementById('postModal')) {
+                    closePostModal();
+                }
+            });
+
+            // Form Validation
+            document.getElementById('postForm').addEventListener('submit', (e) => {
+                const content = e.target.content.value.trim();
+                const image = e.target.image.files[0];
+                
+                if (!content && !image) {
+                    e.preventDefault();
+                    alert('Please provide either text content or an image');
+                    e.target.content.focus();
+                }
+            });
+        });
+
+        // Navigation Handling (from previous code)
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... rest of your navigation code ...
+        });
+
+        // ... rest of your existing JavaScript functions ...
+    </script>
+
+    <script>
         {% comment %} add post {% endcomment %}
         document.getElementById('postForm').addEventListener('submit', function(e) {
             const content = this.content.value.trim();

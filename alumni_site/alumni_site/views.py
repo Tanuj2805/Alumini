@@ -23,26 +23,36 @@ def login(request):
         email = request.POST.get("username")
         password = request.POST.get("password")
 
-        print(Login.objects.all())
+        print("User Email = ",email)
+        print("User Password = ",password)
 
-        print(email,password)
-        for user in Login.objects.all():
-            print(f"Email: {user.email}, Name: {user.name}, Password: {user.password}")
-
+        # Try login with admin/staff model first
         try:
-            print("user","1")
-            user = Login.objects.get(email=email)  # Check if user exists
-            print(user,user.password)
-
-            if check_password(password, user.password) or password == user.password:  # Check password (not secure, use hashing instead)
-                messages.success(request, "Login successful!")
-                print("Success")
-                return redirect("admindash")  # Redirect to a homepage or dashboard
+            user = Login.objects.get(email=email)
+            if check_password(password, user.password) or password == user.password:
+                messages.success(request, "Admin login successful!")
+                return redirect("admindash")
             else:
                 messages.error(request, "Invalid password")
-                print("Failed")
         except Login.DoesNotExist:
-            messages.error(request, "User does not exist")
+            # If not found in Login model, try Alumni model
+            try:
+                alumni = Alumni.objects.get(alumni_email=email)
+                if check_password(password, alumni.password) or password == alumni.password:
+                    # You can set session here if needed
+                    request.session["alumni_id"] = str(alumni._id)
+                    request.session["alumni_email"] = str(alumni.alumni_email)
+                    request.session["alumni_name"] = str(alumni.alumni_name)
+
+                    # print alumni logged in
+                    print("Current User = ",request.session.get('alumni_name'))
+
+                    messages.success(request, "Alumni login successful!")
+                    return redirect("alumnidash")
+                else:
+                    messages.error(request, "Invalid password")
+            except Alumni.DoesNotExist:
+                messages.error(request, "User does not exist")
 
     return render(request, "login.html")
 
@@ -117,7 +127,36 @@ def admindash(request):
 
 
 def alumnidash(request):
-    return render(request,"alumnidash.html")
+
+    posts = Post.objects.select_related('author').order_by('-created_at')
+    alumni_name = request.session.get('alumni_name')
+    print("Current Alumni = ",alumni_name)
+
+    print("Type of Posts = ",type(posts))
+    
+    for post in posts:
+        print("Image URL     =", post.image.url if post.image else "No Image")
+        post_path = post.image.url 
+        cleaned_path = post_path.replace("static/", "", 1)
+        print(cleaned_path)
+
+        print("Author ID     =", post.author._id)  # If you want to print alumni ID
+        print("Author Name   =", post.author.alumni_name)
+        print("Content       =", post.content)
+        print("Image URL     =", post.image.url if post.image else "No Image")
+        print("Image     =", post_path)
+        print("Created At    =", post.created_at.strftime('%Y-%m-%d %H:%M:%S'))
+        print("-" * 40)
+
+    context = {
+        'account_holder':post.author,
+        'alumni_name':alumni_name,
+        'posts':posts
+    }
+
+    print(context)
+
+    return render(request,"alumnidash.html",context)
 
 def logout(request):
     return render(request,"index.html")
@@ -126,12 +165,14 @@ def logout(request):
 def add_alumni(request):
     try:
         # Retrieve POST data from the form
+        avatar = request.FILES.get('avatar')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         alumni_name = request.POST.get('alumni_name')
         dob = request.POST.get('DOB')
         age = request.POST.get('age')
         alumni_email = request.POST.get('alumni_email')
+        password = request.POST.get('alumni_email')
         alumni_phone = request.POST.get('alumni_phone')
         full_address = request.POST.get('full_address')
         street_name = request.POST.get('street_name')
@@ -164,12 +205,14 @@ def add_alumni(request):
             DOB=dob,
             age=age,
             alumni_email=alumni_email,
+            password=password,
             alumni_phone=alumni_phone,
             address=full_address,
             department=department,
             graduation_year=graduation_year,
             created_at=now(),
-            updated_at=now()
+            updated_at=now(),
+            avatar=avatar
         )
 
         print(alumni)
@@ -795,3 +838,29 @@ def get_job_details(request):
 def update_alumni_profile(request):
     if request.method == 'POST':
         return redirect('alumnidash')
+    
+@require_POST
+def create_post(request):
+    content = request.POST.get('content')
+    image = request.FILES.get('image')
+
+    print(content)
+
+    # Get the current logged-in user's Alumni object
+    try:
+        alumni = Alumni.objects.all().first()
+        print(alumni)
+    except Alumni.DoesNotExist:
+        # Handle gracefully if Alumni is not found
+        return redirect('alumnidash')  # or show error message
+
+    # Create and save the post
+    post = Post.objects.create(
+        author=alumni,
+        content=content,
+        image=image
+    )
+
+    print("Post Uploaded Successfully : ",post)
+
+    return redirect('alumnidash')

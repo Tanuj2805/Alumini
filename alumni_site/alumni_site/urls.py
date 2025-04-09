@@ -63,4 +63,5 @@ urlpatterns = [
 
     #alumni urls
     path('update_alumni_profile/', views.update_alumni_profile, name='update_alumni_profile'),
+    path('create_post/', views.create_post, name='create_post'),
 ]

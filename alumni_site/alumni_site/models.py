@@ -26,12 +26,14 @@ class Login(models.Model):
 
 class Alumni(models.Model):
     _id = djongo_models.ObjectIdField(primary_key=True)
+    avatar = models.ImageField(upload_to='static/avatar/', blank=True, null=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     alumni_name = models.CharField(max_length=255)
     DOB = models.DateField()
     age = models.IntegerField()
-    alumni_email = models.EmailField()
+    alumni_email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)  
     alumni_phone = models.CharField(max_length=20)
     address = models.TextField(null=True, blank=True)
     department = models.CharField(max_length=255)
@@ -179,3 +181,16 @@ class Job(models.Model):
     class Meta:
         db_table = 'jobs'
         ordering = ['-posted_date']
+
+# post model
+class Post(models.Model):
+    author = models.ForeignKey(Alumni, on_delete=models.CASCADE)
+    content = models.TextField()
+    image = models.ImageField(upload_to='static/posts/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.author.alumni_name} - {self.created_at.strftime('%Y-%m-%d')}"
+    
+    class Meta:
+        db_table = 'posts'
