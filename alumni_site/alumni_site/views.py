@@ -7,6 +7,8 @@ from django.db.models import Q, Sum, Count
 from datetime import datetime, timedelta
 from django.utils.timezone import now
 import traceback
+from decimal import Decimal
+from bson.decimal128 import Decimal128
 
 from django.views.decorators.http import require_POST, require_http_methods
 from django.core.exceptions import ValidationError
@@ -14,6 +16,7 @@ from django.core.validators import validate_email
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Job
+from django.db.models import Sum, Count, Max
 
 def index(request):
     return render(request,"index.html")
@@ -38,6 +41,10 @@ def login(request):
             # If not found in Login model, try Alumni model
             try:
                 alumni = Alumni.objects.get(alumni_email=email)
+
+                print("-------------------------------------------------")
+                print("After Login ID = ",alumni._id)
+                print("-------------------------------------------------")
                 if check_password(password, alumni.password) or password == alumni.password:
                     # You can set session here if needed
                     request.session["alumni_id"] = str(alumni._id)
@@ -45,7 +52,7 @@ def login(request):
                     request.session["alumni_name"] = str(alumni.alumni_name)
 
                     # print alumni logged in
-                    print("Current User = ",request.session.get('alumni_name'))
+                    print("Current User = ",request.session.get('alumni_id'))
 
                     messages.success(request, "Alumni login successful!")
                     return redirect("alumnidash")
@@ -58,7 +65,7 @@ def login(request):
 
 from django.shortcuts import render
 from django.db.models import Q, Sum
-from datetime import datetime
+from datetime import datetime, date
 from .models import Alumni, Job, Event, Donation
 
 def admindash(request):
@@ -72,8 +79,6 @@ def admindash(request):
     # Apply search filter if provided
     if search_query:
         alumni_queryset = alumni_queryset.filter(
-            Q(first_name__icontains=search_query) |
-            Q(last_name__icontains=search_query) |
             Q(alumni_name__icontains=search_query) |
             Q(alumni_email__icontains=search_query) 
         )
@@ -91,17 +96,52 @@ def admindash(request):
     events = Event.objects.all().order_by('event_date')
     print(events)
     upcoming_events = events.filter(event_date__gte=datetime.now().date())[:5]
-
-    # Donations
+    
     donations = Donation.objects.all()
-    total_donations = donations.aggregate(total=Sum('amount'))['total'] or 0
-    recent_donations = donations.order_by('-date')[:5]
+    total_donations = Decimal('0.0')
+    recent_donations = []
+
+    # Loop through all donations
+    for d in sorted(donations, key=lambda x: x.date, reverse=True):
+        # Convert amount if needed
+        amt = d.amount
+        if isinstance(amt, Decimal128):
+            amt = amt.to_decimal()
+        
+        total_donations += amt  # Add to total
+
+        # Get donor name from Alumni
+        try:
+            print('donor = ',d.donor_id)
+            alumni = Alumni.objects.get(_id=d.donor_id)
+            donor_name = alumni.alumni_name
+            donor_email = alumni.alumni_email
+        except Alumni.DoesNotExist:
+            donor_name = "Unknown Donor"
+            donor_email = "Unknown"
+
+        # Add this donation to recent list (limit to 5)
+        if len(recent_donations) < 5:
+            recent_donations.append({
+                'name': donor_name,
+                'amount': amt,
+                'date': d.date,
+                'email':donor_email
+            })
+
+    print(recent_donations)
+    # Final structure
+    donation_stats = {
+        'total_donations': total_donations,
+        'recent_donations': recent_donations
+    }
 
     print("Total Alumni:",Alumni.objects.count())
     print("Total Events:",events.count())
     print("Total Job Postings:",Job.objects.count())
 
     context = {
+        'donations':donations, 
         'alumni_data': alumni_queryset,
         'search_query': search_query,
         'sort_by': sort_by,
@@ -110,8 +150,7 @@ def admindash(request):
         'jobs': jobs,
         'upcoming_events': events,
         'total_events': events.count(),
-        'total_donations': total_donations,
-        'recent_donations': recent_donations,
+        'donation_stats': donation_stats,
         'engagement_rate': 78,  # Placeholder
         'alumni_growth_data': {
             'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -129,11 +168,22 @@ def admindash(request):
 def alumnidash(request):
 
     posts = Post.objects.select_related('author').order_by('-created_at')
-    alumni_name = request.session.get('alumni_name')
-    print("Current Alumni = ",alumni_name)
+    account_holder = Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first()
+    print("Account Holder = ",account_holder)
+    self_posts = Post.objects.filter(author=account_holder).order_by('-created_at')
+    print(self_posts)
+
+    print("-------------------------------------------------")
+    print("ID = ",account_holder._id)
+    print("Avatar = ",account_holder.avatar)
+    print("Avatar url = ",account_holder.avatar.url)
+    print("Address = ",account_holder.address)
+    print("Email = ",account_holder.alumni_email)
+    print("Address = ",account_holder.alumni_phone)
 
     print("Type of Posts = ",type(posts))
-    
+    print("-------------------------------------------------")
+
     for post in posts:
         print("Image URL     =", post.image.url if post.image else "No Image")
         post_path = post.image.url 
@@ -147,11 +197,54 @@ def alumnidash(request):
         print("Image     =", post_path)
         print("Created At    =", post.created_at.strftime('%Y-%m-%d %H:%M:%S'))
         print("-" * 40)
+    print("-------------------------------------------------")
+    
+    #donation info for profile cards
+    donations = Donation.objects.filter(donor=account_holder)
+    print(donations)
+
+    total_amount = Decimal('0.0')
+    total_times = donations.count()
+    latest_date = None
+
+    for d in donations:
+        amt = d.amount
+        if isinstance(amt, Decimal128):
+            amt = amt.to_decimal()
+        total_amount += amt
+        if not latest_date or d.date > latest_date:
+            latest_date = d.date
+
+    donation_stats = {
+        'total_amount': total_amount,
+        'total_times': total_times,
+        'latest_date': latest_date
+    }
+
+    # Get latest donation details (if needed)
+    latest = Donation.objects.filter(donor_id=account_holder._id).order_by('-date').first()
+
+    # Store everything in one dictionary
+    donation_data = {
+        'total_donated': donation_stats['total_amount'] or 0,
+        'donation_count': donation_stats['total_times'],
+        'latest_donation': {
+            'amount': latest.amount if latest else 0,
+            'date': latest.date if latest else None,
+            'method': latest.payment_method if latest else None,
+            'notes': latest.notes if latest else ""
+        }
+    }
+
+    print("-------------------------------------------------")
+    print("Donation Data = ",donation_data)
+    print("-------------------------------------------------")
 
     context = {
-        'account_holder':post.author,
-        'alumni_name':alumni_name,
-        'posts':posts
+        'donation_data':donation_data,
+        'account_holder':account_holder,
+        'posts':posts,
+        'self_posts':self_posts
     }
 
     print(context)
@@ -166,41 +259,29 @@ def add_alumni(request):
     try:
         # Retrieve POST data from the form
         avatar = request.FILES.get('avatar')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
         alumni_name = request.POST.get('alumni_name')
         dob = request.POST.get('DOB')
-        age = request.POST.get('age')
+        age = (date.today().year - datetime.strptime(request.POST.get('DOB'), '%Y-%m-%d').year) - (date.today() < datetime.strptime(request.POST.get('DOB'), '%Y-%m-%d').date().replace(year=date.today().year))
         alumni_email = request.POST.get('alumni_email')
         password = request.POST.get('alumni_email')
         alumni_phone = request.POST.get('alumni_phone')
         full_address = request.POST.get('full_address')
-        street_name = request.POST.get('street_name')
-        city = request.POST.get('city')
-        pincode = request.POST.get('pincode')
         department = request.POST.get('department')
         graduation_year = request.POST.get('graduation_year')
 
         # Print the received data for debugging
         print("---- Alumni Form Data ----")
-        print("First Name:", first_name)
-        print("Last Name:", last_name)
         print("Full Name:", alumni_name)
         print("DOB:", dob)
         print("Age:", age)
         print("Email:", alumni_email)
         print("Phone:", alumni_phone)
         print("Full Address:", full_address)
-        print("Street Name:", street_name)
-        print("City:", city)
-        print("Pincode:", pincode)
         print("Department:", department)
         print("Graduation Year:", graduation_year)
         print("---------------------------")
 
         alumni = Alumni.objects.create(
-            first_name=first_name,
-            last_name=last_name,
             alumni_name=alumni_name,
             DOB=dob,
             age=age,
@@ -260,32 +341,31 @@ def add_event(request):
         })
 
 
-@login_required
-@require_http_methods(["POST"])
+# @login_required
+@require_POST
 def update_alumni_profile(request):
     try:
         # Get the alumni instance for the current user
-        alumni = Alumni.objects.get(alumni_email=request.user.email)
+        alumni = Alumni.objects.filter(alumni_name=request.session.get('alumni_name')).first()
         
+        print("-----------------------------------------------")
+        print("Before:",alumni.alumni_name)
+
         # Update the alumni fields
-        alumni.first_name = request.POST.get('first_name')
-        alumni.last_name = request.POST.get('last_name')
         alumni.alumni_name = request.POST.get('alumni_name')
-        alumni.DOB = request.POST.get('DOB')
-        alumni.age = request.POST.get('age')
         alumni.alumni_phone = request.POST.get('alumni_phone')
         alumni.address = request.POST.get('address')
-        alumni.street_name = request.POST.get('street_name')
-        alumni.city = request.POST.get('city')
-        alumni.pincode = request.POST.get('pincode')
-        
+
+        print("After:",alumni.alumni_name)
+        print("-----------------------------------------------")
+ 
         # Handle profile picture upload if provided
         if 'profile_picture' in request.FILES:
-            alumni.profile_picture = request.FILES['profile_picture']
+            alumni.avatar = request.FILES['profile_picture']
         
         # Save the changes
         alumni.save()
-        
+        return redirect('alumnidash')
         return JsonResponse({
             'success': True,
             'message': 'Profile updated successfully'
@@ -566,7 +646,7 @@ def add_post(request):
             content=content,
             category=category,
             status=status,
-            author=request.user,
+            author=Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first(),
             created_date=datetime.now()
         )
 
@@ -607,27 +687,6 @@ def delete_job(request):
             'message': str(e)
         }, status=500)
 
-# Post Management Functions
-@require_POST
-def add_post(request):
-    try:
-        # Assuming you have a Post model
-        # Post.objects.create(
-        #     title=request.POST['title'],
-        #     content=request.POST['content'],
-        #     author=request.user,
-        #     created_date=datetime.now()
-        # )
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Post created successfully!'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': f"Post creation failed: {e}"
-        })
 
 @require_POST
 def edit_post(request):
@@ -653,25 +712,35 @@ def edit_post(request):
             'message': str(e)
         }, status=500)
 
+
 @require_POST
 def delete_post(request):
     try:
-        post_id = request.POST.get('post_id')
-        # post = Post.objects.get(post_id=post_id)
-        
-        # Delete the post
-        # post.delete()
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Post deleted successfully'
-        })
-        
+        created_at_str = request.POST.get('created_at')
+        author_email = request.POST.get('author_email')
+        author = Alumni.objects.filter(alumni_email=request.session.get('author_email')).first()
+
+        print("Delete Post is Called with:", created_at_str, author_email)
+
+        # Convert timestamp string back to datetime object
+        created_at = datetime.strptime(created_at_str, "%Y-%m-%d %H:%M:%S.%f")
+
+        # Find the post based on author email and created_at
+        post = Post.objects.filter(created_at=created_at, author=author).first()
+
+        if not post:
+            print("Post not found.")
+            return JsonResponse({'success': False, 'message': 'Post not found'}, status=404)
+
+        post.delete()
+        print(" -- Post Deleted Successfully.....")
+
+        return redirect('alumnidash')  # OR return JsonResponse if it's AJAX
+        # return JsonResponse({'success': True, 'message': 'Post deleted successfully'})
+
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+        print(" -- Exception --", e)
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 @require_POST
 def get_post_details(request):
@@ -701,6 +770,29 @@ def get_post_details(request):
         }, status=500)
 
 # Donation Management Functions
+def fake_payment(request):
+    if request.method == 'POST':
+        card_number = request.POST.get('card_number')
+        expiry = request.POST.get('expiry')
+        cvv = request.POST.get('cvv')
+        amount = request.POST.get('amount')
+        payment_method = request.POST.get('payment_method')
+        notes = request.POST.get('notes')
+
+        if card_number and expiry and cvv:
+            donation = Donation.objects.create(
+                donor=Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first(),
+                amount=amount,
+                date=timezone.now().date(),
+                payment_method=payment_method,
+                notes=notes,
+            )
+            print("Donation Success = ",donation)
+            return HttpResponse(f"<h2>Thank you, {request.session.get('alumni_name')}! Payment of ₹{amount} was successful.</h2>")
+        else:
+            return HttpResponse("<h2>Payment failed. Please fill in all required fields.</h2>")
+
+
 @require_POST
 def add_donation(request):
     try:
@@ -834,10 +926,6 @@ def get_admin_details(request):
 def get_job_details(request):
     return redirect("admindash")
 
-@require_POST
-def update_alumni_profile(request):
-    if request.method == 'POST':
-        return redirect('alumnidash')
     
 @require_POST
 def create_post(request):

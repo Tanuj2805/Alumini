@@ -64,4 +64,7 @@ urlpatterns = [
     #alumni urls
     path('update_alumni_profile/', views.update_alumni_profile, name='update_alumni_profile'),
     path('create_post/', views.create_post, name='create_post'),
+    path('fake_payment/', views.fake_payment, name='fake_payment'),
+    path('delete_post/', views.delete_post, name='delete_post'),
+
 ]

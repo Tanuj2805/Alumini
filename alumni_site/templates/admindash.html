@@ -323,8 +323,6 @@
                 <table class="data-table" id="alumniTable">
                     <thead>
                         <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
                             <th>Full Name</th>
                             <th>Date of Birth</th>
                             <th>Age</th>
@@ -337,8 +335,6 @@
                     <tbody>
                         {% for alumni in alumni_data %}
                             <tr>
-                                <td>{{ alumni.first_name }}</td>
-                                <td>{{ alumni.last_name }}</td>
                                 <td>{{ alumni.alumni_name }}</td>
                                 <td>{{ alumni.DOB }}</td>
                                 <td>{{ alumni.age }}</td>
@@ -551,8 +547,7 @@
               </div>
               <div class="card-content">
                 <h4>Total Donations</h4>
-                <p class="amount">$24,850</p>
-                <span class="trend positive"><i class="fas fa-arrow-up"></i> 12% from last month</span>
+                <p class="amount">{{ donation_stats.total_donations }}</p>
               </div>
             </div>
             
@@ -563,20 +558,17 @@
               <div class="card-content">
                 <h4>Recent Donors</h4>
                 <div class="donor-list">
-                  <div class="donor-item">
-                    <div class="donor-info">
-                      <span class="donor-name">John Doe</span>
-                      <span class="donation-amount">$500</span>
+                  {% for donation in recent_donations %}
+                    <div class="donor-item">
+                      <div class="donor-info">
+                        <span class="donor-name">{{ donation.name }}</span>
+                        <span class="donation-amount">${{ donation.amount }}</span>
+                      </div>
+                      <span class="donation-date">{{ donation.date|date:"M d, Y" }}</span>
                     </div>
-                    <span class="donation-date">Mar 25, 2024</span>
-                  </div>
-                  <div class="donor-item">
-                    <div class="donor-info">
-                      <span class="donor-name">Jane Smith</span>
-                      <span class="donation-amount">$250</span>
-                    </div>
-                    <span class="donation-date">Mar 24, 2024</span>
-                  </div>
+                  {% empty %}
+                    <p class="no-donations">No recent donations yet.</p>
+                  {% endfor %}
                 </div>
               </div>
             </div>
@@ -603,39 +595,72 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td class="donor-info-cell">
-                    <div class="donor-avatar">
-                      JD
-                    </div>
-                    <div class="donor-details">
-                      <span class="donor-name">John Doe</span>
-                      <span class="donor-email">john@example.com</span>
-                    </div>
-                  </td>
-                  <td class="amount-cell">
-                    <span class="donation-amount">$200</span>
-                  </td>
-                  <td>2024-03-20</td>
-                  <td>
-                    <span class="payment-method credit-card">
-                      <i class="fas fa-credit-card"></i> Card
-                    </span>
-                  </td>
-                  <td>
-                    <span class="status-badge completed">
-                      <i class="fas fa-check-circle"></i> Completed
-                    </span>
-                  </td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="btn-action view"><i class="fas fa-eye"></i></button>
-                      <button class="btn-action receipt"><i class="fas fa-receipt"></i></button>
-                    </div>
-                  </td>
-                </tr>
+                {% for donation in donations %}
+                  <tr>
+                    <td class="donor-info-cell">
+                      <div class="donor-avatar">
+                        {{ donation.donor.alumni_name|default:"??"|slice:":1" }}
+                      </div>
+                      <div class="donor-details">
+                        <span class="donor-name">{{ donation.donor.alumni_name }}</span>
+                        <span class="donor-email">{{ donation.donor.alumni_email|default:"-" }}</span>
+                      </div>
+                    </td>
+                    <td class="amount-cell">
+                      <span class="donation-amount">${{ donation.amount }}</span>
+                    </td>
+                    <td>{{ donation.date }}</td>
+                    <td>
+                      <span class="payment-method {{ donation.payment_method }}">
+                        {% if donation.payment_method == 'card' %}
+                          <i class="fas fa-credit-card"></i> Card
+                        {% elif donation.payment_method == 'cash' %}
+                          <i class="fas fa-money-bill-wave"></i> Cash
+                        {% elif donation.payment_method == 'upi' %}
+                          <i class="fas fa-mobile-alt"></i> UPI
+                        {% elif donation.payment_method == 'bank_transfer' %}
+                          <i class="fas fa-university"></i> Bank
+                        {% else %}
+                          Unknown
+                        {% endif %}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-badge {{ donation.status }}">
+                        {% if donation.status == 'completed' %}
+                          <i class="fas fa-check-circle"></i> Completed
+                        {% elif donation.status == 'pending' %}
+                          <i class="fas fa-hourglass-half"></i> Pending
+                        {% elif donation.status == 'failed' %}
+                          <i class="fas fa-times-circle"></i> Failed
+                        {% endif %}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn-action view"><i class="fas fa-eye"></i></button>
+                        <button class="btn-action receipt"><i class="fas fa-receipt"></i></button>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="6" style="text-align: center;">No donations found.</td>
+                  </tr>
+                {% endfor %}
+            
+                {% if donations %}
+                  <tr class="total-row">
+                    <td colspan="6" style="text-align: right; font-weight: bold; padding-top: 10px;">
+                      Total Donations: <span style="color: #28a745;">${{ total_donations }}</span>
+                    </td>
+                  </tr>
+                {% endif %}
               </tbody>
             </table>
+            
+            
+            
           </div>
         </div>
         <!-- Management Section -->
@@ -688,20 +713,6 @@
         {% csrf_token %}
   
         <div class="form-group">
-          <label for="inputFirstName">First Name:</label>
-          <input type="text" id="inputFirstName" name="first_name" required pattern="^[A-Za-z\s'-]+$"
-            title="Only letters, spaces, hyphens and apostrophes are allowed">
-          <small id="firstNameError" class="error-message"></small>
-        </div>
-  
-        <div class="form-group">
-          <label for="inputLastName">Last Name:</label>
-          <input type="text" id="inputLastName" name="last_name" required pattern="^[A-Za-z\s'-]+$"
-            title="Only letters, spaces, hyphens and apostrophes are allowed">
-          <small id="lastNameError" class="error-message"></small>
-        </div>
-  
-        <div class="form-group">
           <label for="inputAlumniName">Full Name:</label>
           <input type="text" id="inputAlumniName" name="alumni_name" required pattern="^[A-Za-z\s'-]+$"
             title="Only letters, spaces, hyphens and apostrophes are allowed">
@@ -721,13 +732,6 @@
         </div>
   
         <div class="form-group">
-          <label for="inputAge">Age:</label>
-          <input type="number" id="inputAge" name="age" required min="18" max="150"
-            title="Age must be between 18 and 150">
-          <small id="ageError" class="error-message"></small>
-        </div>
-  
-        <div class="form-group">
           <label for="inputAlumniEmail">Email:</label>
           <input type="email" id="inputAlumniEmail" name="alumni_email" required>
           <small id="emailError" class="error-message"></small>
@@ -744,25 +748,6 @@
           <label for="inputAddress">Full Address:</label>
           <textarea id="inputAddress" name="full_address" required></textarea>
           <small id="addressError" class="error-message"></small>
-        </div>
-  
-        <div class="form-group">
-          <label for="inputStreetName">Street Name:</label>
-          <input type="text" id="inputStreetName" name="street_name" required>
-          <small id="streetNameError" class="error-message"></small>
-        </div>
-  
-        <div class="form-group">
-          <label for="inputCity">City:</label>
-          <input type="text" id="inputCity" name="city" required>
-          <small id="cityError" class="error-message"></small>
-        </div>
-  
-        <div class="form-group">
-          <label for="inputPincode">Pincode:</label>
-          <input type="text" id="inputPincode" name="pincode" required pattern="^[0-9]{6,10}$"
-            title="Pincode must be 6 to 10 digits">
-          <small id="pincodeError" class="error-message"></small>
         </div>
   
         <div class="form-group">

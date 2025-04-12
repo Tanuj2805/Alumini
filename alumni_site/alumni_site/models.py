@@ -27,8 +27,6 @@ class Login(models.Model):
 class Alumni(models.Model):
     _id = djongo_models.ObjectIdField(primary_key=True)
     avatar = models.ImageField(upload_to='static/avatar/', blank=True, null=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
     alumni_name = models.CharField(max_length=255)
     DOB = models.DateField()
     age = models.IntegerField()
@@ -77,13 +75,11 @@ class Donation(models.Model):
     )
 
     _id = djongo_models.ObjectIdField(primary_key=True)
-    donor = models.CharField(max_length=200)
+    donor = models.ForeignKey(Alumni, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHODS)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     notes = models.TextField(blank=True)
-    metadata = djongo_models.JSONField(default=dict)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -184,6 +180,7 @@ class Job(models.Model):
 
 # post model
 class Post(models.Model):
+    _id = djongo_models.ObjectIdField(primary_key=True)
     author = models.ForeignKey(Alumni, on_delete=models.CASCADE)
     content = models.TextField()
     image = models.ImageField(upload_to='static/posts/', blank=True, null=True)
