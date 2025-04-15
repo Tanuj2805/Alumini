@@ -141,6 +141,7 @@ def admindash(request):
     print("Total Job Postings:",Job.objects.count())
 
     context = {
+        'posts':Post.objects.select_related('author').order_by('-created_at'),
         'donations':donations, 
         'alumni_data': alumni_queryset,
         'search_query': search_query,

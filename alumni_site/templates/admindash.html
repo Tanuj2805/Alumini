@@ -195,6 +195,145 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
   }
+
+  .posts-section {
+      flex: 1;
+      overflow-y: auto;
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+
+  .posts-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #f0f2f5;
+  }
+
+  .btn-new-post {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.2s;
+  }
+
+  .btn-new-post:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  /* Post Components */
+  .posts-grid {
+      display: grid;
+      gap: 2rem;
+  }
+
+  .post-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+  }
+
+  .post-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+
+  .post-author {
+      display: flex;
+      align-items: center;
+      padding: 1.5rem;
+      background: linear-gradient(90deg, #f8fafc, #ffffff);
+      border-bottom: 1px solid #f1f5f9;
+  }
+
+  .post-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      margin-right: 1rem;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .author-info h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #1e293b;
+  }
+
+  .post-time {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin: 0;
+  }
+
+  .post-content {
+      padding: 1.5rem;
+      position: relative;
+  }
+
+  .post-text {
+      color: #334155;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+  }
+
+  .post-image {
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 1rem;
+      transition: transform 0.3s;
+      cursor: zoom-in;
+  }
+
+  .post-image:hover {
+      transform: scale(1.02);
+  }
+
+  .post-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: #f8fafc;
+      border-top: 1px solid #f1f5f9;
+  }
+
+  .posts-scroll-container {
+      max-height: 70vh; /* Adjust based on your layout */
+      overflow-y: auto;
+      padding-right: 0.5rem;
+      margin-top: 1rem;
+  }
+
+  /* Optional: smooth scrollbar styling */
+  .posts-scroll-container::-webkit-scrollbar {
+      width: 8px;
+  }
+
+  .posts-scroll-container::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 10px;
+  }
+
+  .posts-scroll-container::-webkit-scrollbar-thumb:hover {
+      background-color: #94a3b8;
+  }
   
   </style>
 </head>
@@ -300,13 +439,6 @@
             <div class="alumni-actions" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <!-- Search Box -->
                    <input type="text" id="alumniSearch" name="search" placeholder="Search alumni..." value="{{ search_query }}" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 5px;">
-                    <!-- Sort Dropdown -->
-                    <select id="alumniSort" name="sort" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 5px;">
-                        <option value="">Sort By</option>
-                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name</option>
-                        <option value="email" {% if sort_by == 'email' %}selected{% endif %}>Email</option>
-                        <option value="city" {% if sort_by == 'city' %}selected{% endif %}>City</option>
-                    </select>
                     <!-- Action Buttons -->
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-search"></i> Search
@@ -502,33 +634,73 @@
         <div class="section-header">
           <h3 class="section-title">Latest Posts</h3>
           <div class="section-actions">
-            <button class="btn-primary" id="btnOpenModalAddPost">
+            <button class="btn-primary" onclick="showPostModal()">
               <i class="fas fa-plus"></i> New Post
-            </button>
+          </button>
           </div>
         </div>
         
-        <div class="posts-list">
-          <div class="post-card">
-            <h4>Understanding Mental Health Awareness</h4>
-            <p class="post-meta">By Admin | March 20, 2024</p>
-            <p>Raising awareness about mental health issues and supporting those in need...</p>
-            <div class="post-actions">
-              <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-              <button class="btn-action delete"><i class="fas fa-trash"></i></button>
-            </div>
+        <div class="posts-scroll-container">
+          <div class="posts-grid">
+              {% for post in posts %}
+              <div class="post-card">
+                  <div class="post-author">
+                      <img src="{{ post.author.avatar.url }}" alt="User" class="post-avatar">
+                      <div class="author-info">
+                          <h4>{{ post.author.alumni_name }}</h4>
+                          <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
+                      </div>
+                      <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                  </div>
+                  
+                  <div class="post-content">
+                      <p class="post-text">{{ post.content }}</p>
+                      
+                      {% if post.image %}
+                          <img src="{{ post.image.url }}" class="post-image" alt="Post image">
+                      {% endif %}
+      
+                      <div class="post-tags">
+                          <span class="post-tag">#Alumni</span>
+                          <span class="post-tag">#Post</span>
+                      </div>
+      
+                      <div class="emoji-reactions">
+                          <button class="emoji-button">👍</button>
+                          <button class="emoji-button">❤️</button>
+                          <button class="emoji-button">🎉</button>
+                      </div>
+                  </div>
+                  
+                  <div class="post-actions">
+                      <div class="action-group">
+                          <button class="btn-action">
+                              <i class="fas fa-thumbs-up"></i>
+                              Like
+                          </button>
+                          <button class="btn-action">
+                              <i class="fas fa-comment-alt"></i>
+                              Comment
+                          </button>
+                          <button class="btn-action">
+                              <i class="fas fa-share"></i>
+                              Share
+                          </button>
+                      </div>
+                      <button class="btn-action">
+                          <i class="fas fa-bookmark"></i>
+                      </button>
+                  </div>
+                  
+                  <div class="comment-preview">
+                      <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
+                      <input type="text" class="comment-input" placeholder="Write a comment...">
+                  </div>
+              </div>
+              {% empty %}
+                  <p>No posts to show.</p>
+              {% endfor %}
           </div>
-          
-          <div class="post-card">
-            <h4>Tips for Stress Management</h4>
-            <p class="post-meta">By Dr. Smith | March 18, 2024</p>
-            <p>Practical ways to handle stress and improve mental well-being...</p>
-            <div class="post-actions">
-              <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-              <button class="btn-action delete"><i class="fas fa-trash"></i></button>
-            </div>
-          </div>
-        </div>
       </div>
 
        <!-- Donation Section -->
@@ -851,6 +1023,30 @@
       </form>
     </div>
   </div>
+
+  {% comment %} post modal {% endcomment %}
+  <div id="postModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Create New Post</h2>
+        <form id="postForm" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-scroll-container">
+                <div class="form-group">
+                    <label>Post Content <span class="required">*</span></label>
+                    <textarea name="content" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Add Image (Optional)</label>
+                    <input type="file" name="image" accept="image/*">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Publish Post</button>
+            </div>
+        </form>
+    </div>
+</div>
   
 <style>
   .error-message {
@@ -859,6 +1055,88 @@
       display: block;
   }
   </style>
+
+  {% comment %} posts {% endcomment %}
+  <script>
+    // Modal Handling
+    function showPostModal() {
+        document.getElementById('postModal').style.display = 'block';
+    }
+
+    function closePostModal() {
+        document.getElementById('postModal').style.display = 'none';
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // New Post Button
+        document.querySelector('.btn-new-post').addEventListener('click', (e) => {
+            e.preventDefault();
+            showPostModal();
+        });
+
+        // Close Modal
+        document.querySelector('#postModal .close').addEventListener('click', closePostModal);
+
+        // Close when clicking outside modal
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('postModal')) {
+                closePostModal();
+            }
+        });
+
+        // Form Validation
+        document.getElementById('postForm').addEventListener('submit', (e) => {
+            const content = e.target.content.value.trim();
+            const image = e.target.image.files[0];
+            
+            if (!content && !image) {
+                e.preventDefault();
+                alert('Please provide either text content or an image');
+                e.target.content.focus();
+            }
+        });
+    });
+
+    // Navigation Handling (from previous code)
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... rest of your navigation code ...
+    });
+
+    // ... rest of your existing JavaScript functions ...
+</script>
+
+  {% comment %} Search {% endcomment %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const searchInput = document.getElementById("alumniSearch");
+      const table = document.getElementById("alumniTable");
+      const rows = table.querySelectorAll("tbody tr");
+    
+      
+      console.log(searchInput)
+      searchInput.addEventListener("input", function () {
+        const query = this.value.toLowerCase();
+        
+        console.log(query)
+        // Loop through all rows in the table body
+        rows.forEach(function (row) {
+          // Get all text content of the row (to compare with the search query)
+          const rowText = row.textContent.toLowerCase();
+          
+          // If the row text contains the search query, show the row
+          if (rowText.includes(query)) {
+            row.style.display = "";
+          } else {
+            // Otherwise, hide the row
+            row.style.display = "none";
+          }
+        });
+      });
+    });
+    </script>
+    
+  
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
