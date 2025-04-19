@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="{% static 'js/careers.js' %}"></script>
+  {% comment %} <script src="{% static 'js/careers.js' %}"></script> {% endcomment %}
   <style>
     /* Base Styles */
     body.dashboard-body {
@@ -352,7 +352,7 @@
           <li><a href="#dashboard" class="active">Dashboard</a></li>
           <li><a href="#alumni">Alumni</a></li>
           <li><a href="#events">Events</a></li>
-          <li><a href="#careers">Careers</a></li>
+          {% comment %} <li><a href="#careers">Careers</a></li> {% endcomment %}
           <li><a href="#posts">Posts</a></li>
           <li><a href="#donation">Donation</a></li>
           <li><a href="#management">Student</a></li>
