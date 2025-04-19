@@ -404,9 +404,10 @@
 
         /* Events Section Styles */
         .events-grid {
-            display: grid;
+            display: flex;
+            flex-direction: column;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Ensures the cards take up full width and adjust based on screen size */
-            gap: 20px; /* Adjust space between the event cards */
+            gap: 10px; /* Adjust space between the event cards */
             width: 100%; /* Ensure it takes up the full width of the parent container */
         }
 
@@ -436,6 +437,10 @@
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 20px;
+        }
+
+        .events-title{
+            justify-content: center;
         }
 
         /* Careers Section Styles */
@@ -848,6 +853,7 @@
                     <!-- Accepted Events (Upcoming) -->
                     <div class="events-container">
                         <h2 class="events-title">Your Upcoming Events</h2>
+                        <br>
                         
                         {% if upcoming_events %}
                             <div class="events-grid">
