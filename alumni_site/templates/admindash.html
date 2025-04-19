@@ -355,7 +355,7 @@
           <li><a href="#careers">Careers</a></li>
           <li><a href="#posts">Posts</a></li>
           <li><a href="#donation">Donation</a></li>
-          <li><a href="#management">Management</a></li>
+          <li><a href="#management">Student</a></li>
         </ul>
       </nav>
     </aside>
@@ -889,45 +889,56 @@
         </div>
         <!-- Management Section -->
         <div id="management" class="content-section">
-          <div class="section-header">
-            <h3>System Administration</h3>
-            <div class="section-actions">
-              <button class="btn-primary" id="btnOpenModalAddAdmin">
-                <i class="fas fa-plus"></i> Add Admin
-              </button>
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h3>Student Login Management</h3>
+            <div class="student-actions" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <!-- Add Student Button -->
+              <button class="btn-primary" id="btnOpenModalAddStudent">
+                <i class="fas fa-plus"></i> Add Student
+              </button>              
             </div>
           </div>
-
+        
           <div class="admin-table">
             <table class="data-table">
               <thead>
                 <tr>
                   <th>Username</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Last Login</th>
+                  <th>Name</th>
+                  <th>Department</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
+                {% for student in student_logins %}
                 <tr>
-                  <td>admin1</td>
-                  <td>admin@vitgrad.com</td>
-                  <td>Super Admin</td>
-                  <td>2024-03-12 14:30</td>
+                  <td>{{ student.username }}</td>
+                  <td>{{ student.name }}</td>
+                  <td>{{ student.dept }}</td>
                   <td>
-                    <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                    <button class="btn-action delete"><i class="fas fa-trash"></i></button>
+                    <button class="btn-action edit" title="Edit"><i class="fas fa-edit"></i></button>
+                    <form method="POST" action="{% url 'delete_student' %}" style="display: inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="username" value="{{ student.username }}">
+                      <button type="submit" class="btn-action delete" title="Delete" onclick="return confirm('Are you sure you want to delete this student?')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
                   </td>
                 </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4">No student login records found.</td>
+                </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
-        </div>
       </div>
     </main>
   </div>
 
+  
   <!-- Add Alumni Modal -->
   <div id="modalAddAlumni" class="modal">
     <div class="modal-content">
@@ -996,6 +1007,35 @@
       </form>
     </div>
   </div>
+
+  <!-- Add Student Modal -->
+<div id="modalAddStudent" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Add Student</h2>
+    <form id="studentForm" action="{% url 'add_student' %}" method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="username">Username (numeric):</label>
+        <input type="number" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="name">Full Name:</label>
+        <input type="text" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="dept">Department:</label>
+        <input type="text" name="dept" required>
+      </div>
+      <button type="submit" class="btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
+
     
   <!-- Add Event Modal-->
   <div id="modalAddEvent" class="modal">
@@ -1179,6 +1219,28 @@
       display: block;
   }
   </style>
+  <script>
+    // Open Student Modal
+    document.getElementById('btnOpenModalAddStudent').addEventListener('click', function () {
+      document.getElementById('modalAddStudent').style.display = 'block';
+    });
+  
+    // Close Modal
+    document.querySelectorAll('.modal .close').forEach(function (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        this.closest('.modal').style.display = 'none';
+      });
+    });
+  
+    // Close when clicking outside modal content
+    window.addEventListener('click', function (event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    });
+  </script>
+  
+
   <script>
     function closeInviteModal() {
       console.log('Close Invite');
@@ -1578,6 +1640,7 @@ function validateEventForm() {
 
   return isValid;
 }
+
 
   // Handle add alumni button click
   document.getElementById('btnOpenModalAddAlumni').addEventListener('click', function(e) {

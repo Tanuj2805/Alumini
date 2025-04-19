@@ -158,6 +158,7 @@ def admindash(request):
     print("Total Job Postings:",Job.objects.count())
 
     context = {
+        'student_logins':StudentLogin.objects.all(),
         'invitations':invitations,
         'upcoming_events':upcoming_events,
         'posts':Post.objects.select_related('author').order_by('-created_at'),
@@ -360,6 +361,49 @@ def add_alumni(request):
         }, status=400)
     
 @require_POST
+def add_student(request):
+    try:
+        # Extract form data
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        name = request.POST.get('name')
+        dept = request.POST.get('dept')
+
+        # Debug print
+        print("---- Student Form Data ----")
+        print("Username:", username)
+        print("Password:", password)
+        print("Name:", name)
+        print("Department:", dept)
+        print("----------------------------")
+
+        # Optional: Validate numeric username
+        if not username.isdigit():
+            return JsonResponse({'success': False, 'message': 'Username must be numeric'}, status=400)
+
+        student = StudentLogin.objects.create(
+            username=int(username),
+            password=password,  # Note: Hashing recommended
+            name=name,
+            dept=dept,
+        )
+
+        print("Created Student:", student)
+
+        return redirect('admindash')
+        return JsonResponse({
+            'success': True,
+            'message': 'Student added successfully!'
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'message': f"Error: {str(e)}"
+        }, status=400)
+
+@require_POST
 def add_event(request):
     print("Add Event")
     try:
@@ -505,6 +549,21 @@ def delete_alumni(request):
             'success': False,
             'message': str(e)
         }, status=500)
+
+@require_POST
+def delete_student(request):
+    username = request.POST.get('username')
+    try:
+        student = StudentLogin.objects.get(username=username)
+        student.delete()
+        return redirect('admindash')
+        messages.success(request, "Student deleted successfully.")
+    except StudentLogin.DoesNotExist:
+        messages.error(request, "Student not found.")
+    except Exception as e:
+        messages.error(request, f"Error deleting student: {e}")
+    
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 @require_POST
 def get_alumni_details(request):

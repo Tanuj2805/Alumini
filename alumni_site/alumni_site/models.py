@@ -196,9 +196,11 @@ class StudentLogin(models.Model):
     _id = djongo_models.ObjectIdField(primary_key=True)
     username = models.PositiveIntegerField(unique=True)  # Numeric only
     password = models.CharField(max_length=128)  # Store hashed password ideally
+    name = models.CharField(max_length=100)
+    dept = models.CharField(max_length=100)
 
     def __str__(self):
-        return str(self.username)
+        return f"{self.username} - {self.name}"
     
     class Meta:
         db_table = 'student_login'
