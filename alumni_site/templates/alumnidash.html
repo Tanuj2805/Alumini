@@ -183,16 +183,30 @@
         }
     
         .btn-action {
-            background: none;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
             border: none;
+            border-radius: 5px;
+            margin: 5px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #64748b;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: all 0.2s;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-action i {
+            margin-right: 5px;
+        }
+        
+        .blink {
+            animation: blink-animation 0.5s ease-in-out 2;
+        }
+        
+        @keyframes blink-animation {
+            0% { opacity: 1; }
+            25% { opacity: 0; }
+            50% { opacity: 1; }
+            75% { opacity: 0; }
+            100% { opacity: 1; }
         }
     
         .btn-action:hover {
@@ -391,15 +405,16 @@
         /* Events Section Styles */
         .events-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Ensures the cards take up full width and adjust based on screen size */
+            gap: 20px; /* Adjust space between the event cards */
+            width: 100%; /* Ensure it takes up the full width of the parent container */
         }
 
         .event-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background: #fff; /* Event card background */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow around the cards */
+            overflow: hidden; /* Ensure content stays within the card */
         }
 
         .event-image {
@@ -623,6 +638,7 @@
     </style>
 
 </head>
+
 <body class="dashboard-body">
     <!-- Dashboard Wrapper -->
     <div class="dashboard-wrapper">
@@ -719,7 +735,6 @@
                                     </div>
                                     
                                     <div class="comment-preview">
-                                        <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
                                         <input type="text" class="comment-input" placeholder="Write a comment...">
                                     </div>
                                 </div>
