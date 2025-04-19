@@ -50,6 +50,7 @@
       background: #2563eb;
       color: white;
     }
+
     .dashboard-main {
       flex: 1;
       overflow-x: hidden;
@@ -76,60 +77,68 @@
     
     /* Events Styles */
     .events-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
+      display: flex;
+      flex-direction: column; /* Stack children vertically */
+      gap: 1rem; /* Add spacing between event cards */
+      width: 100%;
     }
-    .event-card {
-      background: white;
-      border-radius: 10px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
-    }
+
     .event-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
+    .event-card {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 1rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+    
     .event-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 1rem;
+      align-items: center;
+      width: 100%;
     }
-    .event-date {
-      background: #2563eb;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
-    }
+    
     .event-title {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
+      flex: 1;
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin: 0;
     }
+    
+    .event-date {
+      background-color: #2962ff;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+    
     .event-location {
-      color: #64748b;
-      margin-bottom: 1rem;
+      margin-top: 0.5rem;
+      width: 100%;
+      color: #666;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
     }
+    
+    .event-location i {
+      margin-right: 0.5rem;
+    }
+    
     .event-description {
-      margin-bottom: 1.5rem;
-      color: #334155;
+      margin-top: 0.5rem;
+      width: 100%;
+      color: #444;
     }
-    .btn-rsvp {
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .btn-rsvp:hover {
-      background: #1d4ed8;
-    }
+    
     
     /* Posts Styles */
     .posts-scroll-container {
@@ -264,13 +273,25 @@
         <img src="{% static 'images/vit_logo.webp' %}" alt="VITGrad Logo" class="logo-img">
         <h1 class="logo">VITGrad</h1>
       </div>
+    
       <nav class="sidebar-nav">
         <ul>
-          <li><a href="#events" class="active">Events</a></li>
-          <li><a href="#posts">Posts</a></li>
+          <li>
+            <a href="#events" class="sidebar-link active">
+              <i class="fas fa-calendar-alt"></i>
+              <span>Events</span>
+            </a>
+          </li>
+          <li>
+            <a href="#posts" class="sidebar-link">
+              <i class="fas fa-newspaper"></i>
+              <span>Posts</span>
+            </a>
+          </li>
         </ul>
       </nav>
     </aside>
+    
     <main class="dashboard-main">
       <header class="dashboard-header">
         <h2>Student Dashboard</h2>
@@ -303,9 +324,7 @@
                 {{ event.location }}
               </div>
               <p class="event-description">{{ event.description|truncatechars:150 }}</p>
-              <button class="btn-rsvp" onclick="rsvpToEvent('{{ event.event_id }}')">
-                <i class="fas fa-calendar-check"></i> RSVP
-              </button>
+            
             </div>
             {% empty %}
             <div class="no-events">
