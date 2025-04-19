@@ -9,6 +9,8 @@ from django.utils.timezone import now
 import traceback
 from decimal import Decimal
 from bson.decimal128 import Decimal128
+from bson import ObjectId
+import json
 
 from django.views.decorators.http import require_POST, require_http_methods
 from django.core.exceptions import ValidationError
@@ -63,6 +65,20 @@ def login(request):
 
     return render(request, "login.html")
 
+def student_login(request):
+    return render(request,'student_login.html')
+
+def studentdash(request):
+    events = Event.objects.all().order_by('event_date')
+    upcoming_events = events.filter(event_date__gte=datetime.now().date())[:5]
+    posts = Post.objects.select_related('author').order_by('-created_at')
+
+    context = {
+        'upcoming_events':upcoming_events,
+        'posts':posts
+    }
+    return render(request,'studentdash.html',context)
+
 from django.shortcuts import render
 from django.db.models import Q, Sum
 from datetime import datetime, date
@@ -96,6 +112,7 @@ def admindash(request):
     events = Event.objects.all().order_by('event_date')
     print(events)
     upcoming_events = events.filter(event_date__gte=datetime.now().date())[:5]
+    invitations = EventInvitation.objects.all()
     
     donations = Donation.objects.all()
     total_donations = Decimal('0.0')
@@ -141,6 +158,8 @@ def admindash(request):
     print("Total Job Postings:",Job.objects.count())
 
     context = {
+        'invitations':invitations,
+        'upcoming_events':upcoming_events,
         'posts':Post.objects.select_related('author').order_by('-created_at'),
         'donations':donations, 
         'alumni_data': alumni_queryset,
@@ -175,7 +194,7 @@ def alumnidash(request):
     print(self_posts)
 
     print("-------------------------------------------------")
-    print("ID = ",account_holder._id)
+    # print("ID = ",account_holder._id)
     print("Avatar = ",account_holder.avatar)
     print("Avatar url = ",account_holder.avatar.url)
     print("Address = ",account_holder.address)
@@ -200,6 +219,31 @@ def alumnidash(request):
         print("-" * 40)
     print("-------------------------------------------------")
     
+    invitations = EventInvitation.objects.all()
+    today = timezone.now().date()    
+
+    # invitations for events
+    invitations = EventInvitation.objects.filter(
+    alumni_id=ObjectId(account_holder.alumni_id()),
+    status='pending').order_by('-sent_at')
+    
+    # Upcoming accepted events
+    upcoming_events = EventInvitation.objects.filter(
+        alumni_id=ObjectId(account_holder.alumni_id()),
+        status='accepted',
+        event__event_date__gte=today
+    ).select_related('event').order_by('event__event_date')
+    
+    # Past events (both accepted and declined)
+    past_events = EventInvitation.objects.filter(
+        alumni_id=ObjectId(account_holder.alumni_id()),
+        event__event_date__lt=timezone.now().date()
+    ).exclude(status='pending').select_related('event').order_by('-event__event_date')
+    
+    print("-----------------------------------------")
+    print(invitations)
+
+
     #donation info for profile cards
     donations = Donation.objects.filter(donor=account_holder)
     print(donations)
@@ -242,6 +286,9 @@ def alumnidash(request):
     print("-------------------------------------------------")
 
     context = {
+        'past_events':past_events,
+        'upcoming_events':upcoming_events,
+        'invitations':invitations,
         'donation_data':donation_data,
         'account_holder':account_holder,
         'posts':posts,
@@ -528,15 +575,79 @@ def edit_event(request):
             'message': str(e)
         }, status=500)
 
+
+@require_POST  
+def send_event_invitations(request):
+    try:
+        data = json.loads(request.body)
+        event_id = data.get('event_id')
+        alumni_ids = data.get('alumni_ids', [])
+
+        # Convert event_id and alumni_ids to ObjectId
+        object_event_id = ObjectId(event_id)
+        object_alumni_ids = [ObjectId(aid) for aid in alumni_ids]
+
+        # Get event
+        event = Event.objects.get(_id=object_event_id)
+
+        # Get alumni objects
+        alumni_to_invite = Alumni.objects.filter(_id__in=object_alumni_ids)
+
+        # Create invitations
+        for alumni in alumni_to_invite:
+            EventInvitation.objects.get_or_create(
+                event=event,
+                alumni=alumni,
+                defaults={'status': 'pending'}
+            )
+
+        # Add to many-to-many relationship
+        event.invited_alumni.add(*alumni_to_invite)
+
+        return JsonResponse({'success': True, 'message': 'Invitations sent successfully'})
+
+    except Event.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Event not found'}, status=404)
+    except Alumni.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'One or more alumni not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    
+def respond_to_invitation(request):
+    try:
+        invitation_id = request.POST.get('invitation_id')
+        response = request.POST.get('response')
+
+        if not invitation_id or response not in ['accepted', 'declined']:
+            return redirect('alumnidash')  # fallback or error page
+
+        # Get the EventInvitation object
+        invitation = EventInvitation.objects.get(_id=ObjectId(invitation_id))
+
+        # Update the invitation's status and timestamp
+        invitation.status = response
+        invitation.responded_at = timezone.now()
+        invitation.save()
+
+        return redirect('alumnidash')
+
+    except EventInvitation.DoesNotExist:
+        return redirect('alumnidash')
+
 @require_POST
 def delete_event(request):
     try:
-        name = request.POST.get('event_name')
-        print(name)
-        event = Event.objects.get(event_name=name)
-        print("deleted event ",event)
-        # Delete the event
+        event_id = request.POST.get('event_id')
+        print("Event ID received:", event_id)
+
+        # Convert to ObjectId
+        obj_id = ObjectId(event_id)
+
+        # Get and delete the event
+        event = Event.objects.get(_id=obj_id)
+        print("Deleting event:", event.event_name)
         event.delete()
+
         return redirect('admindash')
 
     except Event.DoesNotExist:
@@ -549,7 +660,7 @@ def delete_event(request):
             'success': False,
             'message': str(e)
         }, status=500)
-
+    
 @require_POST
 def get_event_details(request):
     try:
@@ -717,30 +828,30 @@ def edit_post(request):
 @require_POST
 def delete_post(request):
     try:
-        created_at_str = request.POST.get('created_at')
-        author_email = request.POST.get('author_email')
-        author = Alumni.objects.filter(alumni_email=request.session.get('author_email')).first()
+        post_id = request.POST.get('post_id')
+        author_email = request.session.get('alumni_email')  # Verify your session key
+        
+        print("-----------------------------------------------")
+        print("Email = ",author_email," Post ID = ",post_id)
 
-        print("Delete Post is Called with:", created_at_str, author_email)
+        # Get author from session
+        author = Alumni.objects.get(alumni_email=author_email)
 
-        # Convert timestamp string back to datetime object
-        created_at = datetime.strptime(created_at_str, "%Y-%m-%d %H:%M:%S.%f")
-
-        # Find the post based on author email and created_at
-        post = Post.objects.filter(created_at=created_at, author=author).first()
-
-        if not post:
-            print("Post not found.")
-            return JsonResponse({'success': False, 'message': 'Post not found'}, status=404)
-
+        print("Alumni = ",author.alumni_name)
+        
+        # Find post by ID and author
+        post = Post.objects.get(_id=ObjectId(post_id))
         post.delete()
-        print(" -- Post Deleted Successfully.....")
+        
+        print("Delete Post Deleted")
+        print("-----------------------------------------------")
 
-        return redirect('alumnidash')  # OR return JsonResponse if it's AJAX
-        # return JsonResponse({'success': True, 'message': 'Post deleted successfully'})
+        return redirect('alumnidash')
 
+    except Post.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Post not found'}, status=404)
     except Exception as e:
-        print(" -- Exception --", e)
+        print("Error:", e)
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 @require_POST
@@ -903,6 +1014,32 @@ def generate_receipt(request):
             'success': False,
             'message': str(e)
         }, status=500)
+    
+@require_POST
+def create_post_admin(request):
+    content = request.POST.get('content')
+    image = request.FILES.get('image')
+
+    print(content)
+
+    # Get the current logged-in user's Alumni object
+    try:
+        alumni = Alumni.objects.all().first()
+        print(alumni)
+    except Alumni.DoesNotExist:
+        # Handle gracefully if Alumni is not found
+        return redirect('alumnidash')  # or show error message
+
+    # Create and save the post
+    post = Post.objects.create(
+        author=alumni,
+        content=content,
+        image=image
+    )
+
+    print("Post Uploaded Successfully : ",post)
+
+    return redirect('admindash')
 
 # Admin Management Functions
 @require_POST
@@ -926,6 +1063,31 @@ def get_admin_details(request):
 @require_POST
 def get_job_details(request):
     return redirect("admindash")
+
+from django.http import JsonResponse
+from .models import Event, EventInvitation
+
+def get_event_attendees(request, event_id):
+    try:
+        event = Event.objects.get(_id=event_id)
+        attendees = EventInvitation.objects.filter(event=event, status='accepted').select_related('alumni')
+
+        attendees_list = [{
+            'first_name': ai.alumni.first_name,
+            'last_name': ai.alumni.last_name,
+            'email': ai.alumni.email,
+        } for ai in attendees]
+
+        print("------------------------------------")
+        print(attendees_list)
+
+        return JsonResponse({
+            'event_name': event.event_name,
+            'attendees': attendees_list
+        })
+    except Event.DoesNotExist:
+        return JsonResponse({'error': 'Event not found'}, status=404)
+
 
     
 @require_POST

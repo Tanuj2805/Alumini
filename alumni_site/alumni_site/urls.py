@@ -22,7 +22,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index,name="index"),
     path('login/', views.login,name="login"),
+    path('student_login/', views.student_login,name="student_login"),
     path('admindash/', views.admindash,name="admindash"),
+    path('studentdash/', views.studentdash,name="studentdash"),
     path('alumnidash/', views.alumnidash,name="alumnidash"),
     path('logout/', views.logout, name='logout'),
     path('add_alumni/', views.add_alumni, name='add_alumni'),
@@ -60,11 +62,16 @@ urlpatterns = [
     path('edit_admin/', views.edit_admin, name='edit_admin'),
     path('delete_admin/', views.delete_admin, name='delete_admin'),
     path('get_admin_details/', views.get_admin_details, name='get_admin_details'),
+    # path('events/', views.events_management, name='events_management'),
+    path('send-invitations/', views.send_event_invitations, name='send_event_invitations'),
+    path('admindash/<str:event_id>/attendees/', views.get_event_attendees, name='get_event_attendees'),
+    path('create_post_admin/', views.create_post_admin, name='create_post_admin'),
 
     #alumni urls
     path('update_alumni_profile/', views.update_alumni_profile, name='update_alumni_profile'),
     path('create_post/', views.create_post, name='create_post'),
     path('fake_payment/', views.fake_payment, name='fake_payment'),
     path('delete_post/', views.delete_post, name='delete_post'),
+    path('respond_to_invitation/', views.respond_to_invitation, name='respond_to_invitation'),
 
 ]

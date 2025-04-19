@@ -41,6 +41,9 @@ class Alumni(models.Model):
 
     def __str__(self):
         return self.alumni_name
+    
+    def alumni_id(self):
+        return str(self._id)
 
     class Meta:
         db_table = 'alumni'
@@ -54,12 +57,31 @@ class Event(models.Model):
     max_participants = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     tags = djongo_models.JSONField(default=list)
+    invited_alumni = models.ManyToManyField(Alumni, through='EventInvitation', related_name='invited_events')
+
+    def event_id(self):
+        return str(self._id)
 
     def __str__(self):
         return self.event_name
 
+class EventInvitation(models.Model):
+    _id = djongo_models.ObjectIdField(primary_key=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    alumni = models.ForeignKey(Alumni, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined')
+    ], default='pending')
+    sent_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
-        db_table = 'events'
+        unique_together = ('event', 'alumni')
+    
+    def inv_id(self):
+        return str(self._id)
 
 class Donation(models.Model):
     PAYMENT_METHODS = (
@@ -117,31 +139,6 @@ class Organization(models.Model):
 
     class Meta:
         db_table = 'organizations'
-
-class AlumniEventData(models.Model):
-    alumni_id = models.CharField(max_length=50)
-    event_id = models.CharField(max_length=50)
-    registration_date = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=20, default='registered')
-    
-    class Meta:
-        abstract = True
-
-class AlumniEvent(models.Model):
-    _id = djongo_models.ObjectIdField(primary_key=True)
-    data = djongo_models.EmbeddedField(
-        model_container=AlumniEventData,
-        default={'alumni_id': '', 'event_id': '', 'status': 'registered'}
-    )
-    created_at = models.DateTimeField(default=timezone.now)
-    metadata = djongo_models.JSONField(default=dict)
-
-    def __str__(self):
-        return f"Alumni {self.data.alumni_id} - Event {self.data.event_id}"
-
-    class Meta:
-        db_table = 'alumni_events'
-
 class Job(models.Model):
     JOB_TYPES = (
         ('full_time', 'Full Time'),
@@ -189,5 +186,19 @@ class Post(models.Model):
     def __str__(self):
         return f"{self.author.alumni_name} - {self.created_at.strftime('%Y-%m-%d')}"
     
+    def post_id(self):
+        return str(self._id)
+    
     class Meta:
         db_table = 'posts'
+
+class StudentLogin(models.Model):
+    _id = djongo_models.ObjectIdField(primary_key=True)
+    username = models.PositiveIntegerField(unique=True)  # Numeric only
+    password = models.CharField(max_length=128)  # Store hashed password ideally
+
+    def __str__(self):
+        return str(self.username)
+    
+    class Meta:
+        db_table = 'student_login'

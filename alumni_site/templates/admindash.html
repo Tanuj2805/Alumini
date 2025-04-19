@@ -334,6 +334,9 @@
   .posts-scroll-container::-webkit-scrollbar-thumb:hover {
       background-color: #94a3b8;
   }
+
+  {% comment %} invitations styles {% endcomment %}
+   
   
   </style>
 </head>
@@ -417,16 +420,6 @@
               <div class="card-body">
                 <p>78%</p>
               </div>
-            </div>
-          </div>
-          <div class="charts-container">
-            <div class="chart-card">
-              <h3>Alumni Growth Over Time</h3>
-              <canvas id="alumniGrowthChart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>Event Participation</h3>
-              <canvas id="eventParticipationChart"></canvas>
             </div>
           </div>
         </div>
@@ -521,53 +514,110 @@
             </div>
         </div>
   
-     <!-- Events Section -->
-      <div id="events" class="content-section">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-          <h3>Events Management</h3>
-          <button class="btn-primary" id="btnOpenModalAddEvent">
-            <i class="fas fa-plus"></i> New Event
-          </button>
+        <!-- Events Section -->
+        <div id="events" class="content-section">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <h3>Events Management</h3>
+              <button class="btn-primary" id="btnOpenModalAddEvent">
+                  <i class="fas fa-plus"></i> New Event
+              </button>
+          </div>
+
+          <div class="table-container" style="margin-top: 20px;">
+              <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                      <tr style="background-color: #f3f4f6; text-align: left;">
+                          <th style="padding: 10px;">Event Name</th>
+                          <th style="padding: 10px;">Date</th>
+                          <th style="padding: 10px;">Location</th>
+                          <th style="padding: 10px;">Description</th>
+                          <th style="padding: 10px;">Invited</th>
+                          <th style="padding: 10px;">Actions</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for event in upcoming_events %}
+                      <tr>
+                          <td style="padding: 10px;">{{ event.event_name }}</td>
+                          <td style="padding: 10px;">{{ event.event_date|date:"M d, Y" }}</td>
+                          <td style="padding: 10px;">{{ event.location }}</td>
+                          <td style="padding: 10px;">{{ event.description|truncatechars:50 }}</td>
+                          <td style="padding: 10px;">{{ event.invited_alumni.count }}</td>
+                          <td style="padding: 10px; white-space: nowrap;">
+                              <button class="btn-action view" title="View Attendees"
+                                onclick="openAttendeesModal('{{ event.event_id }}')">
+                                <i class="fas fa-users"></i>
+                              </button>
+
+                              <button class="btn-action invite" title="Invite Alumni" 
+                                  onclick="openInviteModal('{{ event.event_id }}', '{{ event.event_name }}')">
+                                  <i class="fas fa-user-plus"></i>
+                              </button>
+                              <form method="POST" action="{% url 'delete_event' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="event_id" value="{{ event.event_id }}">
+                                <button type="submit" class="btn-action delete" title="Delete" 
+                                        onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>                            
+                          </td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td colspan="6" style="padding: 10px; text-align: center;">No upcoming events available.</td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
         </div>
 
-        <div class="table-container" style="margin-top: 20px;">
-          <table class="data-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f3f4f6; text-align: left;">
-                <th style="padding: 10px;">Event Name</th>
-                <th style="padding: 10px;">Date</th>
-                <th style="padding: 10px;">Location</th>
-                <th style="padding: 10px;">Description</th>
-                <th style="padding: 10px;">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for event in upcoming_events %}
-              <tr>
-                <td style="padding: 10px;">{{ event.event_name }}</td>
-                <td style="padding: 10px;">{{ event.event_date }}</td>
-                <td style="padding: 10px;">{{ event.location }}</td>
-                <td style="padding: 10px;">{{ event.description }}</td>
-                <td>
-                  <form method="POST" action="{% url 'delete_event' %}" style="display: inline;">
-                    {% csrf_token %}
-                    <input type="hidden" name="event_name" value="{{ event.event_name }}">
-                    <button type="submit" class="btn-action delete" title="Delete" onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone.');">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="5" style="padding: 10px; text-align: center;">No upcoming events available.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+<!-- Invite Alumni Modal -->
+<div id="inviteAlumniModal" class="modal">
+  <div class="modal-content" style="max-width: 600px;">
+    <button class="close" onclick="closeInviteModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+      <h3 id="inviteModalTitle">Invite Alumni to Event</h3>
+      <div class="search-box" style="margin-bottom: 15px;">
+          <input type="text" id="alumniSearch" placeholder="Search alumni..." style="width: 100%; padding: 8px;">
       </div>
+      <div class="alumni-list" style="max-height: 400px; overflow-y: auto;">
+          {% for alumni in alumni_data %}
+          <div class="alumni-item" style="padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center;">
+              <input type="checkbox" id="alumni_{{ alumni.alumni_id }}" value="{{ alumni.alumni_id }}" style="margin-right: 10px;">
+              <img src="{{ alumni.avatar.url }}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+              <div>
+                  <div style="font-weight: bold;">{{ alumni.alumni_name }}</div>
+                  <div style="font-size: 0.9em; color: #666;">{{ alumni.alumni_email }}</div>
+              </div>
+          </div>
+          {% endfor %}
+      </div>
+      <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+          <button class="btn-secondary" onclick="selectAllAlumni()">Select All</button>
+          <button class="btn-primary" onclick="sendInvitations()">Send Invitations</button>
+      </div>
+  </div>
+</div>
 
+
+        <div id="attendeesModal" class="modal">
+          <div class="modal-content">
+              <span class="close" onclick="closeAttendeesModal()">&times;</span>
+              <h2>Attendees for Event: <span id="eventName"></span></h2>
+              {% for invitation in invitations %}
+              <div style="border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9;">
+                <h3 style="margin: 0; color: #333;">Alumni: {{ invitation.alumni.alumni_name }}</h3>
+                <p>Status: <strong>{{ invitation.status }}</strong></p>
+                <p>Event: {{ invitation.event.event_name }}</p>
+                <p>Sent at: {{ invitation.sent_at }}</p>
+              </div>
+            {% empty %}
+              <p>No invitations found.</p>
+            {% endfor %}
+          </div>
+      </div>
+      
 
 
          <!-- Careers Section -->
@@ -630,78 +680,80 @@
           </div>
         </div>
        <!-- Posts Section -->
-      <div id="posts" class="content-section">
+       <div id="posts" class="content-section">
         <div class="section-header">
-          <h3 class="section-title">Latest Posts</h3>
-          <div class="section-actions">
-            <button class="btn-primary" onclick="showPostModal()">
-              <i class="fas fa-plus"></i> New Post
-          </button>
-          </div>
+            <h3 class="section-title">Latest Posts</h3>
+            <div class="section-actions">
+                <button class="btn-primary" onclick="showPostModal()">
+                    <i class="fas fa-plus"></i> New Post
+                </button>
+            </div>
         </div>
         
         <div class="posts-scroll-container">
-          <div class="posts-grid">
-              {% for post in posts %}
-              <div class="post-card">
-                  <div class="post-author">
-                      <img src="{{ post.author.avatar.url }}" alt="User" class="post-avatar">
-                      <div class="author-info">
-                          <h4>{{ post.author.alumni_name }}</h4>
-                          <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
-                      </div>
-                      <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
-                  </div>
-                  
-                  <div class="post-content">
-                      <p class="post-text">{{ post.content }}</p>
-                      
-                      {% if post.image %}
-                          <img src="{{ post.image.url }}" class="post-image" alt="Post image">
-                      {% endif %}
-      
-                      <div class="post-tags">
-                          <span class="post-tag">#Alumni</span>
-                          <span class="post-tag">#Post</span>
-                      </div>
-      
-                      <div class="emoji-reactions">
-                          <button class="emoji-button">👍</button>
-                          <button class="emoji-button">❤️</button>
-                          <button class="emoji-button">🎉</button>
-                      </div>
-                  </div>
-                  
-                  <div class="post-actions">
-                      <div class="action-group">
-                          <button class="btn-action">
-                              <i class="fas fa-thumbs-up"></i>
-                              Like
-                          </button>
-                          <button class="btn-action">
-                              <i class="fas fa-comment-alt"></i>
-                              Comment
-                          </button>
-                          <button class="btn-action">
-                              <i class="fas fa-share"></i>
-                              Share
-                          </button>
-                      </div>
-                      <button class="btn-action">
-                          <i class="fas fa-bookmark"></i>
-                      </button>
-                  </div>
-                  
-                  <div class="comment-preview">
-                      <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
-                      <input type="text" class="comment-input" placeholder="Write a comment...">
-                  </div>
-              </div>
-              {% empty %}
-                  <p>No posts to show.</p>
-              {% endfor %}
-          </div>
-      </div>
+            <div class="posts-grid">
+                {% for post in posts %}
+                <div class="post-card">
+                    <div class="post-author">
+                        <img src="{{ post.author.avatar.url }}" alt="User" class="post-avatar">
+                        <div class="author-info">
+                            <h4>{{ post.author.alumni_name }}</h4>
+                            <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
+                        </div>
+                        <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+                    
+                    <div class="post-content">
+                        <p class="post-text">{{ post.content }}</p>
+                        
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" class="post-image" alt="Post image">
+                        {% endif %}
+    
+                        <div class="post-tags">
+                            <span class="post-tag">#Alumni</span>
+                            <span class="post-tag">#Post</span>
+                        </div>
+    
+                        <div class="emoji-reactions">
+                            <button class="emoji-button">👍</button>
+                            <button class="emoji-button">❤️</button>
+                            <button class="emoji-button">🎉</button>
+                        </div>
+                    </div>
+                    
+                    <div class="post-actions">
+                        <div class="action-group">
+                            <button class="btn-action">
+                                <i class="fas fa-thumbs-up"></i>
+                                Like
+                            </button>
+                            <button class="btn-action">
+                                <i class="fas fa-comment-alt"></i>
+                                Comment
+                            </button>
+                            <button class="btn-action">
+                                <i class="fas fa-share"></i>
+                                Share
+                            </button>
+                        </div>
+                        <button class="btn-action">
+                            <i class="fas fa-bookmark"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="comment-preview">
+                        <img src="{% static 'images/user2.jpg' %}" class="post-avatar" alt="User">
+                        <input type="text" class="comment-input" placeholder="Write a comment...">
+                    </div>
+                </div>
+                {% empty %}
+                    <p>No posts to show.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
 
        <!-- Donation Section -->
         <div id="donation" class="content-section">
@@ -1029,7 +1081,7 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Create New Post</h2>
-        <form id="postForm" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+        <form id="postForm" method="POST" action="{% url 'create_post_admin' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-scroll-container">
                 <div class="form-group">
@@ -1049,12 +1101,193 @@
 </div>
   
 <style>
+  /* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
+
+/* Button styles */
+.btn-action {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px;
+    margin: 0 2px;
+    font-size: 16px;
+}
+
+.btn-action.invite {
+    color: #4CAF50;
+}
+
+.btn-action.delete {
+    color: #f44336;
+}
+
+.btn-action:hover {
+    opacity: 0.8;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
   .error-message {
       color: red;
       font-size: 0.8em;
       display: block;
   }
   </style>
+  <script>
+    function closeInviteModal() {
+      console.log('Close Invite');
+      document.getElementById('inviteAlumniModal').style.display = 'none';
+    }
+    </script>
+
+  
+
+  {% comment %} alumni invitation model {% endcomment %}
+  <script>
+
+    function openAttendeesModal(eventId) {
+      // Open the modal
+      document.getElementById("attendeesModal").style.display = "block";
+  }
+  
+  
+  function closeAttendeesModal() {
+      // Close the modal
+      document.getElementById("attendeesModal").style.display = "none";
+  }
+  
+
+  let currentEventId = null;
+
+  function openInviteModal(eventId, eventName) {
+      currentEventId = eventId;
+      document.getElementById('inviteModalTitle').textContent = `Invite Alumni to ${eventName}`;
+      document.getElementById('inviteAlumniModal').style.display = 'block';
+  
+      // Reset checkboxes and search
+      document.getElementById('alumniSearch').value = '';
+      filterAlumni();
+      document.querySelectorAll('#inviteAlumniModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+  }
+  
+  function closeInviteModal() {
+    console.log('Close Invite');
+      document.getElementById('inviteAlumniModal').style.display = 'none';
+  }
+    
+    function filterAlumni() {
+        const searchTerm = document.getElementById('alumniSearch').value.toLowerCase();
+        const alumniItems = document.querySelectorAll('.alumni-item');
+        
+        alumniItems.forEach(item => {
+            const name = item.querySelector('div > div:first-child').textContent.toLowerCase();
+            const email = item.querySelector('div > div:last-child').textContent.toLowerCase();
+            item.style.display = (name.includes(searchTerm) || email.includes(searchTerm)) ? 'flex' : 'none';
+        });
+    }
+    
+    function selectAllAlumni() {
+        const checkboxes = document.querySelectorAll('#inviteAlumniModal input[type="checkbox"]');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+        });
+    }
+    
+    function sendInvitations() {
+        const selectedAlumni = Array.from(
+            document.querySelectorAll('#inviteAlumniModal input[type="checkbox"]:checked')
+        ).map(cb => cb.value);
+        
+        if (selectedAlumni.length === 0) {
+            alert('Please select at least one alumni to invite.');
+            return;
+        }
+        
+        fetch("{% url 'send_event_invitations' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                event_id: currentEventId,
+                alumni_ids: selectedAlumni
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Invitations sent successfully!');
+                closeInviteModal();
+                location.reload(); // Refresh to show updated counts
+            } else {
+                alert('Error sending invitations: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while sending invitations.');
+        });
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('inviteAlumniModal')) {
+            closeInviteModal();
+        }
+    }
+    
+    // Initialize search functionality
+    document.getElementById('alumniSearch').addEventListener('input', filterAlumni);
+    </script>
 
   {% comment %} posts {% endcomment %}
   <script>

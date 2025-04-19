@@ -30,6 +30,9 @@
             <div class="header-actions">
                 <a href="{% url 'login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Sign In</a>
             </div>
+            <div class="header-actions">
+                <a href="{% url 'student_login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Student Sign In</a>
+            </div>
         </div>
     </header>
 
@@ -37,13 +40,13 @@
     <section id="home" class="hero">
         <div class="swiper hero-swiper">
             <div class="swiper-wrapper">
-                <div class="swiper-slide" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1562774053-701939374585?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y29sbGVnZXxlbnwwfHwwfHx8MA%3D%3D')">
+                <div class="swiper-slide" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/slide1.jpg" %}')">
                     <div class="slide-content">
                         <h2 class="slide-title">Reconnect. Network. Thrive.</h2>
                         <p class="slide-text">Join our global community of successful alumni</p>
                     </div>
                 </div>
-                <div class="swiper-slide" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')">
+                <div class="swiper-slide" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/slide2.jpg" %}')">
                     <div class="slide-content">
                         <h2 class="slide-title">Career Opportunities</h2>
                         <p class="slide-text">Explore exclusive job offers and mentorship programs</p>
@@ -233,11 +236,13 @@
         </div>
         <div class="contact-container">
             <div class="contact-info">
-                <div class="info-card">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h3>Visit Us</h3>
-                    <p>Vishwakarma Institute of Technology<br>Pune, Maharashtra 411037</p>
-                </div>
+                <a href="https://maps.app.goo.gl/J9ebPyZMt1rZPstaA" target="_blank" style="text-decoration: none; color: inherit;">
+                    <div class="info-card" style="cursor: pointer;">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Visit Us</h3>
+                        <p>Vishwakarma Institute of Technology<br>Pune, Maharashtra 411037</p>
+                    </div>
+                </a>                
                 <div class="info-card">
                     <i class="fas fa-phone"></i>
                     <h3>Call Us</h3>
