@@ -671,9 +671,9 @@
                                 {% for post in posts %}
                                 <div class="post-card">
                                     <div class="post-author">
-                                        <img src="{{ post.author.avatar.url }}" alt="User" class="post-avatar">
+                                        <img src="{{ post.avatar.url }}" alt="User" class="post-avatar">
                                         <div class="author-info">
-                                            <h4>{{ post.author.alumni_name }}</h4>
+                                            <h4>{{ post.author_name }}</h4>
                                             <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
                                         </div>
                                         <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
@@ -685,17 +685,7 @@
                                         {% if post.image %}
                                             <img src="{{ post.image.url }}" class="post-image" alt="Post image">
                                         {% endif %}
-                        
-                                        <div class="post-tags">
-                                            <span class="post-tag">#Alumni</span>
-                                            <span class="post-tag">#Post</span>
-                                        </div>
-                        
-                                        <div class="emoji-reactions">
-                                            <button class="emoji-button">👍</button>
-                                            <button class="emoji-button">❤️</button>
-                                            <button class="emoji-button">🎉</button>
-                                        </div>
+                    
                                     </div>
                                     
                                     <div class="post-actions">

@@ -178,13 +178,16 @@ class Job(models.Model):
 # post model
 class Post(models.Model):
     _id = djongo_models.ObjectIdField(primary_key=True)
-    author = models.ForeignKey(Alumni, on_delete=models.CASCADE)
+    author_id = models.CharField(max_length=255)  # author_id as a string (e.g., username or custom ID)
+    avatar = models.ImageField(upload_to='static/avatar/', blank=True, null=True)
+    author_name = models.CharField(max_length=255)  # Store the author's name
+    author_email = models.EmailField(max_length=255)  # Store the author's email
     content = models.TextField()
     image = models.ImageField(upload_to='static/posts/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.author.alumni_name} - {self.created_at.strftime('%Y-%m-%d')}"
+        return f"{self.author_name} - {self.created_at.strftime('%Y-%m-%d')}"
     
     def post_id(self):
         return str(self._id)

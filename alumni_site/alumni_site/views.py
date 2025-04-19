@@ -36,6 +36,7 @@ def login(request):
             user = Login.objects.get(email=email)
             if check_password(password, user.password) or password == user.password:
                 messages.success(request, "Admin login successful!")
+                request.session["admin_email"] = email
                 return redirect("admindash")
             else:
                 messages.error(request, "Invalid password")
@@ -55,6 +56,8 @@ def login(request):
 
                     # print alumni logged in
                     print("Current User = ",request.session.get('alumni_id'))
+                    print("Current User = ",request.session.get('alumni_email'))
+                    print("Current User = ",request.session.get('alumni_name'))
 
                     messages.success(request, "Alumni login successful!")
                     return redirect("alumnidash")
@@ -71,13 +74,15 @@ def student_login(request):
 def studentdash(request):
     events = Event.objects.all().order_by('event_date')
     upcoming_events = events.filter(event_date__gte=datetime.now().date())[:5]
-    posts = Post.objects.select_related('author').order_by('-created_at')
+    
+    # No need for select_related since Post no longer uses ForeignKey
+    posts = Post.objects.all().order_by('-created_at')
 
     context = {
-        'upcoming_events':upcoming_events,
-        'posts':posts
+        'upcoming_events': upcoming_events,
+        'posts': posts
     }
-    return render(request,'studentdash.html',context)
+    return render(request, 'studentdash.html', context)
 
 from django.shortcuts import render
 from django.db.models import Q, Sum
@@ -161,7 +166,7 @@ def admindash(request):
         'student_logins':StudentLogin.objects.all(),
         'invitations':invitations,
         'upcoming_events':upcoming_events,
-        'posts':Post.objects.select_related('author').order_by('-created_at'),
+        'posts':Post.objects.order_by('-created_at'),
         'donations':donations, 
         'alumni_data': alumni_queryset,
         'search_query': search_query,
@@ -188,10 +193,11 @@ def admindash(request):
 
 def alumnidash(request):
 
-    posts = Post.objects.select_related('author').order_by('-created_at')
-    account_holder = Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first()
+    posts = Post.objects.order_by('-created_at')
+    email = request.session.get('alumni_email')
+    account_holder = Alumni.objects.filter(alumni_email=email).first()
     print("Account Holder = ",account_holder)
-    self_posts = Post.objects.filter(author=account_holder).order_by('-created_at')
+    self_posts = Post.objects.filter(author_email=email).order_by('-created_at')
     print(self_posts)
 
     print("-------------------------------------------------")
@@ -211,8 +217,8 @@ def alumnidash(request):
         cleaned_path = post_path.replace("static/", "", 1)
         print(cleaned_path)
 
-        print("Author ID     =", post.author._id)  # If you want to print alumni ID
-        print("Author Name   =", post.author.alumni_name)
+        print("Author ID     =", post.author_name)  # If you want to print alumni ID
+        print("Author Name   =", post.author_email)
         print("Content       =", post.content)
         print("Image URL     =", post.image.url if post.image else "No Image")
         print("Image     =", post_path)
@@ -801,37 +807,6 @@ def add_job(request):
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
 
-
-
-@require_POST
-def add_post(request):
-    try:
-        title = request.POST.get('title')
-        content = request.POST.get('content')
-        category = request.POST.get('category')
-        status = request.POST.get('status')
-
-        # Save post to the database
-        Post.objects.create(
-            title=title,
-            content=content,
-            category=category,
-            status=status,
-            author=Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first(),
-            created_date=datetime.now()
-        )
-
-        return JsonResponse({
-            'success': True,
-            'message': 'Post created successfully!'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': f"Post creation failed: {str(e)}"
-        }, status=500)
-
-
 @require_POST
 def delete_job(request):
     try:
@@ -1079,26 +1054,33 @@ def create_post_admin(request):
     content = request.POST.get('content')
     image = request.FILES.get('image')
 
-    print(content)
+    print("Content:", content)
 
-    # Get the current logged-in user's Alumni object
     try:
-        alumni = Alumni.objects.all().first()
-        print(alumni)
-    except Alumni.DoesNotExist:
-        # Handle gracefully if Alumni is not found
-        return redirect('alumnidash')  # or show error message
+        # Assuming Login is the admin model and admin_email is stored in session
+        user = Login.objects.filter(email=request.session.get('admin_email')).first()
+        if not user:
+            raise Exception("Admin not found")
 
-    # Create and save the post
+        print("Admin User:", user)
+
+    except Exception as e:
+        print("Error:", str(e))
+        return redirect('admindash')  # or display a proper error message
+
+    # Create and save the post with admin (Login model) info
     post = Post.objects.create(
-        author=alumni,
+        author_id=str(user._id),  # assuming _id is ObjectIdField
+        author_name=user.name,
+        author_email=user.email,
         content=content,
         image=image
     )
 
-    print("Post Uploaded Successfully : ",post)
+    print("Post Uploaded Successfully:", post)
 
     return redirect('admindash')
+
 
 # Admin Management Functions
 @require_POST
@@ -1148,7 +1130,6 @@ def get_event_attendees(request, event_id):
         return JsonResponse({'error': 'Event not found'}, status=404)
 
 
-    
 @require_POST
 def create_post(request):
     content = request.POST.get('content')
@@ -1156,21 +1137,26 @@ def create_post(request):
 
     print(content)
 
-    # Get the current logged-in user's Alumni object
+    # Get the current logged-in user's Alumni object (assuming email is in session)
     try:
-        alumni = Alumni.objects.all().first()
+        alumni = Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first()
+        if not alumni:
+            raise Alumni.DoesNotExist
         print(alumni)
     except Alumni.DoesNotExist:
         # Handle gracefully if Alumni is not found
-        return redirect('alumnidash')  # or show error message
+        return redirect('alumnidash')  # or show an error message
 
-    # Create and save the post
+    # Create and save the post with author details as strings
     post = Post.objects.create(
-        author=alumni,
+        author_id=str(alumni.alumni_id()),  # Assuming alumni_id is a string, you can use alumni_email or username too
+        author_name=alumni.alumni_name,
+        avatar=alumni.avatar,
+        author_email=alumni.alumni_email,
         content=content,
         image=image
     )
 
-    print("Post Uploaded Successfully : ",post)
+    print("Post Uploaded Successfully: ", post)
 
     return redirect('alumnidash')

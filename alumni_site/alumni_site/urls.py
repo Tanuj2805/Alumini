@@ -46,7 +46,6 @@ urlpatterns = [
     path('get_job_details/', views.get_job_details, name='get_job_details'),
     
     # Post Management URLs
-    path('add_post/', views.add_post, name='add_post'),
     path('edit_post/', views.edit_post, name='edit_post'),
     path('delete_post/', views.delete_post, name='delete_post'),
     path('get_post_details/', views.get_post_details, name='get_post_details'),
