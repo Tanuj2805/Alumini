@@ -4,3 +4,4 @@ setuptools
 pytz
 pymongo==3.12.3
 Pillow
+reportlab

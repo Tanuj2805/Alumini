@@ -692,7 +692,11 @@
                                 {% for post in posts %}
                                 <div class="post-card">
                                     <div class="post-author">
+                                        {% if post.avatar %}
                                         <img src="{{ post.avatar.url }}" alt="User" class="post-avatar">
+                                        {% else %}
+                                        <img src="{% static 'images/avatar.png' %}" alt="User" class="post-avatar">
+                                        {% endif %}
                                         <div class="author-info">
                                             <h4>{{ post.author_name }}</h4>
                                             <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
@@ -710,23 +714,17 @@
                                     </div>
                                     
                                     <div class="post-actions">
-                                        <div class="action-group">
-                                            <button class="btn-action">
-                                                <i class="fas fa-thumbs-up"></i>
-                                                Like
-                                            </button>
-                                            <button class="btn-action">
-                                                <i class="fas fa-comment-alt"></i>
-                                                Comment
-                                            </button>
-                                            <button class="btn-action">
-                                                <i class="fas fa-share"></i>
-                                                Share
-                                            </button>
-                                        </div>
-                                        <button class="btn-action">
-                                            <i class="fas fa-bookmark"></i>
+                                    <div class="action-group">
+                                        <button class="btn-action like-btn">
+                                        <i class="fas fa-thumbs-up"></i> Like
                                         </button>
+                                        <button class="btn-action">
+                                        <i class="fas fa-comment-alt"></i> Comment
+                                        </button>
+                                        <button class="btn-action">
+                                        <i class="fas fa-share"></i> Share
+                                        </button>
+                                    </div>
                                     </div>
                                     
                                     <div class="comment-preview">
@@ -1015,39 +1013,49 @@
                     <!-- Donation Modal -->
                     <div id="paymentModal" class="modal">
                         <div class="modal-content">
-                            <span class="close" onclick="closeDonationModal()">&times;</span>
-                            <h2>Make a Donation</h2>
-                            <form id="donationForm" method="POST" action="{% url 'fake_payment' %}">
-                                {% csrf_token %}
-                                <div class="form-scroll-container">
-                                    <div class="form-group">
-                                        <label>Card Number <span class="required">*</span></label>
-                                        <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required />
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Expiry <span class="required">*</span></label>
-                                        <input type="text" name="expiry" placeholder="MM/YY" required />
-                                    </div>
-                                    <div class="form-group">
-                                        <label>CVV <span class="required">*</span></label>
-                                        <input type="text" name="cvv" placeholder="123" required />
-                                    </div>
-                                    <div class="form-group">
-                                        <label><i class="fas fa-notes-medical"></i> <span class="required">*</span></label>
-                                        <input type="text" name="notes" placeholder="Type Notes Here" required />
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Amount <span class="required">*</span></label>
-                                        <input type="number" name="amount" placeholder="500" required />
-                                    </div>
-                                    <div class="form-actions">
-                                        <button type="submit" class="btn btn-primary">Donate ₹</button>
-                                    </div>
-                                </div>
-                            </form>
+                          <span class="close" onclick="closeDonationModal()">&times;</span>
+                          <h2>Make a Donation</h2>
+                          <form id="donationForm" method="POST" action="{% url 'fake_payment' %}">
+                            {% csrf_token %}
+                            <div class="form-scroll-container">
+                      
+                              <div class="form-group">
+                                <label>Payment Method <span class="required">*</span></label>
+                                <select name="payment_method" required onchange="togglePaymentFields(this.value)">
+                                  <option value="">Select</option>
+                                  <option value="UPI">UPI</option>
+                                  <option value="Wallet">Wallet</option>
+                                  <option value="Netbanking">Netbanking</option>
+                                </select>
+                              </div>
+                      
+                              <div class="form-group" id="upiField" style="display:none;">
+                                <label>UPI ID <span class="required">*</span></label>
+                                <input type="text" name="upi_id" placeholder="example@upi" />
+                              </div>
+                      
+                              <div class="form-group" id="walletField" style="display:none;">
+                                <label>Wallet Number <span class="required">*</span></label>
+                                <input type="text" name="wallet_number" placeholder="9999999999" />
+                              </div>
+                      
+                              <div class="form-group">
+                                <label><i class="fas fa-notes-medical"></i> Notes <span class="required">*</span></label>
+                                <input type="text" name="notes" placeholder="Type Notes Here" required />
+                              </div>
+                      
+                              <div class="form-group">
+                                <label>Amount <span class="required">*</span></label>
+                                <input type="number" name="amount" placeholder="500" required />
+                              </div>
+                      
+                              <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Simulate Donation</button>
+                              </div>
+                            </div>
+                          </form>
                         </div>
-                    </div>
-                </div>
+                      </div>                      
                 
                 <!-- Messages Section -->
                 <div class="content-section" id="messages-section">
@@ -1145,6 +1153,57 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.getElementById('donationForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission to simulate the payment
+    
+            const form = this;
+          
+            // Show alert for processing
+            alert("Processing your donation...");
+          
+            setTimeout(() => {
+                alert("🎉 Donation successful! Thank you.");
+    
+                // Optionally close the modal
+                closeDonationModal();
+          
+                // Now submit the form to the fake_payment view to save data and generate the receipt
+                form.action = "{% url 'fake_payment' %}";  // Make sure this is the correct URL
+                form.submit();  // Proceed with the form submission to the actual endpoint
+            }, 1000); // Simulate delay of 1 second
+        });
+    </script>
+      
+      <script>
+        function togglePaymentFields(method) {
+          document.getElementById('upiField').style.display = (method === 'UPI') ? 'block' : 'none';
+          document.getElementById('walletField').style.display = (method === 'Wallet') ? 'block' : 'none';
+        }
+      </script>
+            
+
+    <script>
+        // Keep track of liked posts by ID
+        const likedPosts = new Set();
+      
+        document.querySelectorAll('.like-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            const postCard = this.closest('.post-card');
+            const postId = postCard.getAttribute('data-post-id');
+      
+            if (likedPosts.has(postId)) {
+              alert("You've already liked this post.");
+              return;
+            }
+      
+            likedPosts.add(postId);
+            this.classList.add('liked');
+            this.innerHTML = '<i class="fas fa-thumbs-up"></i> Liked';
+          });
+        });
+      </script>
 
     <script>
         

@@ -11,6 +11,10 @@ from decimal import Decimal
 from bson.decimal128 import Decimal128
 from bson import ObjectId
 import json
+from django.core import serializers
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from io import BytesIO
 
 from django.views.decorators.http import require_POST, require_http_methods
 from django.core.exceptions import ValidationError
@@ -69,7 +73,22 @@ def login(request):
     return render(request, "login.html")
 
 def student_login(request):
-    return render(request,'student_login.html')
+    if request.method == 'POST':
+        prn = request.POST.get('prn')
+        password = request.POST.get('password')
+        
+        try:
+            student = StudentLogin.objects.get(username=prn)
+            if student.password == password:
+                # Login successful - redirect to dashboard or homepage
+                messages.success(request, f"Welcome {student.name}!")
+                return redirect('studentdash')  # change as needed
+            else:
+                messages.error(request, "Invalid password.")
+        except StudentLogin.DoesNotExist:
+            messages.error(request, "Student with this PRN does not exist.")
+    
+    return render(request, 'student_login.html')
 
 def studentdash(request):
     events = Event.objects.all().order_by('event_date')
@@ -117,11 +136,13 @@ def admindash(request):
     events = Event.objects.all().order_by('event_date')
     print(events)
     upcoming_events = events.filter(event_date__gte=datetime.now().date())[:5]
-    invitations = EventInvitation.objects.all()
+    invitations = EventInvitation.objects.select_related('event', 'alumni').all()
     
     donations = Donation.objects.all()
     total_donations = Decimal('0.0')
     recent_donations = []
+    already_invited_ids = EventInvitation.objects.filter().values_list('alumni_id', flat=True)
+
 
     # Loop through all donations
     for d in sorted(donations, key=lambda x: x.date, reverse=True):
@@ -163,6 +184,8 @@ def admindash(request):
     print("Total Job Postings:",Job.objects.count())
 
     context = {
+        'already_invited_ids': list(already_invited_ids),
+        'upcoming_events': Event.objects.filter(event_date__gte=timezone.now()),
         'student_logins':StudentLogin.objects.all(),
         'invitations':invitations,
         'upcoming_events':upcoming_events,
@@ -916,27 +939,63 @@ def get_post_details(request):
         }, status=500)
 
 # Donation Management Functions
+@require_POST
 def fake_payment(request):
     if request.method == 'POST':
-        card_number = request.POST.get('card_number')
-        expiry = request.POST.get('expiry')
-        cvv = request.POST.get('cvv')
-        amount = request.POST.get('amount')
         payment_method = request.POST.get('payment_method')
+        amount = request.POST.get('amount')
         notes = request.POST.get('notes')
+        upi = request.POST.get('upi_id') or ''
+        wallet = request.POST.get('wallet_number') or ''
 
-        if card_number and expiry and cvv:
+        print("-------------------------------------")
+        print("FAKE PAYMENT DONE...")
+        print("-------------------------------------")
+
+        if payment_method and amount:
+            # Fetch the donor from the session (make sure the alumni email is set in the session)
+            donor = Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first()
+
+            # Create the donation record in the database
             donation = Donation.objects.create(
-                donor=Alumni.objects.filter(alumni_email=request.session.get('alumni_email')).first(),
+                donor=donor,
                 amount=amount,
                 date=timezone.now().date(),
                 payment_method=payment_method,
                 notes=notes,
             )
-            print("Donation Success = ",donation)
-            return HttpResponse(f"<h2>Thank you, {request.session.get('alumni_name')}! Payment of ₹{amount} was successful.</h2>")
-        else:
-            return HttpResponse("<h2>Payment failed. Please fill in all required fields.</h2>")
+
+            # Generate the PDF receipt for the donation
+            buffer = BytesIO()
+            p = canvas.Canvas(buffer, pagesize=A4)
+            p.setFont("Helvetica", 14)
+
+            p.drawString(100, 800, "🎓 VITGrad - Donation Receipt")
+            p.line(100, 795, 500, 795)
+
+            p.drawString(100, 760, f"Donor Name: {donor.alumni_name}")
+            p.drawString(100, 740, f"Email: {donor.alumni_email}")
+            p.drawString(100, 720, f"Date: {timezone.now().strftime('%d-%m-%Y')}")
+            p.drawString(100, 700, f"Payment Method: {payment_method}")
+            if upi:
+                p.drawString(100, 680, f"UPI ID: {upi}")
+            if wallet:
+                p.drawString(100, 660, f"Wallet Number: {wallet}")
+            p.drawString(100, 640, f"Amount Donated: ₹{amount}")
+            p.drawString(100, 620, f"Notes: {notes}")
+            p.drawString(100, 580, "✅ Thank you for your generous contribution!")
+            p.drawString(100, 560, "This is a system-generated receipt for demonstration purposes.")
+
+            p.showPage()
+            p.save()
+
+            buffer.seek(0)
+            response = HttpResponse(buffer, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=VITGrad_Receipt_{donor.alumni_name}.pdf'
+            return response
+
+        # If the required fields are missing
+        return HttpResponse("<script>alert('Payment failed. Please check required fields.'); window.history.back();</script>")
 
 
 @require_POST

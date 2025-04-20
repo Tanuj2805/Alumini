@@ -334,51 +334,51 @@
           </div>
         </div>
 
-        <!-- Posts Section -->
         <div id="posts" class="content-section">
           <div class="section-header">
             <h3 class="section-title">Latest Posts</h3>
           </div>
-          
+        
           <div class="posts-scroll-container">
             <div class="posts-grid">
               {% for post in posts %}
-              <div class="post-card">
+              <div class="post-card" data-post-id="{{ post.id }}">
                 <div class="post-author">
-                  <img src="{{ post.author.avatar.url }}" alt="User" class="post-avatar">
+                  {% if post.avatar %}
+                    <img src="{{ post.avatar.url }}" alt="User" class="post-avatar">
+                  {% else %}
+                    <img src="{% static 'images/avatar.png' %}" alt="User" class="post-avatar">
+                  {% endif %}
                   <div class="author-info">
-                    <h4>{{ post.author.alumni_name }}</h4>
+                    <h4>{{ post.author_name }}</h4>
                     <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
                   </div>
                 </div>
-                
+        
                 <div class="post-content">
                   <p class="post-text">{{ post.content }}</p>
-                  
+        
                   {% if post.image %}
                     <img src="{{ post.image.url }}" class="post-image" alt="Post image">
                   {% endif %}
-
+        
                   <div class="post-tags">
                     {% for tag in post.tags.all %}
-                    <span class="post-tag">#{{ tag.name }}</span>
+                      <span class="post-tag">#{{ tag.name }}</span>
                     {% endfor %}
                   </div>
                 </div>
-                
+        
                 <div class="post-actions">
                   <div class="action-group">
-                    <button class="btn-action">
-                      <i class="fas fa-thumbs-up"></i>
-                      Like
+                    <button class="btn-action like-btn">
+                      <i class="fas fa-thumbs-up"></i> Like
                     </button>
                     <button class="btn-action">
-                      <i class="fas fa-comment-alt"></i>
-                      Comment
+                      <i class="fas fa-comment-alt"></i> Comment
                     </button>
                     <button class="btn-action">
-                      <i class="fas fa-share"></i>
-                      Share
+                      <i class="fas fa-share"></i> Share
                     </button>
                   </div>
                 </div>
@@ -389,6 +389,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </main>
   </div>
@@ -410,6 +411,27 @@
   <div class="loader-wrapper" style="display: none;">
     <div class="loader"></div>
   </div>
+
+  <script>
+    // Keep track of liked posts by ID
+    const likedPosts = new Set();
+  
+    document.querySelectorAll('.like-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        const postCard = this.closest('.post-card');
+        const postId = postCard.getAttribute('data-post-id');
+  
+        if (likedPosts.has(postId)) {
+          alert("You've already liked this post.");
+          return;
+        }
+  
+        likedPosts.add(postId);
+        this.classList.add('liked');
+        this.innerHTML = '<i class="fas fa-thumbs-up"></i> Liked';
+      });
+    });
+  </script>
 
   <script>
     // Navigation between sections
