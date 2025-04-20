@@ -786,7 +786,7 @@
                                 </div>
                                 <div class="detail-item">
                                     <i class="fas fa-briefcase"></i>
-                                    <span>Software Engineer at Tech Corp</span>
+                                    <span>{{ account_holder.jobpost }} ( {{ account_holder.company }} )</span>
                                 </div>
                             </div>
                         </div>
@@ -797,11 +797,6 @@
                 <div class="content-section" id="events-section">
                     <div class="section-header">
                         <h2>Events</h2>
-                        <div class="header-actions">
-                            <button class="btn-secondary" onclick="filterEvents('upcoming')">Upcoming</button>
-                            <button class="btn-secondary" onclick="filterEvents('past')">Past</button>
-                            <button class="btn-secondary" onclick="filterEvents('all')">All Events</button>
-                        </div>
                     </div>
 
                     <!-- Pending Invitations -->

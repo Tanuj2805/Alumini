@@ -27,6 +27,127 @@ from django.db.models import Sum, Count, Max
 def index(request):
     return render(request,"index.html")
 
+def sample(request):
+    posts = Post.objects.order_by('-created_at')
+    email = request.session.get('alumni_email')
+    account_holder = Alumni.objects.filter(alumni_email=email).first()
+    print("Account Holder = ",account_holder)
+    self_posts = Post.objects.filter(author_email=email).order_by('-created_at')
+    print(self_posts)
+
+    print("-------------------------------------------------")
+    # print("ID = ",account_holder._id)
+    print("Avatar = ",account_holder.avatar)
+    print("Avatar url = ",account_holder.avatar.url)
+    print("Address = ",account_holder.address)
+    print("Email = ",account_holder.alumni_email)
+    print("Address = ",account_holder.alumni_phone)
+
+    print("Type of Posts = ",type(posts))
+    print("-------------------------------------------------")
+
+    for post in posts:
+        print("Image URL     =", post.image.url if post.image else "No Image")
+        post_path = post.image.url 
+        cleaned_path = post_path.replace("static/", "", 1)
+        print(cleaned_path)
+
+        print("Author ID     =", post.author_name)  # If you want to print alumni ID
+        print("Author Name   =", post.author_email)
+        print("Content       =", post.content)
+        print("Image URL     =", post.image.url if post.image else "No Image")
+        print("Image     =", post_path)
+        print("Created At    =", post.created_at.strftime('%Y-%m-%d %H:%M:%S'))
+        print("-" * 40)
+    print("-------------------------------------------------")
+    
+    invitations = EventInvitation.objects.all()
+    today = timezone.now().date()    
+
+    # invitations for events
+    invitations = EventInvitation.objects.filter(
+    alumni_id=ObjectId(account_holder.alumni_id()),
+    status='pending').order_by('-sent_at')
+    
+    today = date.today()
+    # Upcoming accepted events
+    upcoming_events = EventInvitation.objects.filter(
+        alumni_id=ObjectId(account_holder.alumni_id()),
+        status='accepted',
+        event__event_date__gte=today
+    ).select_related('event').order_by('event__event_date')
+
+    print("--------------------------------------------")
+    print("Today = ",today)
+    print("Upcoming Events : ",upcoming_events)
+    print("--------------------------------------------")
+    
+    # Past events (both accepted and declined)
+    past_events = EventInvitation.objects.filter(
+        alumni_id=ObjectId(account_holder.alumni_id()),
+        event__event_date__lt=timezone.now().date()
+    ).exclude(status='pending').select_related('event').order_by('-event__event_date')
+    
+    print("-----------------------------------------")
+    print(invitations)
+
+
+    #donation info for profile cards
+    donations = Donation.objects.filter(donor=account_holder)
+    print(donations)
+
+    total_amount = Decimal('0.0')
+    total_times = donations.count()
+    latest_date = None
+
+    for d in donations:
+        amt = d.amount
+        if isinstance(amt, Decimal128):
+            amt = amt.to_decimal()
+        total_amount += amt
+        if not latest_date or d.date > latest_date:
+            latest_date = d.date
+
+    donation_stats = {
+        'total_amount': total_amount,
+        'total_times': total_times,
+        'latest_date': latest_date
+    }
+
+    # Get latest donation details (if needed)
+    latest = Donation.objects.filter(donor_id=account_holder._id).order_by('-date').first()
+
+    # Store everything in one dictionary
+    donation_data = {
+        'total_donated': donation_stats['total_amount'] or 0,
+        'donation_count': donation_stats['total_times'],
+        'latest_donation': {
+            'amount': latest.amount if latest else 0,
+            'date': latest.date if latest else None,
+            'method': latest.payment_method if latest else None,
+            'notes': latest.notes if latest else ""
+        }
+    }
+
+    print("-------------------------------------------------")
+    print("Donation Data = ",donation_data)
+    print("-------------------------------------------------")
+
+    context = {
+        'past_events':past_events,
+        'upcoming_events':upcoming_events,
+        'invitations':invitations,
+        'donation_data':donation_data,
+        'account_holder':account_holder,
+        'posts':posts,
+        'self_posts':self_posts
+    }
+
+    print(context)
+
+    return render(request,"sample.html",context)
+
+
 def login(request):
     if request.method == "POST":
         email = request.POST.get("username")
