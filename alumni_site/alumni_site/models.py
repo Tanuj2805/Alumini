@@ -38,6 +38,8 @@ class Alumni(models.Model):
     graduation_year = models.IntegerField()
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    company = models.CharField(max_length=255)
+    jobpost = models.CharField(max_length=255)
 
     def __str__(self):
         return self.alumni_name

@@ -256,17 +256,8 @@ def alumnidash(request):
     invitations = EventInvitation.objects.filter(
     alumni_id=ObjectId(account_holder.alumni_id()),
     status='pending').order_by('-sent_at')
-
-    upcoming_events = EventInvitation.objects.filter()
-    print("--------------------------------------------")
-    print("Upcoming Events : ",upcoming_events)
-    print("--------------------------------------------")
-
-    upcoming_events = EventInvitation.objects.filter(alumni_id=ObjectId(account_holder.alumni_id()))
-    print("--------------------------------------------")
-    print("Upcoming Events : ",upcoming_events)
-    print("--------------------------------------------")
     
+    today = date.today()
     # Upcoming accepted events
     upcoming_events = EventInvitation.objects.filter(
         alumni_id=ObjectId(account_holder.alumni_id()),
@@ -275,6 +266,7 @@ def alumnidash(request):
     ).select_related('event').order_by('event__event_date')
 
     print("--------------------------------------------")
+    print("Today = ",today)
     print("Upcoming Events : ",upcoming_events)
     print("--------------------------------------------")
     
@@ -490,6 +482,8 @@ def update_alumni_profile(request):
         alumni.alumni_name = request.POST.get('alumni_name')
         alumni.alumni_phone = request.POST.get('alumni_phone')
         alumni.address = request.POST.get('address')
+        alumni.company = request.POST.get('alumni_company')
+        alumni.jobpost = request.POST.get('alumni_jobpost')
 
         print("After:",alumni.alumni_name)
         print("-----------------------------------------------")
