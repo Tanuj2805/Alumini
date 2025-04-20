@@ -256,6 +256,16 @@ def alumnidash(request):
     invitations = EventInvitation.objects.filter(
     alumni_id=ObjectId(account_holder.alumni_id()),
     status='pending').order_by('-sent_at')
+
+    upcoming_events = EventInvitation.objects.filter()
+    print("--------------------------------------------")
+    print("Upcoming Events : ",upcoming_events)
+    print("--------------------------------------------")
+
+    upcoming_events = EventInvitation.objects.filter(alumni_id=ObjectId(account_holder.alumni_id()))
+    print("--------------------------------------------")
+    print("Upcoming Events : ",upcoming_events)
+    print("--------------------------------------------")
     
     # Upcoming accepted events
     upcoming_events = EventInvitation.objects.filter(
@@ -263,6 +273,10 @@ def alumnidash(request):
         status='accepted',
         event__event_date__gte=today
     ).select_related('event').order_by('event__event_date')
+
+    print("--------------------------------------------")
+    print("Upcoming Events : ",upcoming_events)
+    print("--------------------------------------------")
     
     # Past events (both accepted and declined)
     past_events = EventInvitation.objects.filter(

@@ -560,7 +560,12 @@
         {% else %}
           <div class="alumni-item" style="padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center;">
               <input type="checkbox" name="alumni_ids" value="{{ alumni.alumni_id }}" style="margin-right: 10px;">
+              
+              {% if alumni.avatar %}
               <img src="{{ alumni.avatar.url }}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+              {% else %}
+                <img src="{% static 'images/avatar.png' %}" alt="User" class="post-avatar">
+              {% endif %}
               <div>
                   <div style="font-weight: bold;">{{ alumni.alumni_name }}</div>
                   <div style="font-size: 0.9em; color: #666;">{{ alumni.alumni_email }}</div>
@@ -720,188 +725,196 @@
         
         <div class="posts-scroll-container">
             <div class="posts-grid">
-                {% for post in posts %}
-                <div class="post-card">
-                    <div class="post-author">
-                        {% if post.avatar %}
-                          <img src="{{ post.avatar.url }}" alt="User" class="post-avatar">
-                        {% else %}
-                          <img src="{% static 'images/avatar.png' %}" alt="User" class="post-avatar">
-                        {% endif %}
-                        <div class="author-info">
-                            <h4>{{ post.author_name }}</h4>
-                            <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
-                        </div>
-                        <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
-                    </div>
-                    
-                    <div class="post-content">
-                        <p class="post-text">{{ post.content }}</p>
-                        
-                        {% if post.image %}
-                            <img src="{{ post.image.url }}" class="post-image" alt="Post image">
-                        {% endif %}
-    
-                        <div class="post-tags">
-                            <span class="post-tag">#Alumni</span>
-                            <span class="post-tag">#Post</span>
-                        </div>
-                    </div>
-                    
-                    <div class="post-actions">
-                    <div class="action-group">
-                      <button class="btn-action like-btn">
-                        <i class="fas fa-thumbs-up"></i> Like
-                      </button>
-                      <button class="btn-action">
-                        <i class="fas fa-comment-alt"></i> Comment
-                      </button>
-                      <button class="btn-action">
-                        <i class="fas fa-share"></i> Share
-                      </button>
-                    </div>
+              {% for post in posts %}
+              <div class="post-card" data-post-id="{{ post.post_id }}">
+                <div class="post-author">
+                  {% if post.avatar %}
+                    <img src="{{ post.avatar.url }}" alt="User" class="post-avatar">
+                  {% else %}
+                    <img src="{% static 'images/avatar.png' %}" alt="User" class="post-avatar">
+                  {% endif %}
+                  <div class="author-info">
+                    <h4>{{ post.author_name }}</h4>
+                    <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
+                  </div>
+                  <button class="btn-action"><i class="fas fa-ellipsis-h"></i></button>
+                </div>
+                
+                <div class="post-content">
+                  <p class="post-text">{{ post.content }}</p>
+                  
+                  {% if post.image %}
+                    <img src="{{ post.image.url }}" class="post-image" alt="Post image">
+                  {% endif %}
+
+                  <div class="post-tags">
+                    <span class="post-tag">#Alumni</span>
+                    <span class="post-tag">#Post</span>
                   </div>
                 </div>
-                {% empty %}
-                    <p>No posts to show.</p>
-                {% endfor %}
+
+                <div class="post-actions">
+                  <div class="action-group">
+                    <button class="btn-action like-btn">
+                      <i class="fas fa-thumbs-up"></i> Like
+                    </button>
+                    <button class="btn-action">
+                      <i class="fas fa-comment-alt"></i> Comment
+                    </button>
+                    <button class="btn-action share-btn" data-post-url="https://yourdomain.com/post/{{ post.post_id }}">
+                      <i class="fas fa-share"></i> Share
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Comment Section -->
+                <div class="post-comments">
+                  <div class="existing-comments" id="comments-{{ post.post_id }}">
+                    <!-- New comments will appear here -->
+                  </div>
+                  <div class="add-comment">
+                    <input type="text" class="comment-input" placeholder="Write a comment..." data-post-id="{{ post.post_id }}">
+                    <button class="btn-comment" data-post-id="{{ post.post_id }}">
+                      <i class="fas fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <p>No posts to show.</p>
+            {% endfor %}
+      
             </div>
         </div>
     </div>
     
 
-       <!-- Donation Section -->
-        <div id="donation" class="content-section">
-          <div class="donation-header">
-            <h3 class="section-title">Donation Management</h3>
-            <button class="btn-primary btn-donation">
-              <i class="fas fa-hand-holding-heart"></i> New Donation
-            </button>
-          </div>
-          
-          <div class="donation-summary-cards">
-            <div class="summary-card total-donations">
-              <div class="card-icon">
-                <i class="fas fa-coins"></i>
-              </div>
-              <div class="card-content">
-                <h4>Total Donations</h4>
-                <p class="amount">{{ donation_stats.total_donations }}</p>
-              </div>
-            </div>
-            
-            <div class="summary-card recent-donors">
-              <div class="card-icon">
-                <i class="fas fa-users"></i>
-              </div>
-              <div class="card-content">
-                <h4>Recent Donors</h4>
-                <div class="donor-list">
-                  {% for donation in recent_donations %}
-                    <div class="donor-item">
-                      <div class="donor-info">
-                        <span class="donor-name">{{ donation.name }}</span>
-                        <span class="donation-amount">${{ donation.amount }}</span>
-                      </div>
-                      <span class="donation-date">{{ donation.date|date:"M d, Y" }}</span>
-                    </div>
-                  {% empty %}
-                    <p class="no-donations">No recent donations yet.</p>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-          </div>
+      <!-- Donation Section -->
+<div id="donation" class="content-section">
+  <div class="donation-header">
+    <h3 class="section-title">Donation Management</h3>
+  </div>
 
-          <div class="donation-table-container">
-            <div class="table-header">
-              <h4>Donation Records</h4>
-              <div class="table-controls">
-                <input type="text" placeholder="Search donations..." class="search-input">
-                <button class="btn-filter"><i class="fas fa-filter"></i> Filter</button>
+  <div class="donation-summary-cards">
+    <div class="summary-card total-donations">
+      <div class="card-icon">
+        <i class="fas fa-coins"></i>
+      </div>
+      <div class="card-content">
+        <h4>Total Donations</h4>
+        <p class="amount">{{ donation_stats.total_donations }}</p>
+      </div>
+    </div>
+
+    <div class="summary-card recent-donors">
+      <div class="card-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="card-content">
+        <h4>Recent Donors</h4>
+        <div class="donor-list">
+          {% for donation in recent_donations %}
+            <div class="donor-item">
+              <div class="donor-info">
+                <span class="donor-name">{{ donation.name }}</span>
+                <span class="donation-amount">${{ donation.amount }}</span>
               </div>
+              <span class="donation-date">{{ donation.date|date:"M d, Y" }}</span>
             </div>
-            
-            <table class="donation-data-table">
-              <thead>
-                <tr>
-                  <th>Donor</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Payment Method</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for donation in donations %}
-                  <tr>
-                    <td class="donor-info-cell">
-                      <div class="donor-avatar">
-                        {{ donation.donor.alumni_name|default:"??"|slice:":1" }}
-                      </div>
-                      <div class="donor-details">
-                        <span class="donor-name">{{ donation.donor.alumni_name }}</span>
-                        <span class="donor-email">{{ donation.donor.alumni_email|default:"-" }}</span>
-                      </div>
-                    </td>
-                    <td class="amount-cell">
-                      <span class="donation-amount">${{ donation.amount }}</span>
-                    </td>
-                    <td>{{ donation.date }}</td>
-                    <td>
-                      <span class="payment-method {{ donation.payment_method }}">
-                        {% if donation.payment_method == 'card' %}
-                          <i class="fas fa-credit-card"></i> Card
-                        {% elif donation.payment_method == 'cash' %}
-                          <i class="fas fa-money-bill-wave"></i> Cash
-                        {% elif donation.payment_method == 'upi' %}
-                          <i class="fas fa-mobile-alt"></i> UPI
-                        {% elif donation.payment_method == 'bank_transfer' %}
-                          <i class="fas fa-university"></i> Bank
-                        {% else %}
-                          Unknown
-                        {% endif %}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="status-badge {{ donation.status }}">
-                        {% if donation.status == 'completed' %}
-                          <i class="fas fa-check-circle"></i> Completed
-                        {% elif donation.status == 'pending' %}
-                          <i class="fas fa-hourglass-half"></i> Pending
-                        {% elif donation.status == 'failed' %}
-                          <i class="fas fa-times-circle"></i> Failed
-                        {% endif %}
-                      </span>
-                    </td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn-action view"><i class="fas fa-eye"></i></button>
-                        <button class="btn-action receipt"><i class="fas fa-receipt"></i></button>
-                      </div>
-                    </td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="6" style="text-align: center;">No donations found.</td>
-                  </tr>
-                {% endfor %}
-            
-                {% if donations %}
-                  <tr class="total-row">
-                    <td colspan="6" style="text-align: right; font-weight: bold; padding-top: 10px;">
-                      Total Donations: <span style="color: #28a745;">${{ total_donations }}</span>
-                    </td>
-                  </tr>
-                {% endif %}
-              </tbody>
-            </table>
-            
-            
-            
-          </div>
+          {% empty %}
+            <p class="no-donations">No recent donations yet.</p>
+          {% endfor %}
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="donation-table-container">
+    <div class="table-header">
+      <h4>Donation Records</h4>
+      <div class="table-controls">
+        <input type="text" placeholder="Search donations..." class="search-input" id="donationSearchInput" onkeyup="filterDonations()">
+        <button class="btn-filter"><i class="fas fa-filter"></i> Filter</button>
+      </div>
+    </div>
+
+    <table class="donation-data-table" id="donationTable">
+      <thead>
+        <tr>
+          <th>Donor</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Payment Method</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for donation in donations %}
+          <tr>
+            <td class="donor-info-cell">
+              <div class="donor-avatar">
+                {{ donation.donor.alumni_name|default:"??"|slice:":1" }}
+              </div>
+              <div class="donor-details">
+                <span class="donor-name">{{ donation.donor.alumni_name }}</span>
+                <span class="donor-email">{{ donation.donor.alumni_email|default:"-" }}</span>
+              </div>
+            </td>
+            <td class="amount-cell">
+              <span class="donation-amount">${{ donation.amount }}</span>
+            </td>
+            <td>{{ donation.date }}</td>
+            <td>
+              <span class="payment-method {{ donation.payment_method }}">
+                {% if donation.payment_method == 'card' %}
+                  <i class="fas fa-credit-card"></i> Card
+                {% elif donation.payment_method == 'cash' %}
+                  <i class="fas fa-money-bill-wave"></i> Cash
+                {% elif donation.payment_method == 'upi' %}
+                  <i class="fas fa-mobile-alt"></i> UPI
+                {% elif donation.payment_method == 'bank_transfer' %}
+                  <i class="fas fa-university"></i> Bank
+                {% else %}
+                  Unknown
+                {% endif %}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge {{ donation.status }}">
+                {% if donation.status == 'completed' %}
+                  <i class="fas fa-check-circle"></i> Completed
+                {% elif donation.status == 'pending' %}
+                  <i class="fas fa-hourglass-half"></i> Pending
+                {% elif donation.status == 'failed' %}
+                  <i class="fas fa-times-circle"></i> Failed
+                {% endif %}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-action view" title="View Details"><i class="fas fa-eye"></i></button>
+                <button class="btn-action receipt" title="Generate Receipt"><i class="fas fa-receipt"></i></button>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" style="text-align: center;">No donations found.</td>
+          </tr>
+        {% endfor %}
+
+        {% if donations %}
+          <tr class="total-row">
+            <td colspan="6" style="text-align: right; font-weight: bold; padding-top: 10px;">
+              Total Donations: <span style="color: #28a745;">${{ total_donations }}</span>
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
         <!-- Management Section -->
         <div id="management" class="content-section">
           <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
@@ -956,48 +969,45 @@
   
   <!-- Add Alumni Modal -->
   <div id="modalAddAlumni" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
+    <div class="modal-content" style="position: relative; padding: 20px; background: #fff; width: 90%; max-width: 600px; margin: 100px auto; border-radius: 8px;">
+      <span class="close" id="closeModalBtn" style="position: absolute; right: 20px; top: 10px; cursor: pointer; font-size: 28px;">&times;</span>
       <h2>Add Alumni</h2>
-      <form id="alumniForm" action="{% url 'add_alumni' %}" method="post" novalidate>
+      <form id="alumniForm" action="{% url 'add_alumni' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
   
         <div class="form-group">
           <label for="inputAlumniName">Full Name:</label>
-          <input type="text" id="inputAlumniName" name="alumni_name" required pattern="^[A-Za-z\s'-]+$"
-            title="Only letters, spaces, hyphens and apostrophes are allowed">
-          <small id="alumniNameError" class="error-message"></small>
+          <input type="text" id="inputAlumniName" name="alumni_name" 
+                 required pattern="^[A-Za-z\s'-]+$" 
+                 title="Only letters, spaces, hyphens, and apostrophes allowed">
         </div>
-
-      <div class="form-group">
-        <label>Add Image (Optional)</label>
-          <input type="file" name="avatar" accept="image/*">
-        <small id="imageError" class="error-message"></small>
-      </div>
+  
+        <div class="form-group">
+          <label>Add Image (Optional)</label>
+          <input type="file" id="inputAvatar" name="avatar" accept="image/*">
+        </div>
   
         <div class="form-group">
           <label for="inputDOB">Date of Birth:</label>
-          <input type="date" id="inputDOB" name="DOB" required>
-          <small id="dobError" class="error-message"></small>
+          <input type="date" id="inputDOB" name="DOB" required max="{{ now|date:'Y-m-d' }}">
         </div>
   
         <div class="form-group">
           <label for="inputAlumniEmail">Email:</label>
           <input type="email" id="inputAlumniEmail" name="alumni_email" required>
-          <small id="emailError" class="error-message"></small>
         </div>
   
         <div class="form-group">
           <label for="inputAlumniPhone">Phone:</label>
-          <input type="tel" id="inputAlumniPhone" name="alumni_phone" required pattern="^[0-9]{10,15}$"
-            title="Phone number must be 10 to 15 digits">
-          <small id="phoneError" class="error-message"></small>
+          <input type="tel" id="inputAlumniPhone" name="alumni_phone" required 
+                 pattern="^[0-9]{10,15}$" 
+                 title="Phone number must be 10 to 15 digits (numbers only)">
         </div>
   
         <div class="form-group">
           <label for="inputAddress">Full Address:</label>
-          <textarea id="inputAddress" name="full_address" required></textarea>
-          <small id="addressError" class="error-message"></small>
+          <textarea id="inputAddress" name="full_address" required minlength="10"
+                    title="Please enter at least 10 characters"></textarea>
         </div>
   
         <div class="form-group">
@@ -1007,15 +1017,14 @@
             <option value="Computer Science">Computer Science</option>
             <option value="Electronics">Electronics</option>
             <option value="Mechanical">Mechanical</option>
-            <!-- Add more options if needed -->
           </select>
-          <small id="departmentError" class="error-message"></small>
         </div>
   
         <div class="form-group">
           <label for="inputGraduationYear">Graduation Year:</label>
-          <input type="number" id="inputGraduationYear" name="graduation_year" required min="1950" max="2100">
-          <small id="graduationYearError" class="error-message"></small>
+          <input type="number" id="inputGraduationYear" name="graduation_year" 
+                 required min="1950" max="2100" 
+                 title="Enter a valid year between 1950 and 2100">
         </div>
   
         <button type="submit" class="btn-primary">Submit</button>
@@ -1051,55 +1060,60 @@
   </div>
 </div>
 
-    
-  <!-- Add Event Modal-->
+    <!-- Add Event Modal -->
   <div id="modalAddEvent" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Add Event</h2>
-        <form id="eventForm" action="{% url 'add_event' %}" method="post" onsubmit="return validateEventForm()">
-            {% csrf_token %}
+      <span class="close">&times;</span>
+      <h2>Add Event</h2>
+      <form id="eventForm" action="{% url 'add_event' %}" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
 
-            <div class="form-group">
-                <label for="inputEventName">Event Name:</label>
-                <input type="text" id="inputEventName" name="event_name" required>
-                <small id="eventNameError" class="error-message"></small>
-            </div>
+        <div class="form-group">
+          <label for="inputEventName">Event Name:</label>
+          <input type="text" id="inputEventName" name="event_name" required
+                pattern="^[A-Za-z0-9\s,'-]{3,100}$"
+                title="Event name must be 3–100 characters long and can include letters, numbers, commas, apostrophes, and hyphens.">
+        </div>
 
-            <div class="form-group">
-                <label for="inputEventDate">Event Date:</label>
-                <input type="date" id="inputEventDate" name="event_date" required>
-                <small id="eventDateError" class="error-message"></small>
-            </div>
+        <div class="form-group">
+          <label for="inputEventDate">Event Date:</label>
+          <input type="date" id="inputEventDate" name="event_date" required min="{{ today|date:'Y-m-d' }}">
+        </div>
 
-            <div class="form-group">
-                <label for="inputLocation">Location:</label>
-                <input type="text" id="inputLocation" name="location" required>
-                <small id="locationError" class="error-message"></small>
-            </div>
+        <div class="form-group">
+          <label for="inputLocation">Location:</label>
+          <input type="text" id="inputLocation" name="location" required
+                minlength="3" maxlength="100"
+                pattern="^[A-Za-z0-9\s,'-]+$"
+                title="Location must be between 3–100 characters and contain valid characters.">
+        </div>
 
-            <div class="form-group">
-                <label for="inputDescription">Description:</label>
-                <textarea id="inputDescription" name="description" rows="4"></textarea>
-                <small id="descriptionError" class="error-message"></small>
-            </div>
+        <div class="form-group">
+          <label for="inputDescription">Description:</label>
+          <textarea id="inputDescription" name="description" rows="4" required
+                    minlength="10" maxlength="1000"
+                    title="Description must be 10–1000 characters."></textarea>
+        </div>
 
-            <div class="form-group">
-                <label for="inputMaxParticipants">Max Participants:</label>
-                <input type="number" id="inputMaxParticipants" name="max_participants" min="0">
-                <small id="maxParticipantsError" class="error-message"></small>
-            </div>
+        <div class="form-group">
+          <label for="inputMaxParticipants">Max Participants:</label>
+          <input type="number" id="inputMaxParticipants" name="max_participants"
+                required min="1" max="10000"
+                title="Must be a number between 1 and 10,000">
+        </div>
 
-            <div class="form-group">
-                <label for="inputTags">Tags (comma-separated):</label>
-                <input type="text" id="inputTags" name="tags">
-                <small id="tagsError" class="error-message"></small>
-            </div>
+        <div class="form-group">
+          <label for="inputTags">Tags (comma-separated):</label>
+          <input type="text" id="inputTags" name="tags"
+                pattern="^[A-Za-z\s,]+$"
+                title="Tags must be comma-separated words (letters and spaces only)">
+        </div>
 
-            <button type="submit" class="btn-primary">Submit</button>
-        </form>
+        <button type="submit" class="btn-primary">Submit</button>
+      </form>
     </div>
   </div>
+
 
   <div id="modalAddJob" class="modal">
     <div class="modal-content">
@@ -1294,7 +1308,30 @@
     });
     </script>
 
+    <script>
+      function filterDonations() {
+        const input = document.getElementById('donationSearchInput');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('donationTable');
+        const rows = table.getElementsByTagName('tr');
+    
+        for (let i = 1; i < rows.length; i++) {
+          let cells = rows[i].getElementsByTagName('td');
+          let match = false;
+          for (let j = 0; j < cells.length; j++) {
+            if (cells[j].textContent.toLowerCase().includes(filter)) {
+              match = true;
+              break;
+            }
+          }
+          rows[i].style.display = match ? '' : 'none';
+        }
+      }
+    </script>
+
 <style>
+
+  
 /* Add these styles to your existing CSS */
 .status-badge {
   padding: 3px 8px;
@@ -1369,78 +1406,45 @@ select {
 }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const alumniForm = document.getElementById('alumniForm');
-  
-    alumniForm.addEventListener('submit', function (e) {
-      let valid = true;
-      console.log("Form submitted... validating");
-  
-      // Clear previous errors
-      document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
-  
-      // Name validation
-      const name = document.getElementById('inputAlumniName');
-      if (!/^[A-Za-z\s'-]+$/.test(name.value)) {
-        document.getElementById('alumniNameError').innerText = "Only letters, spaces, hyphens and apostrophes allowed.";
-        valid = false;
-      }
-  
-      // DOB validation
-      const dob = document.getElementById('inputDOB');
-      if (!dob.value) {
-        document.getElementById('dobError').innerText = "Please enter date of birth.";
-        valid = false;
-      }
-  
-      // Email validation
-      const email = document.getElementById('inputAlumniEmail');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-        document.getElementById('emailError').innerText = "Invalid email address.";
-        valid = false;
-      }
-  
-      // Phone
-      const phone = document.getElementById('inputAlumniPhone');
-      if (!/^[0-9]{10,15}$/.test(phone.value)) {
-        document.getElementById('phoneError').innerText = "Phone must be 10 to 15 digits.";
-        valid = false;
-      }
-  
-      // Address
-      const address = document.getElementById('inputAddress');
-      if (!address.value.trim()) {
-        document.getElementById('addressError').innerText = "Address is required.";
-        valid = false;
-      }
-  
-      // Department
-      const dept = document.getElementById('inputDepartment');
-      if (!dept.value) {
-        document.getElementById('departmentError').innerText = "Select a department.";
-        valid = false;
-      }
-  
-      // Graduation year
-      const gradYear = document.getElementById('inputGraduationYear');
-      const year = parseInt(gradYear.value);
-      if (isNaN(year) || year < 1950 || year > 2100) {
-        document.getElementById('graduationYearError').innerText = "Enter a year between 1950 and 2100.";
-        valid = false;
-      }
-  
-      // Prevent submission if any check failed
-      if (!valid) {
-        console.log("Validation failed, preventing submission.");
-        e.preventDefault();
-      } else {
-        console.log("Validation passed, form will be submitted.");
-      }
-    });
-  });
-  </script>
-    
+<style>
+  .post-comments {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    background: #fafafa;
+  }
+
+  .add-comment {
+    display: flex;
+    margin-top: 8px;
+  }
+
+  .comment-input {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .btn-comment {
+    background: #007bff;
+    color: white;
+    border: none;
+    margin-left: 6px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .comment-item {
+    font-size: 14px;
+    margin-top: 5px;
+  }
+
+  .like-btn.liked {
+    color: #0d6efd;
+  }
+</style>
+
 
   <script>
     // Open Student Modal
@@ -1690,25 +1694,57 @@ select {
   </script>
 
   <script>
-    // Keep track of liked posts by ID
-    const likedPosts = new Set();
+    document.addEventListener('DOMContentLoaded', function () {
+      const likedPosts = new Set();
   
-    document.querySelectorAll('.like-btn').forEach(button => {
-      button.addEventListener('click', function () {
-        const postCard = this.closest('.post-card');
-        const postId = postCard.getAttribute('data-post-id');
+      // Like Post
+      document.querySelectorAll('.like-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const postCard = this.closest('.post-card');
+          const postId = postCard.getAttribute('data-post-id');
   
-        if (likedPosts.has(postId)) {
-          alert("You've already liked this post.");
-          return;
-        }
+          if (likedPosts.has(postId)) {
+            alert("You've already liked this post.");
+            return;
+          }
   
-        likedPosts.add(postId);
-        this.classList.add('liked');
-        this.innerHTML = '<i class="fas fa-thumbs-up"></i> Liked';
+          likedPosts.add(postId);
+          this.classList.add('liked');
+          this.innerHTML = '<i class="fas fa-thumbs-up"></i> Liked';
+        });
+      });
+  
+      // Share Post (Facebook by default)
+      document.querySelectorAll('.share-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const postUrl = this.getAttribute('data-post-url');
+          const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
+          window.open(shareUrl, '_blank', 'width=600,height=400');
+        });
+      });
+  
+      // Temporary Commenting
+      document.querySelectorAll('.btn-comment').forEach(button => {
+        button.addEventListener('click', function () {
+          const postId = this.getAttribute('data-post-id');
+          const input = document.querySelector(`.comment-input[data-post-id="${postId}"]`);
+          const commentText = input.value.trim();
+  
+          if (!commentText) return;
+  
+          const commentBox = document.getElementById(`comments-${postId}`);
+          const newComment = document.createElement('div');
+          newComment.classList.add('comment-item');
+          newComment.innerHTML = `<strong>You:</strong> ${commentText}`;
+          commentBox.appendChild(newComment);
+  
+          input.value = '';
+        });
       });
     });
   </script>
+  
+  
   
 
   <script>
@@ -1848,81 +1884,6 @@ select {
     }
   }
 
-  function validateForm() {
-    let isValid = true;
-    const firstName = document.getElementById('inputFirstName').value;
-    const lastName = document.getElementById('inputLastName').value;
-    const alumniName = document.getElementById('inputAlumniName').value;
-    const dob = document.getElementById('inputDOB').value;
-    const age = document.getElementById('inputAge').value;
-    const email = document.getElementById('inputAlumniEmail').value;
-    const phone = document.getElementById('inputAlumniPhone').value;
-    const address = document.getElementById('inputAddress').value;
-    const streetName = document.getElementById('inputStreetName').value;
-    const city = document.getElementById('inputCity').value;
-    const pincode = document.getElementById('inputPincode').value;
-
-    // Clear previous error messages
-    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-
-    if (!/^[A-Za-z\s'-]+$/.test(firstName)) {
-        document.getElementById('firstNameError').textContent = 'Invalid first name format.';
-        isValid = false;
-    }
-
-    if (!/^[A-Za-z\s'-]+$/.test(lastName)) {
-        document.getElementById('lastNameError').textContent = 'Invalid last name format.';
-        isValid = false;
-    }
-
-    if (!/^[A-Za-z\s'-]+$/.test(alumniName)) {
-        document.getElementById('alumniNameError').textContent = 'Invalid full name format.';
-        isValid = false;
-    }
-
-    if (!dob) {
-        document.getElementById('dobError').textContent = 'Date of birth is required.';
-        isValid = false;
-    }
-
-    if (!age || age < 18 || age > 150) {
-        document.getElementById('ageError').textContent = 'Age must be between 18 and 150.';
-        isValid = false;
-    }
-
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-        document.getElementById('emailError').textContent = 'Invalid email format.';
-        isValid = false;
-    }
-
-    if (!phone || !/^[0-9]{10,15}$/.test(phone)) {
-        document.getElementById('phoneError').textContent = 'Phone must be 10 to 15 digits.';
-        isValid = false;
-    }
-
-    if (!address) {
-        document.getElementById('addressError').textContent = 'Address is required.';
-        isValid = false;
-    }
-
-    if (!streetName) {
-        document.getElementById('streetNameError').textContent = 'Street name is required.';
-        isValid = false;
-    }
-
-    if (!city) {
-        document.getElementById('cityError').textContent = 'City is required.';
-        isValid = false;
-    }
-
-    if (!pincode || !/^[0-9]{6,10}$/.test(pincode)) {
-        document.getElementById('pincodeError').textContent = 'Pincode must be 6 to 10 digits.';
-        isValid = false;
-    }
-
-    return isValid;
-}
-
 function validateEventForm() {
   let isValid = true;
   const eventName = document.getElementById('inputEventName').value;
@@ -2029,82 +1990,6 @@ function validateEventForm() {
       submitBtn.disabled = false;
     });
   });
-}
-
-// Function to validate edit form
-function validateEditForm() {
-  let isValid = true;
-  const firstName = document.getElementById('editFirstName').value;
-  const lastName = document.getElementById('editLastName').value;
-  const alumniName = document.getElementById('editAlumniName').value;
-  const dob = document.getElementById('editDOB').value;
-  const age = document.getElementById('editAge').value;
-  const email = document.getElementById('editAlumniEmail').value;
-  const phone = document.getElementById('editAlumniPhone').value;
-  const address = document.getElementById('editAddress').value;
-  const streetName = document.getElementById('editStreetName').value;
-  const city = document.getElementById('editCity').value;
-  const pincode = document.getElementById('editPincode').value;
-
-  // Clear previous error messages
-  document.querySelectorAll('#modalEditAlumni .error-message').forEach(el => el.textContent = '');
-
-  if (!/^[A-Za-z\s'-]+$/.test(firstName)) {
-      document.getElementById('editFirstNameError').textContent = 'Invalid first name format.';
-      isValid = false;
-  }
-
-  if (!/^[A-Za-z\s'-]+$/.test(lastName)) {
-      document.getElementById('editLastNameError').textContent = 'Invalid last name format.';
-      isValid = false;
-  }
-
-  if (!/^[A-Za-z\s'-]+$/.test(alumniName)) {
-      document.getElementById('editAlumniNameError').textContent = 'Invalid full name format.';
-      isValid = false;
-  }
-
-  if (!dob) {
-      document.getElementById('editDOBError').textContent = 'Date of birth is required.';
-      isValid = false;
-  }
-
-  if (!age || age < 18 || age > 150) {
-      document.getElementById('editAgeError').textContent = 'Age must be between 18 and 150.';
-      isValid = false;
-  }
-
-  if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      document.getElementById('editEmailError').textContent = 'Invalid email format.';
-      isValid = false;
-  }
-
-  if (!phone || !/^[0-9]{10,15}$/.test(phone)) {
-      document.getElementById('editPhoneError').textContent = 'Phone must be 10 to 15 digits.';
-      isValid = false;
-  }
-
-  if (!address) {
-      document.getElementById('editAddressError').textContent = 'Address is required.';
-      isValid = false;
-  }
-
-  if (!streetName) {
-      document.getElementById('editStreetNameError').textContent = 'Street name is required.';
-      isValid = false;
-  }
-
-  if (!city) {
-      document.getElementById('editCityError').textContent = 'City is required.';
-      isValid = false;
-  }
-
-  if (!pincode || !/^[0-9]{6,10}$/.test(pincode)) {
-      document.getElementById('editPincodeError').textContent = 'Pincode must be 6 to 10 digits.';
-      isValid = false;
-  }
-
-  return isValid;
 }
 
 // Function to show loading state
