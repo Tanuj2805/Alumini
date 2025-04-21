@@ -335,6 +335,112 @@
       background-color: #94a3b8;
   }
 
+  .guidelines-panel {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.panel-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.btn-toggle {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.btn-toggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+.panel-content {
+    padding: 20px;
+}
+
+.rules-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.rule-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    transition: transform 0.2s ease;
+}
+
+.rule-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.rule-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.rule-text h5 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.rule-text p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.panel-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .rules-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .panel-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+}
+
   {% comment %} invitations styles {% endcomment %}
    
   
@@ -383,11 +489,68 @@
       </div>
             
         <!-- Dashboard Section -->
-      <div id="dashboard" class="content-section active">
-        <div class="cards-grid">
-          <!-- Dynamic cards will be inserted here -->
-        </div>
+        <div id="dashboard" class="content-section active">
+          <div class="cards-grid">
+              <!-- Dynamic cards will be inserted here -->
+          </div>
+      
+          <!-- Rules and Guidelines Panel -->
+          <div class="guidelines-panel mt-5">
+              <div class="panel-header">
+                  <h3 class="panel-title">
+                      <i class="fas fa-info-circle me-2"></i> Community Guidelines & Rules
+                  </h3>
+                  <button class="btn-toggle" aria-label="Toggle guidelines visibility">
+                      <i class="fas fa-chevron-down"></i>
+                  </button>
+              </div>
+              
+              <div class="panel-content">
+                  <div class="rules-list">
+                      <div class="rule-item">
+                          <div class="rule-icon bg-primary bg-opacity-10 text-primary">
+                              <i class="fas fa-user-shield"></i>
+                          </div>
+                          <div class="rule-text">
+                              <h5>Respect Privacy</h5>
+                              <p>Do not share personal information of others without consent.</p>
+                          </div>
+                      </div>
+                      
+                      <div class="rule-item">
+                          <div class="rule-icon bg-success bg-opacity-10 text-success">
+                              <i class="fas fa-comment-alt"></i>
+                          </div>
+                          <div class="rule-text">
+                              <h5>Professional Communication</h5>
+                              <p>Maintain professional and respectful language in all interactions.</p>
+                          </div>
+                      </div>
+                      
+                      <div class="rule-item">
+                          <div class="rule-icon bg-warning bg-opacity-10 text-warning">
+                              <i class="fas fa-bullhorn"></i>
+                          </div>
+                          <div class="rule-text">
+                              <h5>No Spam</h5>
+                              <p>Avoid excessive self-promotion or irrelevant content.</p>
+                          </div>
+                      </div>
+                      
+                      <div class="rule-item">
+                          <div class="rule-icon bg-danger bg-opacity-10 text-danger">
+                              <i class="fas fa-exclamation-triangle"></i>
+                          </div>
+                          <div class="rule-text">
+                              <h5>Report Issues</h5>
+                              <p>Immediately report any inappropriate behavior or content.</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
+      
 
 
         <!-- Alumni Section -->
@@ -1629,6 +1792,11 @@ select {
 
   {% comment %} Search {% endcomment %}
   <script>
+    document.querySelector('.btn-toggle').addEventListener('click', function() {
+      this.classList.toggle('collapsed');
+      document.querySelector('.panel-content').classList.toggle('show');
+  });
+
     document.addEventListener("DOMContentLoaded", function () {
       const searchInput = document.getElementById("alumniSearch");
       const table = document.getElementById("alumniTable");
@@ -1751,6 +1919,7 @@ select {
       document.querySelector('.loader-wrapper').style.display = 'none';
       document.querySelector('.content').style.display = 'block';
   });
+
   </script>
 
 

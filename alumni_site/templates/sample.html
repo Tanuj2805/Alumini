@@ -4,1021 +4,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alumni Dashboard - VITGrad</title>
+    <title>Alumni Information System - VITGrad</title>
+    <meta name="description" content="VITGrad - Alumni Information System for Vishwakarma Institute of Technology. Connect with alumni, find career opportunities, and stay updated with events.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-    <style>
-        /* Layout Structure */
-        * {
-            box-sizing: border-box;
-        }
-    
-        .dashboard-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-    
-        .dashboard-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-    
-        .dashboard-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding: 1rem;
-            gap: 2rem;
-        }
-    
-        /* Posts Section */
-        .posts-section {
-            flex: 1;
-            overflow-y: auto;
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        }
-    
-        .posts-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 2px solid #f0f2f5;
-        }
-    
-        .btn-new-post {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: transform 0.2s;
-        }
-    
-        .btn-new-post:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-    
-        /* Post Components */
-        .posts-grid {
-            display: grid;
-            gap: 2rem;
-        }
-    
-        .post-card {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
-            overflow: hidden;
-        }
-    
-        .post-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-    
-        .post-author {
-            display: flex;
-            align-items: center;
-            padding: 1.5rem;
-            background: linear-gradient(90deg, #f8fafc, #ffffff);
-            border-bottom: 1px solid #f1f5f9;
-        }
-    
-        .post-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            margin-right: 1rem;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-    
-        .author-info h4 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: #1e293b;
-        }
-    
-        .post-time {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-    
-        .post-content {
-            padding: 1.5rem;
-            position: relative;
-        }
-    
-        .post-text {
-            color: #334155;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-    
-        .post-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 1rem;
-            transition: transform 0.3s;
-            cursor: zoom-in;
-        }
-    
-        .post-image:hover {
-            transform: scale(1.02);
-        }
-    
-        .post-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background: #f8fafc;
-            border-top: 1px solid #f1f5f9;
-        }
-
-        .posts-scroll-container {
-            max-height: 70vh;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-            margin-top: 1rem;
-        }
-        
-        .posts-scroll-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .posts-scroll-container::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 10px;
-        }
-        
-        .action-group {
-            display: flex;
-            gap: 1.5rem;
-        }
-    
-        .btn-action {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            margin: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .btn-action i {
-            margin-right: 5px;
-        }
-    
-        .btn-action:hover {
-            background: #f1f5f9;
-            color: #2563eb;
-        }
-    
-        .post-tags {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-    
-        .post-tag {
-            background: #e2e8f0;
-            color: #475569;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-    
-        .post-tag:hover {
-            background: #cbd5e1;
-        }
-    
-        .comment-input {
-            flex-grow: 1;
-            padding: 0.8rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-    
-        .comment-input:focus {
-            border-color: #2563eb;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.4);
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 5% auto;
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-        }
-
-        .close {
-            position: absolute;
-            right: 20px;
-            top: 10px;
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .form-actions {
-            padding: 15px 0 5px;
-            text-align: right;
-        }
-
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-        }
-        
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-
-        .content-section {
-            display: none;
-            padding: 2rem;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        /* Profile Section Styles */
-        .profile-grid {
-            display: grid;
-            gap: 2rem;
-        }
-
-        .profile-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .profile-details {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        /* Events Section Styles */
-        .events-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .event-card {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .btn-logout {
-            color: #333;
-            font-size: 18px;
-            text-decoration: none;
-            padding: 8px 12px;
-            background-color: #eee;
-            border-radius: 6px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .btn-logout:hover {
-            background-color: #ddd;
-        }
-
-        .dashboard-header {
-            padding: 10px 20px;
-            background-color: #f5f5f5;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .required {
-            color: red;
-        }
-
-        /* Loader Styles */
-        .loader-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #2563eb;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loader-text {
-            color: white;
-            margin-top: 15px;
-            font-size: 1.2rem;
-            text-align: center;
-        }
-
-        .loader-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Disable scrolling when loader is active */
-        body.loader-active {
-            overflow: hidden;
-        }
-    </style>
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
 </head>
-
-<body class="dashboard-body">
-    <!-- Loader Overlay -->
-    <div id="loader-overlay" class="loader-overlay">
-        <div class="loader-container">
-            <div class="loader"></div>
-            <div class="loader-text">Processing...</div>
-        </div>
-    </div>
-
-    <div class="dashboard-wrapper">
-        <!-- Side Menu -->
-        <aside class="dashboard-sidebar">
-            <div class="sidebar-header">
-                <img src="{% static 'images/vit_logo.webp' %}" alt="VITGrad Logo" class="logo-img" style="height: 50px; margin-right: 10px;">
-                <h1 class="logo">VITGrad</h1>
+<body>
+    <!-- Header -->
+    <header class="glass-header">
+        <div class="header-content">
+            <div class="logo-container" style="display: flex; align-items: center;">
+                <a href="#home" style="display: flex; align-items: center; text-decoration: none;">
+                    <img src="{% static 'images/vit_logo.webp' %}" alt="VITGrad Logo" class="logo-img" style="height: 40px; width: auto; margin-right: 10px;">
+                    <h1 class="logo">VITGrad</h1>
+                </a>
             </div>
-            <nav class="sidebar-nav">
+            <nav class="main-nav">
                 <ul>
-                    <li><a href="#dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-                    <li><a href="#profile"><i class="fas fa-user-edit"></i> Update Profile</a></li>
-                    <li><a href="#events"><i class="fas fa-calendar-alt"></i> Events</a></li>
-                    <li><a href="#my-posts"><i class="fas fa-file-alt"></i> My Posts</a></li>
-                    <li><a href="#donations"><i class="fas fa-hand-holding-usd"></i> Donations</a></li>
+                    <li><a href="#home" class="active">Home</a></li>
+                    <li><a href="#alumni">Alumni</a></li>
+                    <li><a href="#events">Events</a></li>
+                    <li><a href="#careers">Careers</a></li>
+                    <li><a href="#contact">Contact</a></li>
                 </ul>
             </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="dashboard-main">
-            <header class="dashboard-header">
-                <div class="header-content">
-                    <h2>Welcome Back, {{ account_holder.alumni_name }}!</h2>
-                    <div class="header-actions">
-                        <a href="#" class="btn-logout" data-logout-url="{% url 'logout' %}" onclick="confirmLogout(event)">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Dashboard Section -->
-            <div class="content-section active" id="dashboard-section">
-                <div class="posts-header">
-                    <h3>Community Feed</h3>
-                    <button class="btn-new-post" onclick="showPostModal()">
-                        <i class="fas fa-plus"></i>
-                        Create New Post
-                    </button>
-                </div>
-                
-                <div class="posts-scroll-container">
-                    <div class="posts-grid">
-                        {% for post in posts %}
-                        <div class="post-card" data-post-id="{{ post.post_id }}">
-                          <div class="post-author">
-                            {% if post.avatar %}
-                              <img src="{{ post.avatar.url }}" alt="User" class="post-avatar">
-                            {% else %}
-                              <img src="{% static 'images/avatar.png' %}" alt="User" class="post-avatar">
-                            {% endif %}
-                            <div class="author-info">
-                              <h4>{{ post.author_name }}</h4>
-                              <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
-                            </div>
-                          </div>
-                          
-                          <div class="post-content">
-                            <p class="post-text">{{ post.content }}</p>
-                            
-                            {% if post.image %}
-                              <img src="{{ post.image.url }}" class="post-image" alt="Post image">
-                            {% endif %}
-          
-                            <div class="post-tags">
-                              <span class="post-tag">#Alumni</span>
-                              <span class="post-tag">#Post</span>
-                            </div>
-                          </div>
-          
-                          <div class="post-actions">
-                            <div class="action-group">
-                              <button class="btn-action like-btn">
-                                <i class="fas fa-thumbs-up"></i> Like
-                              </button>
-                              <button class="btn-action">
-                                <i class="fas fa-comment-alt"></i> Comment
-                              </button>
-                              <button class="btn-action share-btn" data-post-url="https://yourdomain.com/post/{{ post.post_id }}">
-                                <i class="fas fa-share"></i> Share
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      {% empty %}
-                        <p>No posts to show.</p>
-                      {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profile Section -->
-            <div class="content-section" id="profile-section">
-                <div class="section-header">
-                    <h2>Update Profile</h2>
-                    <button class="btn-primary" onclick="showProfileModal()">
-                        <i class="fas fa-edit"></i> Edit Profile
-                    </button>
-                </div>
-                <div class="profile-grid">
-                    <div class="profile-card">
-                        <div class="profile-header">
-                            <img src="{{ account_holder.avatar.url }}" alt="Profile" class="profile-avatar">
-                            <div class="profile-info">
-                                <h3>{{ account_holder.alumni_name }}</h3>
-                                <p>Class of {{ account_holder.graduation_year }}</p>
-                            </div>
-                        </div>
-                        <div class="profile-details">
-                            <div class="detail-item">
-                                <i class="fas fa-envelope"></i>
-                                <span>{{ account_holder.alumni_email }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-phone"></i>
-                                <span>{{ account_holder.alumni_phone }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>{{ account_holder.address }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Events Section -->
-            <div class="content-section" id="events-section">
-                <div class="section-header">
-                    <h2>Events</h2>
-                    <div class="header-actions">
-                        <button class="btn-secondary" onclick="filterEvents('upcoming')">Upcoming</button>
-                        <button class="btn-secondary" onclick="filterEvents('past')">Past</button>
-                        <button class="btn-secondary" onclick="filterEvents('all')">All Events</button>
-                    </div>
-                </div>
-
-                <!-- Pending Invitations -->
-                <div class="invitations-container">
-                    <h2 class="invitations-title">Your Event Invitations</h2>
-                    
-                    {% if invitations %}
-                        <div class="invitations-grid">
-                            {% for invitation in invitations %}
-                                <div class="invitation-card invitation-pending" id="invitation-card-{{ invitation.inv_id }}">
-                                    <div class="invitation-event-info">
-                                        <div class="invitation-status-badge status-pending">Pending</div>
-                                        <h3 class="invitation-event-name">{{ invitation.event.event_name }}</h3>
-                                        <p class="invitation-event-date">
-                                            <i class="icon-calendar"></i>
-                                            {{ invitation.event.event_date|date:"F j, Y" }}
-                                        </p>
-                                        <p class="invitation-event-time">
-                                            <i class="icon-clock"></i>
-                                            {{ invitation.event.start_time|time:"g:i A" }} - {{ invitation.event.end_time|time:"g:i A" }}
-                                        </p>
-                                        <p class="invitation-event-location">
-                                            <i class="icon-location"></i>
-                                            {{ invitation.event.location }}
-                                        </p>
-                                    </div>
-                                    
-                                    <div class="invitation-actions">
-                                        <form method="post" action="{% url 'respond_to_invitation' %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="invitation_id" value="{{ invitation.inv_id }}">
-                                            <input type="hidden" name="response" value="accepted">
-                                            <button type="submit" class="invitation-accept-btn">Accept</button>
-                                        </form>
-                                        <form method="post" action="{% url 'respond_to_invitation' %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="invitation_id" value="{{ invitation.inv_id }}">
-                                            <input type="hidden" name="response" value="declined">
-                                            <button type="submit" class="invitation-decline-btn">Decline</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="invitations-empty">You have no pending invitations.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- My Posts Section -->
-            <div class="content-section" id="my-posts-section">
-                <div class="section-header">
-                    <h2>My Posts</h2>
-                    <button class="btn-primary" onclick="showPostModal()">
-                        <i class="fas fa-plus"></i> New Post
-                    </button>
-                </div>
-                <div class="posts-scroll-container">
-                    <div class="posts-grid">
-                        {% for post in self_posts %}
-                        <div class="post-card">
-                            <div class="post-author">
-                                <img src="{{ post.author.avatar.url }}" alt="User" class="post-avatar">
-                                <div class="author-info">
-                                    <h4>{{ post.author.alumni_name }}</h4>
-                                    <p class="post-time">{{ post.created_at|timesince }} ago · <i class="fas fa-globe-asia"></i></p>
-                                </div>
-                                <div class="post-actions">
-                                    <form action="{% url 'delete_post' %}" method="POST" onsubmit="return confirm('Are you sure?');">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="post_id" value="{{ post.post_id }}">
-                                        <button type="submit" class="btn btn-outline-danger btn-circle">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                            
-                            <div class="post-content">
-                                <p class="post-text">{{ post.content }}</p>
-                                
-                                {% if post.image %}
-                                    <img src="{{ post.image.url }}" class="post-image" alt="Post image">
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% empty %}
-                            <p>No posts to show.</p>
-                        {% endfor %}
-                    </div>
-                </div>                    
-            </div>
-
-            <!-- Donations Section -->
-            <div class="content-section" id="donations-section">
-                <div class="section-header d-flex justify-content-between align-items-center">
-                    <h2>Donations</h2>
-                    <button class="btn btn-primary" onclick="showDonationModal()">
-                        <i class="fas fa-hand-holding-usd"></i> Make Donation
-                    </button>
-                </div>
-            
-                <div class="row mt-4 g-4">
-                    <div class="col-md-4">
-                        <div class="card border-0 rounded-4 shadow-lg bg-primary text-white h-100">
-                            <div class="card-body">
-                                <h5 class="card-title fw-bold">
-                                    <i class="fas fa-wallet me-2"></i> Total Donated
-                                </h5>
-                                <p class="display-6 mb-1">₹{{ donation_data.total_donated }}</p>
-                                <p class="small text-light">Thanks for supporting our cause!</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card border-0 rounded-4 shadow-lg bg-success-subtle h-100">
-                            <div class="card-body">
-                                <h5 class="card-title fw-bold text-success">
-                                    <i class="fas fa-calendar-alt me-2"></i> Last Donation
-                                </h5>
-                                <p class="fs-4 text-dark mb-1">₹{{ donation_data.latest_donation.amount }}</p>
-                                <p class="small text-muted">on {{ donation_data.latest_donation.date }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card border-0 rounded-4 shadow-lg bg-warning-subtle h-100">
-                            <div class="card-body">
-                                <h5 class="card-title fw-bold text-warning">
-                                    <i class="fas fa-donate me-2"></i> Times Donated
-                                </h5>
-                                <p class="fs-4 text-dark mb-1">{{ donation_data.donation_count }} Times</p>
-                                <p class="small text-muted">You're making a real impact!</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Profile Modal -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeProfileModal()">&times;</span>
-            <h2>Edit Profile</h2>
-            <div class="form-scroll-container">
-                <form id="profileForm" method="POST" action="{% url 'update_alumni_profile' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label>Profile Picture</label>
-                        <input type="file" name="profile_picture" accept="image/*">
-                    </div>
-                    <div class="form-group">
-                        <label>Company</label>
-                        <input type="text" name="alumni_company" value="{{ account_holder.alumni_company }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Job Post</label>
-                        <input type="text" name="alumni_jobpost" value="{{ account_holder.alumni_jobpost }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="alumni_name" value="{{ account_holder.alumni_name }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="alumni_email" value="{{ account_holder.alumni_email }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="tel" name="alumni_phone" value="{{ account_holder.alumni_phone }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Address</label>
-                        <textarea name="address" required>{{ account_holder.address }}</textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary" onclick="showLoader()">Save Changes</button>
-                    </div>
-                </form>
+            <div class="header-actions">
+                <a href="{% url 'login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Alumni Sign In</a>
+                <a href="{% url 'student_login' %}" class="btn-login" style="margin-left: 10px;"><i class="fas fa-user-graduate"></i> Student Sign In</a>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- Post Modal -->
-    <div id="postModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePostModal()">&times;</span>
-            <h2>Create New Post</h2>
-            <div class="form-scroll-container">
-                <form id="postForm" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label>Post Content <span class="required">*</span></label>
-                        <textarea name="content" rows="4" required></textarea>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="swiper hero-swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/slide1.jpg" %}')">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Reconnect. Network. Thrive.</h2>
+                        <p class="slide-text">Join our global community of successful alumni</p>
+                        <a href="" class="btn-primary">Join Now</a>
                     </div>
-                    <div class="form-group">
-                        <label>Add Image (Optional)</label>
-                        <input type="file" name="image" accept="image/*">
+                </div>
+                <div class="swiper-slide" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/slide2.jpg" %}')">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Career Opportunities</h2>
+                        <p class="slide-text">Explore exclusive job offers and mentorship programs</p>
+                        <a href="#careers" class="btn-primary">View Opportunities</a>
                     </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary" onclick="showLoader()">Publish Post</button>
-                    </div>
-                </form>
+                </div>
+            </div>
+            <div class="hero-decorative-line"></div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse"></div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="features">
+        <div class="section-header">
+            <div class="section-decoration"></div>
+            <h2 class="section-title">Why Join Our Community?</h2>
+            <p class="section-subtitle">Discover the benefits of staying connected</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <i class="fas fa-users"></i>
+                <h3>Networking</h3>
+                <p>Connect with alumni across different industries and regions</p>
+                <a href="#alumni" class="feature-link">Explore Network →</a>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <i class="fas fa-briefcase"></i>
+                <h3>Career Support</h3>
+                <p>Access exclusive job opportunities and career resources</p>
+                <a href="#careers" class="feature-link">View Careers →</a>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Events</h3>
+                <p>Participate in alumni reunions and professional workshops</p>
+                <a href="#events" class="feature-link">See Events →</a>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Donation Modal -->
-    <div id="donationModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeDonationModal()">&times;</span>
-            <h2>Make a Donation</h2>
-            <form id="donationForm" method="POST" action="{% url 'fake_payment' %}">
-                {% csrf_token %}
-                <div class="form-scroll-container">
-                    <div class="form-group">
-                        <label>Payment Method <span class="required">*</span></label>
-                        <select name="payment_method" required onchange="togglePaymentFields(this.value)">
-                            <option value="">Select</option>
-                            <option value="UPI">UPI</option>
-                            <option value="Wallet">Wallet</option>
-                            <option value="Netbanking">Netbanking</option>
-                        </select>
-                    </div>
-            
-                    <div class="form-group" id="upiField" style="display:none;">
-                        <label>UPI ID <span class="required">*</span></label>
-                        <input type="text" name="upi_id" placeholder="example@upi">
-                    </div>
-            
-                    <div class="form-group" id="walletField" style="display:none;">
-                        <label>Wallet Number <span class="required">*</span></label>
-                        <input type="text" name="wallet_number" placeholder="9999999999">
-                    </div>
-            
-                    <div class="form-group">
-                        <label>Notes <span class="required">*</span></label>
-                        <input type="text" name="notes" placeholder="Type Notes Here" required>
-                    </div>
-            
-                    <div class="form-group">
-                        <label>Amount <span class="required">*</span></label>
-                        <input type="number" name="amount" placeholder="500" required>
+    <!-- Alumni Section -->
+    <section id="alumni" class="alumni-section">
+        <div class="section-header">
+            <h2 class="section-title">Our Alumni Network</h2>
+            <p class="section-subtitle">Connect with successful graduates from our institution</p>
+            <div class="section-controls">
+                <button class="alumni-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="alumni-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="alumni-grid">
+            <div class="alumni-card">
+                <div class="alumni-image">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Alumni 1" style="object-fit: cover; height: 250px;">
+                </div>
+                <div class="alumni-info">
+                    <h3>John Doe</h3>
+                    <p>Software Engineer at Google</p>
+                    <p class="alumni-batch">Batch of 2015</p>
+                    <div class="social-links">
+                        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://github.com" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary" onclick="showLoader()">Simulate Donation</button>
+            </div>
+            <div class="alumni-card">
+                <div class="alumni-image">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Alumni 2">
                 </div>
+                <div class="alumni-info">
+                    <h3>Jane Smith</h3>
+                    <p>Product Manager at Microsoft</p>
+                    <p class="alumni-batch">Batch of 2017</p>
+                    <div class="social-links">
+                        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://github.com" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="alumni-card">
+                <div class="alumni-image">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Alumni 3">
+                </div>
+                <div class="alumni-info">
+                    <h3>Mike Johnson</h3>
+                    <p>Data Scientist at Amazon</p>
+                    <p class="alumni-batch">Batch of 2018</p>
+                    <div class="social-links">
+                        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://github.com" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="events-section">
+        <div class="section-header">
+            <h2 class="section-title">Upcoming Events</h2>
+            <p class="section-subtitle">Join us for exciting alumni gatherings and workshops</p>
+        </div>
+        <div class="events-grid">
+            <div class="event-card">
+                <div class="event-date">
+                    <span class="day">15</span>
+                    <span class="month">Mar</span>
+                </div>
+                <div class="event-content">
+                    <h3>Alumni Reunion 2024</h3>
+                    <p class="event-time"><i class="far fa-clock"></i> 10:00 AM - 6:00 PM</p>
+                    <p class="event-location"><i class="fas fa-map-marker-alt"></i> VIT Campus, Pune</p>
+                    <p>Join us for our annual alumni reunion featuring networking sessions, keynote speakers, and entertainment.</p>
+                </div>
+            </div>
+            <div class="event-card">
+                <div class="event-date">
+                    <span class="day">22</span>
+                    <span class="month">Apr</span>
+                </div>
+                <div class="event-content">
+                    <h3>Career Development Workshop</h3>
+                    <p class="event-time"><i class="far fa-clock"></i> 2:00 PM - 5:00 PM</p>
+                    <p class="event-location"><i class="fas fa-map-marker-alt"></i> Online (Zoom)</p>
+                    <p>Learn from industry experts about the latest trends in technology and career opportunities.</p>
+                </div>
+            </div>
+            <div class="event-card">
+                <div class="event-date">
+                    <span class="day">05</span>
+                    <span class="month">May</span>
+                </div>
+                <div class="event-content">
+                    <h3>Mentorship Program Launch</h3>
+                    <p class="event-time"><i class="far fa-clock"></i> 11:00 AM - 1:00 PM</p>
+                    <p class="event-location"><i class="fas fa-map-marker-alt"></i> VIT Auditorium</p>
+                    <p>Connect with experienced alumni for mentorship and career guidance.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section-footer">
+        </div>
+    </section>
+
+    <!-- Careers Section -->
+    <section id="careers" class="careers-section">
+        <div class="section-header">
+            <h2 class="section-title">Career Opportunities</h2>
+            <p class="section-subtitle">Explore exclusive job offers from our partner companies</p>
+        </div>
+        <div class="careers-grid">
+            <div class="career-card">
+                <div class="company-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" style="max-height: 40px; width: auto;">
+                </div>
+                <div class="career-content">
+                    <h3>Senior Software Engineer</h3>
+                    <p class="job-location"><i class="fas fa-map-marker-alt"></i> Bangalore, India</p>
+                    <p class="job-type"><i class="fas fa-briefcase"></i> Full-time</p>
+                    <p>Join our team to build innovative solutions using cutting-edge technologies.</p>
+                    <div class="job-actions">
+                    </div>
+                </div>
+            </div>
+            <div class="career-card">
+                <div class="company-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft">
+                </div>
+                <div class="career-content">
+                    <h3>Product Manager</h3>
+                    <p class="job-location"><i class="fas fa-map-marker-alt"></i> Hyderabad, India</p>
+                    <p class="job-type"><i class="fas fa-briefcase"></i> Full-time</p>
+                    <p>Lead product development and drive innovation in cloud services.</p>
+                    <div class="job-actions">
+                    </div>
+                </div>
+            </div>
+            <div class="career-card">
+                <div class="company-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon">
+                </div>
+                <div class="career-content">
+                    <h3>Data Scientist</h3>
+                    <p class="job-location"><i class="fas fa-map-marker-alt"></i> Pune, India</p>
+                    <p class="job-type"><i class="fas fa-briefcase"></i> Full-time</p>
+                    <p>Work on machine learning models and data analytics projects.</p>
+                    <div class="job-actions">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+        <div class="newsletter-container">
+            <div class="newsletter-content">
+                <h2>Stay Updated</h2>
+                <p>Subscribe to our newsletter for the latest news and updates</p>
+            </div>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email" required>
+                <button type="submit" class="btn-subscribe">Subscribe</button>
             </form>
         </div>
-    </div>
+    </section>
 
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="section-header">
+            <h2 class="section-title">Get in Touch</h2>
+            <p class="section-subtitle">We'd love to hear from you</p>
+        </div>
+        <div class="contact-container">
+            <div class="contact-info">
+                <a href="https://maps.app.goo.gl/J9ebPyZMt1rZPstaA" target="_blank" style="text-decoration: none; color: inherit;">
+                    <div class="info-card" style="cursor: pointer;">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Visit Us</h3>
+                        <p>Vishwakarma Institute of Technology<br>Pune, Maharashtra 411037</p>
+                    </div>
+                </a>                
+                <div class="info-card">
+                    <i class="fas fa-phone"></i>
+                    <h3>Call Us</h3>
+                    <p>+91 1234567890<br>+91 9876543210</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email Us</h3>
+                    <p>alumni@vit.ac.in<br>support@vit.ac.in</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Office Hours</h3>
+                    <p>Monday - Friday<br>9:00 AM - 5:00 PM</p>
+                </div>
+            </div>
+            <div class="contact-form">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>VITGrad</h4>
+                <p>Connecting alumni worldwide since 2024</p>
+                <div class="social-links">
+                    <a href="https://facebook.com/vitpune" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="https://linkedin.com/school/vitpune" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://twitter.com/vitpune" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com/vitpune" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <p><i class="fas fa-map-marker-alt"></i> Vishwakarma Institute of Technology, Pune</p>
+                <p><i class="fas fa-envelope"></i> alumni@vit.ac.in</p>
+                <p><i class="fas fa-phone"></i> +91 1234567890</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#home" class="back-to-top" aria-label="Back to top"><i class="fas fa-arrow-up"></i></a>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Loader Functions
-        function showLoader() {
-            document.getElementById('loader-overlay').style.display = 'flex';
-            document.body.classList.add('loader-active');
-        }
+        // Initialize Hero Swiper
+        const heroSwiper = new Swiper('.hero-swiper', {
+            effect: 'fade',
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+        });
 
-        function hideLoader() {
-            document.getElementById('loader-overlay').style.display = 'none';
-            document.body.classList.remove('loader-active');
-        }
-
-        // Modal Functions
-        function showProfileModal() {
-            document.getElementById('profileModal').style.display = 'block';
-        }
-
-        function closeProfileModal() {
-            document.getElementById('profileModal').style.display = 'none';
-        }
-
-        function showPostModal() {
-            document.getElementById('postModal').style.display = 'block';
-        }
-
-        function closePostModal() {
-            document.getElementById('postModal').style.display = 'none';
-        }
-
-        function showDonationModal() {
-            document.getElementById('donationModal').style.display = 'block';
-        }
-
-        function closeDonationModal() {
-            document.getElementById('donationModal').style.display = 'none';
-        }
-
-        // Toggle payment fields
-        function togglePaymentFields(method) {
-            document.getElementById('upiField').style.display = (method === 'UPI') ? 'block' : 'none';
-            document.getElementById('walletField').style.display = (method === 'Wallet') ? 'block' : 'none';
-        }
-
-        // Navigation handling
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle sidebar navigation
-            const navLinks = document.querySelectorAll('.sidebar-nav a');
-            const contentSections = document.querySelectorAll('.content-section');
-
-            function showSection(sectionId) {
-                contentSections.forEach(section => {
-                    if (section.id === sectionId) {
-                        section.classList.add('active');
-                    } else {
-                        section.classList.remove('active');
-                    }
-                });
+        // Initialize Alumni Swiper
+        const alumniSwiper = new Swiper('.alumni-grid', {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            navigation: {
+                nextEl: '.alumni-next',
+                prevEl: '.alumni-prev',
+            },
+            breakpoints: {
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
             }
+        });
 
-            function updateActiveLink(link) {
-                navLinks.forEach(a => a.classList.remove('active'));
-                link.classList.add('active');
+        // Initialize AOS (Animate On Scroll)
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Back to Top Button
+        const backToTopButton = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
             }
+        });
 
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href').substring(1) + '-section';
-                    updateActiveLink(this);
-                    showSection(targetId);
-                });
-            });
-
-            // Show dashboard section by default
-            showSection('dashboard-section');
-
-            // Close modals when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                }
-            });
-
-            // Form validation and loader handling
-            document.getElementById('profileForm')?.addEventListener('submit', function(e) {
-                showLoader();
-                // Form will submit normally after this
-            });
-
-            document.getElementById('postForm')?.addEventListener('submit', function(e) {
-                const content = this.content.value.trim();
-                const image = this.image.files[0];
-                
-                if (!content && !image) {
-                    e.preventDefault();
-                    alert('Please provide either text content or an image');
-                    this.content.focus();
-                    hideLoader();
-                } else {
-                    showLoader();
-                }
-            });
-
-            // Donation form handling
-            document.getElementById('donationForm')?.addEventListener('submit', function(e) {
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                showLoader();
-                
-                setTimeout(() => {
-                    alert("🎉 Donation successful! Thank you.");
-                    closeDonationModal();
-                    this.submit();
-                }, 1000);
-            });
-
-            // Like button functionality
-            const likedPosts = new Set();
-            document.querySelectorAll('.like-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const postCard = this.closest('.post-card');
-                    const postId = postCard.getAttribute('data-post-id');
-            
-                    if (likedPosts.has(postId)) {
-                        alert("You've already liked this post.");
-                        return;
-                    }
-            
-                    likedPosts.add(postId);
-                    this.classList.add('liked');
-                    this.innerHTML = '<i class="fas fa-thumbs-up"></i> Liked';
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
                 });
             });
+        });
 
-            // Share button functionality
-            document.querySelectorAll('.share-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const postUrl = this.getAttribute('data-post-url');
-                    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
-                    window.open(shareUrl, '_blank', 'width=600,height=400');
-                });
-            });
-
-            // Logout confirmation
-            function confirmLogout(event) {
-                event.preventDefault();
-                if (window.confirm('Are you sure you want to logout?')) {
-                    showLoader();
-                    window.location.href = event.currentTarget.dataset.logoutUrl;
-                }
-            }
-
-            // Filter events
-            function filterEvents(filter) {
-                showLoader();
-                setTimeout(() => {
-                    alert(`Filtering ${filter} events...`);
-                    hideLoader();
-                }, 500);
-            }
-
-            // Hide loader when page finishes loading
-            window.addEventListener('load', function() {
-                hideLoader();
-            });
+        // Mobile menu toggle (would need CSS to support this)
+        const mobileMenuToggle = document.createElement('button');
+        mobileMenuToggle.className = 'mobile-menu-toggle';
+        mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        mobileMenuToggle.setAttribute('aria-label', 'Toggle menu');
+        document.querySelector('.header-content').prepend(mobileMenuToggle);
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            document.querySelector('.main-nav').classList.toggle('active');
         });
     </script>
 </body>
