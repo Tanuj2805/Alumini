@@ -21,17 +21,9 @@
         </div>
         <div class="login-right">
             <div class="form-header">
-                <h2>Welcome Back</h2>
+                <h2>Welcome Back Student</h2>
                 <p>Sign in to your account</p>
             </div>
-            
-            {% if messages %}
-                <div class="messages">
-                    {% for message in messages %}
-                        <div class="message {{ message.tags }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
 
             <form method="POST" action="{% url 'student_login' %}">
                 {% csrf_token %}

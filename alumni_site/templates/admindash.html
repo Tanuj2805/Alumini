@@ -1007,8 +1007,6 @@
           <th>Amount</th>
           <th>Date</th>
           <th>Payment Method</th>
-          <th>Status</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -1024,40 +1022,12 @@
               </div>
             </td>
             <td class="amount-cell">
-              <span class="donation-amount">${{ donation.amount }}</span>
+              <span class="donation-amount">{{ donation.amount }} Rs.</span>
             </td>
             <td>{{ donation.date }}</td>
             <td>
-              <span class="payment-method {{ donation.payment_method }}">
-                {% if donation.payment_method == 'card' %}
-                  <i class="fas fa-credit-card"></i> Card
-                {% elif donation.payment_method == 'cash' %}
-                  <i class="fas fa-money-bill-wave"></i> Cash
-                {% elif donation.payment_method == 'upi' %}
-                  <i class="fas fa-mobile-alt"></i> UPI
-                {% elif donation.payment_method == 'bank_transfer' %}
-                  <i class="fas fa-university"></i> Bank
-                {% else %}
-                  Unknown
-                {% endif %}
+              <span class="payment-method {{ donation.payment_method }}">{{ donation.payment_method }}
               </span>
-            </td>
-            <td>
-              <span class="status-badge {{ donation.status }}">
-                {% if donation.status == 'completed' %}
-                  <i class="fas fa-check-circle"></i> Completed
-                {% elif donation.status == 'pending' %}
-                  <i class="fas fa-hourglass-half"></i> Pending
-                {% elif donation.status == 'failed' %}
-                  <i class="fas fa-times-circle"></i> Failed
-                {% endif %}
-              </span>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="btn-action view" title="View Details"><i class="fas fa-eye"></i></button>
-                <button class="btn-action receipt" title="Generate Receipt"><i class="fas fa-receipt"></i></button>
-              </div>
             </td>
           </tr>
         {% empty %}
