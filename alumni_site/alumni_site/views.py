@@ -25,7 +25,15 @@ from .models import Job
 from django.db.models import Sum, Count, Max
 
 def index(request):
-    return render(request,"index.html")
+    today = timezone.now().date()
+
+    # Get the next 3 upcoming events
+    upcoming_events = Event.objects.filter(event_date__gte=today).order_by('event_date')[:3]
+    print("Upcoming Events :",upcoming_events)
+
+    return render(request, "index.html", {
+        'events': upcoming_events
+    })
 
 def sample(request):
     posts = Post.objects.order_by('-created_at')
